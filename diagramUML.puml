@@ -1,0 +1,47 @@
+@startuml
+
+
+package Ovladanie {
+
+    class Server {
+        +sputstiServer()
+        +stopServer()
+
+    }
+
+    class Client {
+
+    }
+}
+
+class Chodec {
+
+}
+
+class Svet {
+
+
+}
+
+class RozhraniePouzivatela {
+
+}
+
+class Input {
+
+}
+
+class Output {
+
+}
+
+' Spojenia
+
+Svet --> Chodec
+RozhraniePouzivatela --> Input
+RozhraniePouzivatela --> Output
+Client --> RozhraniePouzivatela
+Server --> Svet
+Client --> Server
+Server --> Client
+@enduml
