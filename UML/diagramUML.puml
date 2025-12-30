@@ -10,17 +10,40 @@ package Ovladanie {
     }
 
     class Client {
-
+        
     }
 }
 
-class Chodec {
-
+enum Smer {
+    Hore
+    Dole
+    Vpravo
+    Vlavo
 }
 
+class Chodec {
+    +int x
+    +int y
+    +chodec_init()
+}
+
+class Simulacia {
+    +int pocet_replikacii
+    +char* cesta_k_suboru
+    +simuluj_k_stredu()
+    
+}
+
+
 class Svet {
+    +Chodec *chodec
+    +int ** pole
 
-
+    +svet_init(hranica_x, hranica_y)
+    +svet_destroy()
+    +posun_chodca(Smer smer_posunu)
+    +uloz_do_suboru_suboru(char * cesta_k_suboru)
+    +naformatuj_svet_na_poslanie()
 }
 
 class RozhraniePouzivatela {
@@ -41,7 +64,9 @@ Svet --> Chodec
 RozhraniePouzivatela --> Input
 RozhraniePouzivatela --> Output
 Client --> RozhraniePouzivatela
-Server --> Svet
+Server --> Simulacia
 Client --> Server
 Server --> Client
+Svet --> Smer
+Simulacia --> Svet
 @enduml
