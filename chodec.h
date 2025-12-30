@@ -2,11 +2,11 @@
 
 
 
-struct Chodec {
+typedef struct Chodec {
   int x;
   int y;
 } chdc_t;
 
-chdc_t * chodec_init();
+chdc_t * chodec_init(int hranica_x, int hranica_y);
 
 
