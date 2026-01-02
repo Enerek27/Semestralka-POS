@@ -26,6 +26,7 @@ void je_policko_ok(svt_t * svet, int x, int y, _Bool navstivene[svet->hranica_x]
 void svet_destroy(svt_t * svet);
 void posun_chodca(smer_t smer_posunu, svt_t * svet);
 void uloz_do_suboru(char * cesta_k_suboru);
+void svet_vypis(svt_t * svet);
 
 
 //nevieme este co bude vracat

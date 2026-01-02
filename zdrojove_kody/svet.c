@@ -92,6 +92,36 @@ void posun_chodca(smer_t smer_posunu, svt_t * svet)
 
 }
 
+void svet_vypis(svt_t *svet)
+{
+    for (int i = 0; i < svet->hranica_y; i++)   //vonkajsi for, menej sa opakuje, je to y
+    {
+        for (int j = 0; j < svet->hranica_x; j++) {    //suradnica x
+            printf("%d", svet->pole[j][i]);
+            //prekazka, chodec, nic, stred
+            // 0 reprezentuje prazdne policko, 1 je chodec, 2 je prekazka
+            if(svet->stred_x == j && svet->stred_y == i)
+            {
+                printf("%s ", "*");
+            } else if (svet->pole[j][i] == 0)
+            {
+                printf("%s ", "-");
+            }else if (svet->pole[j][i] == 1)
+            {
+                printf("%s ", "C");
+            } else{
+                //rovna sa 2 == prekazka
+                printf("%s ", "X");
+            }  
+            
+        }
+        printf("\n");
+        
+    }
+    
+
+}
+
 svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku) {
     svt_t * svet;
     svet = malloc(sizeof(svt_t));
