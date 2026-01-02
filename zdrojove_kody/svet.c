@@ -3,6 +3,7 @@
 
 #include <time.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 svt_t * svet_init_normal(int hranica_x, int hranica_y)
 {
@@ -89,6 +90,74 @@ void posun_chodca(smer_t smer_posunu, svt_t * svet)
     svet->pole[aktualna_poloha_x][aktualna_poloha_y] = 0;
     svet->pole[nova_poloha_x][nova_poloha_y] = 1;
     return;
+
+}
+
+void svet_uloz_do_suboru(char *cesta_k_suboru, svt_t * svet)
+{
+    FILE * subor = fopen(cesta_k_suboru, "w");
+
+    if(!subor){
+        perror("Chyba:  subor sa zrejme neotvoril. \n ");
+        fclose(subor);
+        return;
+    }
+
+    fprintf(subor, "%d;%d;\n",svet->hranica_x, svet->hranica_y);
+
+
+    for (int i = 0; i < svet->hranica_y; i++)   //najprv y = 0, a x budem zvysovat == idem po riadku
+    {
+        for (int j = 0; j < svet->hranica_x; j++)
+        {
+            fprintf(subor, "%d;",svet->pole[j][i]);
+            
+        }
+        fprintf(subor, "\n");
+    }
+    
+    fclose(subor);
+}
+
+svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
+{
+    FILE* subor = fopen(cesta_k_suboru, "r");
+    // najpprv sirku, potom vysku, potom vsetko po riadkoch
+    /*char ciselkoSirka1 = fgetc(subor);
+    int ciselkoSirka = ciselkoSirka1 - '0';
+    fgetc(subor);
+    char ciselkoVyska1 = fgetc(subor);
+    int ciselkoVyska = ciselkoVyska1 - '0';
+    fgetc(subor);
+    int uloziskoMapy[ciselkoSirka][ciselkoVyska];*/
+
+    
+        
+        int ciselkoSirka;
+        int ciselkoVyska;
+        fscanf(subor, "%d;%d;", ciselkoSirka, ciselkoVyska);
+
+
+        svt_t * svetNacitany = svet_init_normal(ciselkoSirka, ciselkoVyska);
+
+
+        for (int t = 0; t < ciselkoVyska; t++)
+        {
+            for (int m = 0; m < ciselkoSirka; m++)
+            {
+                //budem nacitavat
+                //fread a strchr, u mna ;
+            }
+            
+        }
+
+
+        
+        fclose(subor);
+        return svetNacitany;
+        
+
+
 
 }
 
