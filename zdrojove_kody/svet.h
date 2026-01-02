@@ -18,6 +18,7 @@ typedef struct Pravdepodobnost {
 typedef struct Svet {
   int ** pole;
   float ** pole_pravdepodobnosti;
+  float ** pole_priemer_krok;
   chdc_t * chodec;
   int hranica_x;
   int hranica_y;
@@ -41,8 +42,10 @@ void uloz_do_suboru(char * cesta_k_suboru);
 void svet_vypis(svt_t * svet);
 //vráti nahodny smer pre chodca ktorý je možný, nevráti smer do steny
 smer_t daj_nahodny_smer_pre_chodca(svt_t * svet);
-//vypise statistiku pre svet v percentach
+//vypise statistiku pre svet v percentach statistyka ze sa dostane
 void svet_vypis_statistiku(svt_t * svet);
+//vypis statistyku krokov pre svet
+void svet_vypis_priem_krok(svt_t * svet);
 //vytvor kopiu sveta
 svt_t * svet_copy(svt_t * svet_nakopirovanie);
 

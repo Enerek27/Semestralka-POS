@@ -25,6 +25,12 @@ svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti)
         svet->pole_pravdepodobnosti[i] = calloc(hranica_y, sizeof(float));
     }
     
+    svet->pole_priemer_krok = calloc((hranica_x), sizeof(float*));
+    for (int i = 0; i < hranica_x; i++)
+    {
+        svet->pole_priemer_krok[i] = calloc(hranica_y, sizeof(float));
+    }
+
     svet->hranica_x = hranica_x;
     svet->hranica_y = hranica_y;
     svet->pole[hranica_x - 1][hranica_y - 1] = 1;
@@ -39,10 +45,11 @@ void svet_destroy(svt_t * svet)
     {
         free(svet->pole[i]);
         free(svet->pole_pravdepodobnosti[i]);
+        free(svet->pole_priemer_krok[i]);
     }
 
     
-    
+    free(svet->pole_priemer_krok);
     free(svet->pole);
     free(svet->pole_pravdepodobnosti);
     chodec_destroy(svet->chodec);
@@ -155,6 +162,12 @@ svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku,
     for (int i = 0; i < hranica_x; i++)
     {
         svet->pole_pravdepodobnosti[i] = calloc(hranica_y, sizeof(float));
+    }
+
+     svet->pole_priemer_krok = calloc((hranica_x), sizeof(float*));
+    for (int i = 0; i < hranica_x; i++)
+    {
+        svet->pole_priemer_krok[i] = calloc(hranica_y, sizeof(float));
     }
 
     svet->hranica_x = hranica_x;
@@ -338,4 +351,19 @@ svt_t * svet_copy(svt_t * svet_nakopirovanie) {
     }
     posun_chodca_na(fiktivny, svet_nakopirovanie->chodec->x, svet_nakopirovanie->chodec->y);
     return fiktivny;
+}
+
+
+void svet_vypis_priem_krok(svt_t * svet) {
+    for (int i = 0; i < svet->hranica_y; i++) {    
+        for (int j = 0; j < svet->hranica_x; j++) {
+            if (svet->pole[j][i] == 2) {
+                printf("%8s%s%4s ", "","X","");
+            } else {
+                printf("%12.2f ", svet->pole_priemer_krok[j][i]);
+            
+            }
+        }
+        printf("\n");
+    }
 }
