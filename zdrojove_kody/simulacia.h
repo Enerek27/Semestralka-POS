@@ -1,13 +1,9 @@
 
 #include "svet.h"
 
-typedef struct Simulacia {
-  int pocet_replikacii;
-  char * cesta_k_suboru;
-  Svet * svet; 
-}sim_t;
 
 
-void simuluj_k_stredu();
-void zavriSimulaciu();
-sim_t * simulacia_init();
+
+float simuluj_k_stredu_od_policka_statistika(int sur_x, int sur_y, int pocet_pokusov_K, svt_t * svet);
+void urobstatistiku_pre_svet(int pocet_pokusov_K, svt_t * svet);
+
