@@ -43,7 +43,8 @@ void svet_vypis(svt_t * svet);
 smer_t daj_nahodny_smer_pre_chodca(svt_t * svet);
 //vypise statistiku pre svet v percentach
 void svet_vypis_statistiku(svt_t * svet);
-
+//vytvor kopiu sveta
+svt_t * svet_copy(svt_t * svet_nakopirovanie);
 
 //nevieme este co bude vracat
 void naformatuj_svet_na_poslanie(); 

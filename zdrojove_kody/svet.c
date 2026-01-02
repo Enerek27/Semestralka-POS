@@ -19,10 +19,10 @@ svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti)
         svet->pole[i] = calloc(hranica_y, sizeof(int));
     }
 
-    svet->pole_pravdepodobnosti = calloc((hranica_x), sizeof(int*));
+    svet->pole_pravdepodobnosti = calloc((hranica_x), sizeof(float*));
     for (int i = 0; i < hranica_x; i++)
     {
-        svet->pole_pravdepodobnosti[i] = calloc(hranica_y, sizeof(int));
+        svet->pole_pravdepodobnosti[i] = calloc(hranica_y, sizeof(float));
     }
     
     svet->hranica_x = hranica_x;
@@ -139,7 +139,7 @@ void svet_vypis(svt_t *svet)
 svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku, prvd_t pravdepodobnosti) {
     svt_t * svet;
     svet = malloc(sizeof(svt_t));
-    srand(time(NULL));
+    
     svet->pravdepodobnosti = pravdepodobnosti;
     svet->stred_x = hranica_x/2;
     svet->stred_y = hranica_y/2;
@@ -151,10 +151,10 @@ svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku,
         svet->pole[i] = calloc(hranica_y, sizeof(int));
     }
     
-    svet->pole_pravdepodobnosti = calloc((hranica_x), sizeof(int*));
+    svet->pole_pravdepodobnosti = calloc((hranica_x), sizeof(float*));
     for (int i = 0; i < hranica_x; i++)
     {
-        svet->pole_pravdepodobnosti[i] = calloc(hranica_y, sizeof(int));
+        svet->pole_pravdepodobnosti[i] = calloc(hranica_y, sizeof(float));
     }
 
     svet->hranica_x = hranica_x;
@@ -220,16 +220,10 @@ void je_policko_ok(svt_t * svet, int x, int y,  _Bool navstivene[svet->hranica_x
     }
 
     navstivene[x][y] = 1;
-    int nove_x = x - 1;
-    int nove_y = y - 1;
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            je_policko_ok(svet, nove_x, nove_y, navstivene);
-            nove_y++;
-        }
-        nove_y = y - 1;
-        nove_x++;
-    }
+    je_policko_ok(svet, x-1, y, navstivene);
+    je_policko_ok(svet, x+1, y, navstivene);
+    je_policko_ok(svet, x, y-1, navstivene);
+    je_policko_ok(svet, x, y+1, navstivene);
     return;
 }
 
@@ -247,7 +241,7 @@ void posun_chodca_na(svt_t * svet, int sur_x, int sur_y) {
 }
 
 smer_t daj_nahodny_smer_pre_chodca(svt_t * svet) {
-    srand(time(NULL));
+   
     int aktual_x = svet->chodec->x;
     int aktual_y =svet->chodec->y;
     
@@ -323,8 +317,25 @@ smer_t daj_nahodny_smer_pre_chodca(svt_t * svet) {
 void svet_vypis_statistiku(svt_t * svet) {
      for (int i = 0; i < svet->hranica_y; i++) {    
         for (int j = 0; j < svet->hranica_x; j++) {
-            printf("%3.2f ", svet->pole_pravdepodobnosti[j][i]);
+            if (svet->pole[j][i] == 2) {
+                printf("%4s%s%2s ", "","X","");
+            } else {
+                printf("%7.2f ", svet->pole_pravdepodobnosti[j][i]);
+            
+            }
         }
         printf("\n");
     }
+}
+
+
+svt_t * svet_copy(svt_t * svet_nakopirovanie) {
+    svt_t * fiktivny = svet_init_normal(svet_nakopirovanie->hranica_x, svet_nakopirovanie->hranica_y, svet_nakopirovanie->pravdepodobnosti);
+    for (int i = 0; i < svet_nakopirovanie->hranica_x; i++) {
+        for (int j = 0; j < svet_nakopirovanie->hranica_y; j++) {
+            fiktivny->pole[i][j] = svet_nakopirovanie->pole[i][j];
+        }
+    }
+    posun_chodca_na(fiktivny, svet_nakopirovanie->chodec->x, svet_nakopirovanie->chodec->y);
+    return fiktivny;
 }
