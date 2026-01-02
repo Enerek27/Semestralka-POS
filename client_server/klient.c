@@ -8,8 +8,8 @@
 int main(int argc, char const *argv[])
 {
     prvd_t pravdepodobnosti;
-    pravdepodobnosti.dole = 0.50;
-    pravdepodobnosti.vpravo = 0.50;
+    pravdepodobnosti.dole = 0.25;
+    pravdepodobnosti.vpravo = 0.25;
     pravdepodobnosti.hore = 0.25;
     pravdepodobnosti.vlavo = 0.25;
     svt_t * svetik =  svet_init_prekazky(10, 10, 20,pravdepodobnosti);

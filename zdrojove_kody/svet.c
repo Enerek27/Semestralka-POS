@@ -323,7 +323,7 @@ smer_t daj_nahodny_smer_pre_chodca(svt_t * svet) {
 void svet_vypis_statistiku(svt_t * svet) {
      for (int i = 0; i < svet->hranica_y; i++) {    
         for (int j = 0; j < svet->hranica_x; j++) {
-            printf("%.2f ", svet->pole_pravdepodobnosti[j][i]);
+            printf("%3.2f ", svet->pole_pravdepodobnosti[j][i]);
         }
         printf("\n");
     }
