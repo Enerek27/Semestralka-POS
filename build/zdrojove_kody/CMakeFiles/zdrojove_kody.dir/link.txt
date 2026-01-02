@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC -shared -Wl,-soname,libzdrojove_kody.so -o libzdrojove_kody.so CMakeFiles/zdrojove_kody.dir/chodec.c.o CMakeFiles/zdrojove_kody.dir/svet.c.o 

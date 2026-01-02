@@ -97,7 +97,6 @@ void svet_vypis(svt_t *svet)
     for (int i = 0; i < svet->hranica_y; i++)   //vonkajsi for, menej sa opakuje, je to y
     {
         for (int j = 0; j < svet->hranica_x; j++) {    //suradnica x
-            printf("%d", svet->pole[j][i]);
             //prekazka, chodec, nic, stred
             // 0 reprezentuje prazdne policko, 1 je chodec, 2 je prekazka
             if(svet->stred_x == j && svet->stred_y == i)

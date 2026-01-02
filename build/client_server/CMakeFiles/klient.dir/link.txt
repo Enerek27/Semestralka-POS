@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/klient.dir/klient.c.o -o klient  -Wl,-rpath,/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/zdrojove_kody ../zdrojove_kody/libzdrojove_kody.so 

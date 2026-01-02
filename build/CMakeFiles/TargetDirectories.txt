@@ -1,0 +1,9 @@
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/CMakeFiles/edit_cache.dir
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/CMakeFiles/rebuild_cache.dir
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/client_server/CMakeFiles/klient.dir
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/client_server/CMakeFiles/server.dir
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/client_server/CMakeFiles/edit_cache.dir
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/client_server/CMakeFiles/rebuild_cache.dir
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/zdrojove_kody/CMakeFiles/zdrojove_kody.dir
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/zdrojove_kody/CMakeFiles/edit_cache.dir
+/home/ondrickova1/mojeKody/semestralka/Semestralka-POS/build/zdrojove_kody/CMakeFiles/rebuild_cache.dir
