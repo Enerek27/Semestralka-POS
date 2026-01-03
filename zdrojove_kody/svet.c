@@ -123,6 +123,7 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
 {
     FILE* subor = fopen(cesta_k_suboru, "r");
     // najpprv sirku, potom vysku, potom vsetko po riadkoch
+
     /*char ciselkoSirka1 = fgetc(subor);
     int ciselkoSirka = ciselkoSirka1 - '0';
     fgetc(subor);
@@ -135,11 +136,14 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
         
         int ciselkoSirka;
         int ciselkoVyska;
-        fscanf(subor, "%d;%d;", ciselkoSirka, ciselkoVyska);
+        fscanf(subor, "%d;%d;", &ciselkoSirka, &ciselkoVyska);
 
 
         svt_t * svetNacitany = svet_init_normal(ciselkoSirka, ciselkoVyska);
 
+
+        char znak;
+        char oddelovac;
 
         for (int t = 0; t < ciselkoVyska; t++)
         {
@@ -147,17 +151,20 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
             {
                 //budem nacitavat
                 //fread a strchr, u mna ;
+
+                fread(&znak,sizeof(char), 1, subor);
+                fread(&oddelovac,sizeof(char), 1, subor);
+                //pom = strchr(buffer, ';');     //vracia adresu tohto znaku ;
+
+                svetNacitany->pole[t][m] = znak; 
             }
             
         }
 
 
-        
         fclose(subor);
         return svetNacitany;
         
-
-
 
 }
 
