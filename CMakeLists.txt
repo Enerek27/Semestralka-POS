@@ -8,3 +8,5 @@ LANGUAGES C
 )
 add_subdirectory(client_server)
 add_subdirectory(zdrojove_kody)
+add_subdirectory(sockety)
+add_subdirectory(zdielanaPamat)

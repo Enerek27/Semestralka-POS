@@ -9,3 +9,7 @@ target_compile_options(server PRIVATE "-std=c11" "-Wall" "-Wextra" "-Wpedantic")
 
 target_link_libraries(server PRIVATE zdrojove_kody)
 target_link_libraries(klient PRIVATE zdrojove_kody)
+target_link_libraries(server PRIVATE sockety)
+target_link_libraries(klient PRIVATE sockety)
+target_link_libraries(server PRIVATE zdielanaPamat)
+target_link_libraries(klient PRIVATE zdielanaPamat)

@@ -14,3 +14,5 @@ void pipe_open_read(pipe_data_t * this);
 void pipe_read(pipe_data_t * this, char * result, size_t size);
 void pipe_write(pipe_data_t * this, const char * data, size_t size);
 void pipe_close(pipe_data_t * this);
+
+#endif

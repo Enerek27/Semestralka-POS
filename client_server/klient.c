@@ -2,41 +2,48 @@
 //TODO
 // treba potom zmenit na svet.h
 
+
+#include "../zdrojove_kody/UI.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include "../zdrojove_kody/UI.h"
-
+#include "../sockety/socket.h"
+#include "../zdielanaPamat/pipe.h"
 
 int main(int argc, char const *argv[])
 {
-     srand(time(NULL));
-    prvd_t pravdepodobnosti;
-    pravdepodobnosti.dole = 0.25;
-    pravdepodobnosti.vpravo = 0.25;
-    pravdepodobnosti.hore = 0.25;
-    pravdepodobnosti.vlavo = 0.25;
-    svt_t * svetik =  svet_init_prekazky(10, 10, 20,pravdepodobnosti);
-    generuj_pravdepodobnost(50, svetik);
-    generuj_priem_krok(svetik);
-    svet_vypis_statistiku(svetik);
-    svet_destroy(svetik);
-    /*
-    printf("\n");
-    generuj_pravdepodobnost(50, svetik);
-    generuj_priem_krok(svetik);
-    svet_vypis_statistiku(svetik);
-    printf("\n");
-    svet_vypis_priem_krok(svetik);
-    svet_destroy(svetik);
-    svt_t * svetik1 = svet_init_normal(10, 10, pravdepodobnosti);
-    svet_vypis(svetik1);
-    printf("\n");
-    generuj_pravdepodobnost(50, svetik1);
-    generuj_priem_krok(svetik1);
-    svet_vypis_statistiku(svetik1);
-    printf("\n");
-    svet_vypis_priem_krok(svetik1);
-    svet_destroy(svetik1); */
-    return 0; 
+
+   
+   srand(time(NULL)); 
+
+    socket_client_t socket_client;
+
+    socket_client_init(&socket_client, "127.0.0.1", "777");
+
+    char * sprava = "Posielam spravu na server";
+    socket_write(&socket_client.activeSocket, sprava, strlen(sprava));
+
+    char buffer[256];
+    memset(buffer, 0, sizeof(buffer));
+
+    socket_read(&socket_client.activeSocket, buffer, sizeof(buffer));
+
+    printf("Sprava co poslal server je: %s\n", buffer);
+
+    socket_client_destroy(&socket_client);
+    
+ /*
+    pipe_data_t klient;
+
+    pipe_init(&klient, "../datovod", 0);
+
+    char * sprava = "Posielam spravu na server";
+    pipe_open_write(&klient);
+    pipe_write(&klient, sprava, strlen(sprava));
+    
+    pipe_destroy(&klient, 0, 0);
+    */
+    return 0;
+
 }

@@ -18,7 +18,9 @@ void socket_write(socket_data_t * this, const char * buffer, size_t length);
 void socket_read(socket_data_t * this, char * buffer, size_t length);
 // Štruktúra obsahujúca informácie pre prácu servera
 typedef struct SocketServer {
+    //toto je prijimaci socket na pripajanie
     socket_data_t passiveSocket;
+    //pole socketov cize ulozeny klienti
     socket_data_t activeSocket;
     int port;
 } socket_server_t;

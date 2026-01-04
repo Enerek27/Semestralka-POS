@@ -160,3 +160,4 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
 void socket_client_destroy(socket_client_t * this) {
   // Zničenie aktívneho soketu pre komunikáciu so serverom
   socket_destroy(&this->activeSocket);
+}
