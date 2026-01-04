@@ -122,7 +122,7 @@ void svet_uloz_do_suboru(char *cesta_k_suboru, svt_t * svet)
         return;
     }
 
-    fprintf(subor, "%d;%d;\n",svet->hranica_x, svet->hranica_y);
+    fprintf(subor, "%d;%d;%f;%f;%f;%f;\n",svet->hranica_x, svet->hranica_y, svet->pravdepodobnosti.hore, svet->pravdepodobnosti.dole, svet->pravdepodobnosti.vpravo, svet->pravdepodobnosti.vlavo);
 
 
     for (int i = 0; i < svet->hranica_y; i++)   //najprv y = 0, a x budem zvysovat == idem po riadku
@@ -155,8 +155,19 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
         
         int ciselkoSirka;
         int ciselkoVyska;
-        fscanf(subor, "%d;%d;", &ciselkoSirka, &ciselkoVyska);
 
+       float hore;
+        float dole;
+        float vpravo;
+        float vlavo;
+
+        fscanf(subor, "%d;%d;%f;%f;%f;%f;", &ciselkoSirka, &ciselkoVyska, &hore, &dole, &vpravo, &vlavo);
+
+        prvd_t pravedpodobnosti;   
+        pravedpodobnosti.hore = hore;
+        pravedpodobnosti.dole = dole;
+        pravedpodobnosti.vpravo = vpravo;
+        pravedpodobnosti.vlavo = vlavo;
 
         svt_t * svetNacitany = svet_init_normal(ciselkoSirka, ciselkoVyska);
 
@@ -175,7 +186,7 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
                 fread(&oddelovac,sizeof(char), 1, subor);
                 //pom = strchr(buffer, ';');     //vracia adresu tohto znaku ;
 
-                svetNacitany->pole[t][m] = znak; 
+                svetNacitany->pole[t][m] = atoi(znak); 
             }
             
         }
