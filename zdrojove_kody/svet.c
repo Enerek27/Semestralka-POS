@@ -169,7 +169,7 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
         pravedpodobnosti.vpravo = vpravo;
         pravedpodobnosti.vlavo = vlavo;
 
-        svt_t * svetNacitany = svet_init_normal(ciselkoSirka, ciselkoVyska);
+        svt_t * svetNacitany = svet_init_normal(ciselkoSirka, ciselkoVyska, pravedpodobnosti);
 
 
         char znak;
@@ -186,7 +186,7 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
                 fread(&oddelovac,sizeof(char), 1, subor);
                 //pom = strchr(buffer, ';');     //vracia adresu tohto znaku ;
 
-                svetNacitany->pole[t][m] = atoi(znak); 
+                svetNacitany->pole[t][m] = znak - '0';
             }
             
         }

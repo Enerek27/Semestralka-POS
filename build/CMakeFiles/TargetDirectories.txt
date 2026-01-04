@@ -1,0 +1,9 @@
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/CMakeFiles/edit_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/CMakeFiles/rebuild_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/CMakeFiles/klient.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/CMakeFiles/server.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/CMakeFiles/edit_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/CMakeFiles/rebuild_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody/CMakeFiles/zdrojove_kody.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody/CMakeFiles/edit_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody/CMakeFiles/rebuild_cache.dir
