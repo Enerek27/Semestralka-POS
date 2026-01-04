@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/cmake_install.cmake",
+		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/cmake_install.cmake",
+		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

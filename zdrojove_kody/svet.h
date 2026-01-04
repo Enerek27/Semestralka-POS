@@ -1,4 +1,3 @@
-
 #include "chodec.h"
 
 typedef enum Smer {
@@ -13,7 +12,7 @@ typedef struct Pravdepodobnost {
   float dole;
   float vpravo;
   float vlavo;
-}prvd_t ;
+}prvd_t;
 
 typedef struct Svet {
   int ** pole;

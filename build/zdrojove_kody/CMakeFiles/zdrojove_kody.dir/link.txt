@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC -shared -Wl,--dependency-file=CMakeFiles/zdrojove_kody.dir/link.d -Wl,-soname,libzdrojove_kody.so -o libzdrojove_kody.so CMakeFiles/zdrojove_kody.dir/chodec.c.o CMakeFiles/zdrojove_kody.dir/svet.c.o CMakeFiles/zdrojove_kody.dir/simulacia.c.o

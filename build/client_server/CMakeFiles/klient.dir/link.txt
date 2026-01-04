@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/klient.dir/link.d CMakeFiles/klient.dir/klient.c.o -o klient  -Wl,-rpath,/home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody ../zdrojove_kody/libzdrojove_kody.so

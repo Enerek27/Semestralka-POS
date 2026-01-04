@@ -1,8 +1,5 @@
 #include "svet.h"
-
-
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 
 svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti)
@@ -358,7 +355,7 @@ void svet_vypis_priem_krok(svt_t * svet) {
     for (int i = 0; i < svet->hranica_y; i++) {    
         for (int j = 0; j < svet->hranica_x; j++) {
             if (svet->pole[j][i] == 2) {
-                printf("%8s%s%4s ", "","X","");
+                printf("%8s%s%3s ", "","X","");
             } else {
                 printf("%12.2f ", svet->pole_priemer_krok[j][i]);
             

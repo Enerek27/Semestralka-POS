@@ -1,9 +1,4 @@
-
 #include "simulacia.h"
-
-
-
-
 
 
 void generuj_pravdepodobnost(int pocet_pokusov_K, svt_t * svet) {
@@ -19,10 +14,6 @@ void generuj_pravdepodobnost(int pocet_pokusov_K, svt_t * svet) {
     
     }
     
-
-
-
-
 }
 
 
