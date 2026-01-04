@@ -198,34 +198,7 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
 
 }
 
-void svet_vypis(svt_t *svet)
-{
-    for (int i = 0; i < svet->hranica_y; i++)   //vonkajsi for, menej sa opakuje, je to y
-    {
-        for (int j = 0; j < svet->hranica_x; j++) {    //suradnica x
-            //prekazka, chodec, nic, stred
-            // 0 reprezentuje prazdne policko, 1 je chodec, 2 je prekazka
-            if(svet->stred_x == j && svet->stred_y == i)
-            {
-                printf("%s ", "*");
-            } else if (svet->pole[j][i] == 0)
-            {
-                printf("%s ", "-");
-            }else if (svet->pole[j][i] == 1)
-            {
-                printf("%s ", "C");
-            } else{
-                //rovna sa 2 == prekazka
-                printf("%s ", "X");
-            }  
-            
-        }
-        printf("\n");
-        
-    }
-    
 
-}
 
 svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku, prvd_t pravdepodobnosti) {
     svt_t * svet;
@@ -411,19 +384,7 @@ smer_t daj_nahodny_smer_pre_chodca(svt_t * svet) {
 }
 
 
-void svet_vypis_statistiku(svt_t * svet) {
-     for (int i = 0; i < svet->hranica_y; i++) {    
-        for (int j = 0; j < svet->hranica_x; j++) {
-            if (svet->pole[j][i] == 2) {
-                printf("%4s%s%2s ", "","X","");
-            } else {
-                printf("%7.2f ", svet->pole_pravdepodobnosti[j][i]);
-            
-            }
-        }
-        printf("\n");
-    }
-}
+
 
 
 svt_t * svet_copy(svt_t * svet_nakopirovanie) {
@@ -438,16 +399,3 @@ svt_t * svet_copy(svt_t * svet_nakopirovanie) {
 }
 
 
-void svet_vypis_priem_krok(svt_t * svet) {
-    for (int i = 0; i < svet->hranica_y; i++) {    
-        for (int j = 0; j < svet->hranica_x; j++) {
-            if (svet->pole[j][i] == 2) {
-                printf("%8s%s%3s ", "","X","");
-            } else {
-                printf("%12.2f ", svet->pole_priemer_krok[j][i]);
-            
-            }
-        }
-        printf("\n");
-    }
-}

@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../zdrojove_kody/simulacia.h"
+#include "../zdrojove_kody/UI.h"
+
 
 int main(int argc, char const *argv[])
 {
@@ -16,7 +17,11 @@ int main(int argc, char const *argv[])
     pravdepodobnosti.hore = 0.25;
     pravdepodobnosti.vlavo = 0.25;
     svt_t * svetik =  svet_init_prekazky(10, 10, 20,pravdepodobnosti);
-    svet_vypis(svetik);
+    generuj_pravdepodobnost(50, svetik);
+    generuj_priem_krok(svetik);
+    svet_vypis_statistiku(svetik);
+    svet_destroy(svetik);
+    /*
     printf("\n");
     generuj_pravdepodobnost(50, svetik);
     generuj_priem_krok(svetik);
@@ -32,6 +37,6 @@ int main(int argc, char const *argv[])
     svet_vypis_statistiku(svetik1);
     printf("\n");
     svet_vypis_priem_krok(svetik1);
-    svet_destroy(svetik1);
-    return 0;
+    svet_destroy(svetik1); */
+    return 0; 
 }
