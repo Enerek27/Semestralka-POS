@@ -21,7 +21,9 @@ typedef struct SocketServer {
     //toto je prijimaci socket na pripajanie
     socket_data_t passiveSocket;
     //pole socketov cize ulozeny klienti
-    socket_data_t activeSocket;
+    socket_data_t * activeSocket;
+    int pocetKlinetov;
+    int maxPocetKlientov;
     int port;
 } socket_server_t;
 // Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre server

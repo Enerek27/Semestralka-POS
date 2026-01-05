@@ -82,8 +82,8 @@ void socket_server_init(socket_server_t * this, int port) {
   memset(&severAddress, '\0', sizeof(severAddress));
   // IPv4
   severAddress.sin_family = AF_INET;
-  // Použije sa localhost, teda adresa 127.0.0.1
-  severAddress.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  // Použije sa localhost, teda adresa 127.0.0.1 local  alebo 192.168.1.10 lan alebo "10.0.0.5" wifi
+  severAddress.sin_addr.s_addr = htonl(INADDR_ANY);
   // Nastaví sa port soketu podľa parametru port, pričom je potrebné brať do úvahy endianitu (htons)
   severAddress.sin_port = htons(port);
   // Samotné zavolanie funkcie bind, pričom sa pretypuje internetová adresa servera na generický typ adresy
@@ -91,6 +91,13 @@ void socket_server_init(socket_server_t * this, int port) {
   // Premena soketu na pasívny socket, na ktorom sa bude prijímať spojenie, pričom sa nebudú ukladať žiadne ďalšie čakajúce pripojenia do frontu
   socket_listen(&this->passiveSocket, 0);
   this->port = port;
+  this->maxPocetKlientov = 5;
+  this->pocetKlinetov = 0;
+  this->activeSocket = malloc(this->maxPocetKlientov * sizeof(socket_data_t));
+  if (this->activeSocket == NULL) {
+    perror("Zle inicializovana pamat pre atkiv sockety!");
+    exit(EXIT_FAILURE);
+  }
 }
 // Funkcia na akceptovanie pripojenia klientom, pričom sa jedná o blokovacie volanie
 void socket_server_accept_connection(socket_server_t * this) {
@@ -99,14 +106,34 @@ void socket_server_accept_connection(socket_server_t * this) {
   // Ukladanie veľkosti adresy klienta
   socklen_t clientAddressSize = sizeof(clientAddress);
   // Pripojenie klienta na server, pričom sa nastaví všetko potrebné v adrese klienta, nastaví sa veľkosť adresy a vráti sa popisovač soketu určeného pre komunikáciu
-  socket_accept(&this->activeSocket, &this->passiveSocket, (struct sockaddr * ) &clientAddress, &clientAddressSize);
+  if (this->maxPocetKlientov == this->pocetKlinetov) {
+    int naviac = this->maxPocetKlientov + 5;
+    socket_data_t * tmp = realloc(this->activeSocket, sizeof(socket_data_t) * naviac);
+    if (tmp == NULL) {
+      perror("Chyba zvacsania pamate!");
+      exit(EXIT_FAILURE);
+    }
+    this->activeSocket = tmp;
+
+    for (int i = this->maxPocetKlientov; i < naviac; i++) {
+    this->activeSocket[i].socket = 0;
+}
+    this->maxPocetKlientov = naviac;
+
+  }
+  socket_accept(&this->activeSocket[this->pocetKlinetov], &this->passiveSocket, (struct sockaddr * ) &clientAddress, &clientAddressSize);
+  this->pocetKlinetov++;
 }
 // Funkcia na zničenie servera, čo momentálne znamená zničenie pasívneho a aktívneho soketu
 void socket_server_destroy(socket_server_t * this) {
   // Zničenie pasívneho soketu na prijímanie pripojení
   socket_destroy(&this->passiveSocket);
   // Zničenie aktívneho soketu pre komunikáciu s klientom
-  socket_destroy(&this->activeSocket);
+  for (int i = 0; i < this->pocetKlinetov; i++) {
+    socket_destroy(&this->activeSocket[i]);
+  }
+  free(this->activeSocket);
+  
 }
 // Funkcia na inicializáciu klienta, pričom je potrebné uviesť aj názov servera a port, na ktorom bude zadaný server čakať na pripojenia
 void socket_client_init(socket_client_t * this, char * serverName, char * port) {
