@@ -1,13 +1,72 @@
 #include "socket.h"
 #include <netinet/in.h>
+#include <pthread.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
 // pridané kvôli funkcii getaddrinfo a vecí okolo nej
 #define __USE_XOPEN2K
 #include <netdb.h>
 #undef __USE_XOPEN2K
+
+
+
+void * nacuvajklientovy(void * arg) {
+  klient_read_t * info_klient = arg; 
+ 
+  while (atomic_load(&info_klient->server->server_bezi)) {
+    char buf[200];
+    int n = socket_read(&info_klient->socket_pocuvaj, buf, sizeof(buf));
+    if (n < 0) {
+      perror("chyba citania socketu");
+      exit(EXIT_FAILURE);
+    } else if (n == 0) {
+      pthread_mutex_lock(&info_klient->server->mutex);
+      int id = -1;
+      int posledny_id = info_klient->server->pocetKlinetov - 1;
+
+      for (int i = 0; i < info_klient->server->pocetKlinetov; i++) {
+          if (info_klient->server->activeSocket[i].socket == info_klient->socket_pocuvaj.socket) {
+              id = i;
+              break;
+          }
+      }
+
+      if (id != -1 && id != posledny_id) {
+          
+          socket_data_t tmp = info_klient->server->activeSocket[id];
+          info_klient->server->activeSocket[id] = info_klient->server->activeSocket[posledny_id];
+          info_klient->server->activeSocket[posledny_id] = tmp;
+      }
+
+    
+      info_klient->server->pocetKlinetov--;
+      pthread_mutex_unlock(&info_klient->server->mutex);
+      
+      socket_destroy(&info_klient->socket_pocuvaj);
+      break;
+    } else {
+      //prijal som spravu spracovanie
+
+
+
+
+    }
+
+
+  }
+
+  free(info_klient);
+  //sem prichadza od klienta info
+}
+
+
+
+
+
 // Funkcia na inicializáciu soketu, pričom je potrebné uviesť komunikačnú doménu, typ komunikácie a protokol
 void socket_init(socket_data_t * this, int domain, int type, int protocol) {
   this->socket = socket(domain, type, protocol);
@@ -65,12 +124,9 @@ void socket_write(socket_data_t * this, const char * buffer, size_t length) {
   }
 }
 // Funkcia, ktorá obaľuje funkciu read, pričom je potrebné uviesť aj miesto, kde sa uloží výsledok a maximálnu veľkosť miesta na uloženie
-void socket_read(socket_data_t * this, char * buffer, size_t length) {
+int socket_read(socket_data_t * this, char * buffer, size_t length) {
   int n = read(this->socket, buffer, length);
-  if (n < 0) {
-    perror("socket_read: zlyhanie citania z soketu!");
-    exit(EXIT_FAILURE);
-  }
+  return n;
 }
 // Funkcia na inicializáciu servera, pričom je potrebné uviesť aj port, na ktorom bude server čakať na pripojenia
 void socket_server_init(socket_server_t * this, int port) {
@@ -98,13 +154,29 @@ void socket_server_init(socket_server_t * this, int port) {
     perror("Zle inicializovana pamat pre atkiv sockety!");
     exit(EXIT_FAILURE);
   }
+  pthread_mutex_init(&this->mutex, NULL);
+  this->server_bezi = (atomic_bool)1;
+  this->hlavny_klient = 0;
+  srv_inf_t server_info;
+  server_info.zobraz_statistiku = 1;
+  this->server_info = server_info;
 }
 // Funkcia na akceptovanie pripojenia klientom, pričom sa jedná o blokovacie volanie
 void socket_server_accept_connection(socket_server_t * this) {
   // Adresa klienta
   struct sockaddr_in clientAddress;
+  klient_read_t * klient_info;
+  klient_info = malloc(sizeof(klient_read_t));
+  if (klient_info == NULL) {
+      perror("Chyba pamate pre vlakno klienta");
+      exit(EXIT_FAILURE);
+  }
+  klient_info->server = this;
   // Ukladanie veľkosti adresy klienta
   socklen_t clientAddressSize = sizeof(clientAddress);
+  socket_data_t tempSocket;
+    socket_accept(&tempSocket, &this->passiveSocket, (struct sockaddr * ) &clientAddress, &clientAddressSize);
+  pthread_mutex_lock(&this->mutex);
   // Pripojenie klienta na server, pričom sa nastaví všetko potrebné v adrese klienta, nastaví sa veľkosť adresy a vráti sa popisovač soketu určeného pre komunikáciu
   if (this->maxPocetKlientov == this->pocetKlinetov) {
     int naviac = this->maxPocetKlientov + 5;
@@ -116,13 +188,17 @@ void socket_server_accept_connection(socket_server_t * this) {
     this->activeSocket = tmp;
 
     for (int i = this->maxPocetKlientov; i < naviac; i++) {
-    this->activeSocket[i].socket = 0;
-}
+      this->activeSocket[i].socket = 0;
+    }
     this->maxPocetKlientov = naviac;
 
   }
-  socket_accept(&this->activeSocket[this->pocetKlinetov], &this->passiveSocket, (struct sockaddr * ) &clientAddress, &clientAddressSize);
+  klient_info->socket_pocuvaj = this->activeSocket[this->pocetKlinetov];
   this->pocetKlinetov++;
+  pthread_t vlakno;
+  pthread_create(&vlakno, NULL, nacuvajklientovy, klient_info);
+  pthread_detach(vlakno);
+  pthread_mutex_unlock(&this->mutex);
 }
 // Funkcia na zničenie servera, čo momentálne znamená zničenie pasívneho a aktívneho soketu
 void socket_server_destroy(socket_server_t * this) {
@@ -133,7 +209,9 @@ void socket_server_destroy(socket_server_t * this) {
     socket_destroy(&this->activeSocket[i]);
   }
   free(this->activeSocket);
-  
+  pthread_mutex_destroy(&this->mutex);
+  atomic_store(&this->server_bezi, 0);
+  shutdown(this->passiveSocket.socket, SHUT_RDWR);
 }
 // Funkcia na inicializáciu klienta, pričom je potrebné uviesť aj názov servera a port, na ktorom bude zadaný server čakať na pripojenia
 void socket_client_init(socket_client_t * this, char * serverName, char * port) {

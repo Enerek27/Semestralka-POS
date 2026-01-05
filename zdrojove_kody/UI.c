@@ -1,6 +1,11 @@
 
 #include "UI.h"
+#include <bits/pthreadtypes.h>
+#include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 
 void vycisti_obrazovku() {
@@ -13,6 +18,7 @@ void vykresli_svet(svt_t * svet) {
 
    vycisti_obrazovku();
 
+   printf("\033[32m%s: %d/%d\033[0m\n","Pocet replikacii", svet->original_replikacii, svet->pocet_replikacii);
     for (int i = 0; i < svet->hranica_y; i++)   //vonkajsi for, menej sa opakuje, je to y
     {
         for (int j = 0; j < svet->hranica_x; j++) {    //suradnica x
@@ -85,4 +91,68 @@ void svet_vypis_statistiku(svt_t * svet) {
             }
             printf("\n");
         }
+}
+void * server_vykonavaj_sim(void * arg) {
+    svt_brd_t * data = arg;
+    
+    for (int i = 0; i < data->svet->original_replikacii; i++) {
+        for (int j; j < data->svet->pocet_krokov_K; j++) {
+            
+           
+            pthread_mutex_lock(&data->server->mutex);
+            int pocet_vlakien = data->server->pocetKlinetov;
+            pthread_mutex_unlock(&data->server->mutex);
+          
+          
+            
+
+            for (int k = 0; k < pocet_vlakien; k++) {
+                pthread_t vlakno;
+                svt_vp_t * vypisovac;
+                vypisovac = calloc(1, sizeof(svt_vp_t));
+                if (vypisovac == NULL) {
+                perror("Chyba vytvarania vlakien zla pamat");
+                exit(EXIT_FAILURE);
+                }
+                pthread_create(&vlakno, NULL, posli_vsetkym_svet, &vypisovac);
+                pthread_detach(vlakno);
+            }
+            posun_chodca(daj_nahodny_smer_pre_chodca(data->svet), data->svet);
+            data->svet->pocet_replikacii--;
+            sleep(1);
+        }
+    }
+}
+
+void * posli_vsetkym_svet(void * arg) {
+    svt_vp_t * data = arg;
+    pthread_mutex_lock(&data->server->mutex);
+    int pocet_klientov = data->server->pocetKlinetov;
+    pthread_mutex_unlock(&data->server->mutex);
+    socket_data_t * posielaj;
+    posielaj = calloc(pocet_klientov, sizeof(socket_data_t));
+    if (posielaj == NULL) {
+        perror("Chyba alokovania pamate pre vypis");
+        exit(EXIT_FAILURE);
+    }
+    pthread_mutex_lock(&data->server->mutex);
+    memcpy(posielaj, data->server->activeSocket, sizeof(socket_data_t) * pocet_klientov);
+    pthread_mutex_unlock(&data->server->mutex);
+    for (int i = 0; i < pocet_klientov; i++) {
+        //treba pockat na lydku
+    };
+    free(posielaj);
+    free(data);
+
+
+
+}
+
+
+
+void spusti_menu_klient() {
+
+
+
+
 }

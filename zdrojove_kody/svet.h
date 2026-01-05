@@ -24,11 +24,15 @@ typedef struct Svet {
   int stred_x; //je to index stedu
   int stred_y;
   prvd_t pravdepodobnosti;
+  int pocet_krokov_K;
+  int pocet_replikacii;
+  int original_replikacii;
+  char cesta_k_suboru[100];
 }svt_t; 
 
 
-svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti);
-svt_t * svet_init_prekazky(int hranica_x, int hranica_y, int sanca_na_prekazku, prvd_t pravdepodobnosti); //od 0-100%
+svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti, int pocet_krokov_K, int pocet_replikacii, char * cesta_k_suboru);
+svt_t * svet_init_prekazky(int hranica_x, int hranica_y, int sanca_na_prekazku, prvd_t pravdepodobnosti, int pocet_krokov_K, int pocet_replikacii, char * cesta_k_suboru); //od 0-100%
 svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru);
 _Bool je_svet_ok(svt_t * svet);
 void posun_chodca_na(svt_t * svet, int sur_x, int sur_y);

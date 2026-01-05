@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti)
+svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti, int pocet_krokov_K, int pocet_replikacii, char * cesta_k_suboru)
 {
     svt_t * svet;
     
@@ -34,6 +35,10 @@ svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti)
     svet->pole[hranica_x - 1][hranica_y - 1] = 1;
     svet->stred_x = hranica_x/2;
     svet->stred_y = hranica_y/2;
+    strcpy(svet->cesta_k_suboru, cesta_k_suboru);
+    svet->pocet_krokov_K = pocet_krokov_K;
+    svet->pocet_replikacii = pocet_replikacii;
+    svet->original_replikacii = pocet_replikacii;
     return svet;
 }
 
@@ -200,7 +205,7 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
 
 
 
-svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku, prvd_t pravdepodobnosti) {
+svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku, prvd_t pravdepodobnosti, int pocet_krokov_K, int pocet_replikacii, char * cesta_k_suboru) {
     svt_t * svet;
     svet = malloc(sizeof(svt_t));
     
@@ -226,9 +231,12 @@ svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku,
     {
         svet->pole_priemer_krok[i] = calloc(hranica_y, sizeof(float));
     }
-
+    strcpy(svet->cesta_k_suboru, cesta_k_suboru);
+    svet->pocet_krokov_K = pocet_krokov_K;
+    svet->pocet_replikacii = pocet_replikacii;
     svet->hranica_x = hranica_x;
     svet->hranica_y = hranica_y;
+    svet->original_replikacii = pocet_replikacii;
     svet->pole[hranica_x - 1][hranica_y - 1] = 1;
     do {
 
