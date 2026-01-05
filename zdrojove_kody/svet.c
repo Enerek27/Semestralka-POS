@@ -128,18 +128,18 @@ void svet_uloz_do_suboru(svt_t * svet)
         return;
     }
 
-    //fprintf(subor, "%d;%d;%f;%f;%f;%f;\n",svet->hranica_x, svet->hranica_y, svet->pravdepodobnosti.hore, svet->pravdepodobnosti.dole, svet->pravdepodobnosti.vpravo, svet->pravdepodobnosti.vlavo);
+   
     //fprintf nepridava ziadne dalsie znaky, zapise presne to, co je uvedene vo formate
 
     fprintf(subor, "%d;%d;%d;%d;", svet->hranica_x, svet->hranica_y, svet->stred_x, svet->stred_y);
     fprintf(subor, "%d;%d;", svet->pocet_krokov_K, svet->original_replikacii);
-    //fprintf(subor, "\n");
+
     //ukladam pole_pravdepodobnosti
     for (int i = 0; i < svet->hranica_y; i++)
     {
         for (int j = 0; j < svet->hranica_x; j++)
         {
-            fprintf(subor, "%f;", svet->pole_pravdepodobnosti);
+            fprintf(subor, "%f;", svet->pole_pravdepodobnosti[i][j]);
         }
     }
 
@@ -148,70 +148,131 @@ void svet_uloz_do_suboru(svt_t * svet)
     {
         for (int j = 0; j < svet->hranica_x; j++)
         {
-            fprintf(subor, "%f;", svet->pole_priemer_krok);
+            fprintf(subor, "%f;", svet->pole_priemer_krok[i][j]);
         }
     }
 
-        //ukladam strukturu pravdepodobnosti   TODO<>TERAZ, ESTE TOTO NEMAM DOROBENE
-    for (int i = 0; i < svet->hranica_y; i++)
-    {
-        for (int j = 0; j < svet->hranica_x; j++)
-        {
-            fprintf(subor, "%lf;", svet->pole_priemer_krok);
-        }
-    }
+        //ukladam strukturu pravdepodobnosti   
+        fprintf(subor, "%c;", svet->pravdepodobnosti.hore);
+        fprintf(subor, "%c;", svet->pravdepodobnosti.dole);
+        fprintf(subor, "%c;", svet->pravdepodobnosti.vpravo);
+        fprintf(subor, "%c;", svet->pravdepodobnosti.vlavo);
 
-    
 
     //ukladam pole
     for (int i = 0; i < svet->hranica_y; i++)   //najprv y = 0, a x budem zvysovat == idem po riadku
     {
         for (int j = 0; j < svet->hranica_x; j++)
         {
-            fprintf(subor, "%d;",svet->pole[j][i]);
-            
+            fprintf(subor, "%d;",svet->pole[j][i]); 
         }
         //fprintf(subor, "\n");  kvoli Tomaskovi
     }
-    
+
     fclose(subor);
 }
 
 svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
 {
     FILE* subor = fopen(cesta_k_suboru, "r");
-    // najpprv sirku, potom vysku, potom vsetko po riadkoch
+ 
+    //hranica x, hranica y, stred x, stred y, pocet krokov K, svet origninal replikacii
+    //pole pravdepodobnosti, priemer krok, struktura preavdepodobnosti, pole
+        int ciselkoHranicaX;
+        int ciselkoHranicaY;
+        int stredX;
+        int stredY;
 
-    /*char ciselkoSirka1 = fgetc(subor);
-    int ciselkoSirka = ciselkoSirka1 - '0';
-    fgetc(subor);
-    char ciselkoVyska1 = fgetc(subor);
-    int ciselkoVyska = ciselkoVyska1 - '0';
-    fgetc(subor);
-    int uloziskoMapy[ciselkoSirka][ciselkoVyska];*/
+        int pocetKrokov;
+        int svetOriginalReplikacii;
 
-    
+
+        fscanf(subor, "%d;%d;%d;%d;", &ciselkoHranicaX, &ciselkoHranicaY, &stredX, &stredY);
+        fscanf(subor, "%d;%d;%d;%d;", &pocetKrokov, &svetOriginalReplikacii);
+
+        //nacitam pole_pravepodobnosti  -float
+        float ** pole_pravdepodobnosti;
+        pole_pravdepodobnosti = calloc((ciselkoHranicaX), sizeof(float));
+        for (int i = 0; i < ciselkoHranicaX; i++)
+        {
+            pole_pravdepodobnosti[i] = calloc((ciselkoHranicaY), sizeof(float));
+        }
         
-        int ciselkoSirka;
-        int ciselkoVyska;
 
-       float hore;
-        float dole;
-        float vpravo;
-        float vlavo;
+        for (int i = 0; i < ciselkoHranicaY; i++)
+        {
+            for (int j = 0; j < ciselkoHranicaX; j++)
+            {
+            fscanf(subor, "%f;", pole_pravdepodobnosti[i][j]);
+            }
+        }
 
-        fscanf(subor, "%d;%d;%f;%f;%f;%f;", &ciselkoSirka, &ciselkoVyska, &hore, &dole, &vpravo, &vlavo);
+        //nacitam priemer_krok  -float
+        float ** pole_priemerKrok;
+        pole_priemerKrok = calloc((ciselkoHranicaX), sizeof(float));
+        for (int i = 0; i < ciselkoHranicaX; i++)
+        {
+            pole_priemerKrok[i] = calloc((ciselkoHranicaY), sizeof(float));
+        }
+        
 
-        prvd_t pravedpodobnosti;   
-        pravedpodobnosti.hore = hore;
-        pravedpodobnosti.dole = dole;
-        pravedpodobnosti.vpravo = vpravo;
-        pravedpodobnosti.vlavo = vlavo;
+        for (int i = 0; i < ciselkoHranicaY; i++)
+        {
+            for (int j = 0; j < ciselkoHranicaX; j++)
+            {
+            fscanf(subor, "%f;", pole_priemerKrok[i][j]);
+            }
+        }
 
-        svt_t * svetNacitany = svet_init_normal(ciselkoSirka, ciselkoVyska, pravedpodobnosti);
+
+        //nacitam struktura pravdepodobnosti
+
+        prvd_t pravedpodobnosti;
+
+        fscanf(subor, "%f;", pravedpodobnosti.hore);
+        fscanf(subor, "%f;", pravedpodobnosti.dole);
+        fscanf(subor, "%f;", pravedpodobnosti.vpravo);
+        fscanf(subor, "%f;", pravedpodobnosti.vlavo);
+
+
+        //nacitam pole  - char
+        svt_t * svetNacitany = svet_init_normal(ciselkoHranicaX, ciselkoHranicaY, pravedpodobnosti, pocetKrokov, svetOriginalReplikacii, DACO);
 
 
         char znak;
+        char oddelovac;
+        
+        for (int t = 0; t < ciselkoHranicaY; t++)
+        {
+            for (int m = 0; m < ciselkoHranicaY; m++)
+            {
+                //budem nacitavat cez fread
+
+                fread(&znak,sizeof(char), 1, subor);
+                fread(&oddelovac,sizeof(char), 1, subor);
+                //pom = strchr(buffer, ';');     //vracia adresu tohto znaku ;
+
+                svetNacitany->pole[t][m] = znak - '0';
+            }
+        }
+
+
+        //inicializacia sveta
+        svetNacitany->hranica_x = ciselkoHranicaX;
+        svetNacitany->hranica_y = ciselkoHranicaY;
+        svetNacitany->stred_x =stredX;
+        svetNacitany->stred_y = stredY;
+        svetNacitany->original_replikacii = svetOriginalReplikacii;
+        svetNacitany->pocet_krokov_K = pocetKrokov;
+        svetNacitany->pravdepodobnosti = pravedpodobnosti;
+        svetNacitany->pole_priemer_krok = pole_priemerKrok;
+        svetNacitany->pole_pravdepodobnosti = pole_pravdepodobnosti;
+
+
+
+
+
+        /*char znak;
         char oddelovac;
 
         for (int t = 0; t < ciselkoVyska; t++)
@@ -228,7 +289,7 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
                 svetNacitany->pole[t][m] = znak - '0';
             }
             
-        }
+        }*/
 
 
         fclose(subor);
