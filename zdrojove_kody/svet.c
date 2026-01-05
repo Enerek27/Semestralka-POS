@@ -117,9 +117,10 @@ void posun_chodca(smer_t smer_posunu, svt_t * svet)
 
 }
 
-void svet_uloz_do_suboru(char *cesta_k_suboru, svt_t * svet)
+void svet_uloz_do_suboru(svt_t * svet)
+//okrem chodca vsetko
 {
-    FILE * subor = fopen(cesta_k_suboru, "w");
+    FILE * subor = fopen(svet->cesta_k_suboru, "w");
 
     if(!subor){
         perror("Chyba:  subor sa zrejme neotvoril. \n ");
@@ -127,9 +128,42 @@ void svet_uloz_do_suboru(char *cesta_k_suboru, svt_t * svet)
         return;
     }
 
-    fprintf(subor, "%d;%d;%f;%f;%f;%f;\n",svet->hranica_x, svet->hranica_y, svet->pravdepodobnosti.hore, svet->pravdepodobnosti.dole, svet->pravdepodobnosti.vpravo, svet->pravdepodobnosti.vlavo);
+    //fprintf(subor, "%d;%d;%f;%f;%f;%f;\n",svet->hranica_x, svet->hranica_y, svet->pravdepodobnosti.hore, svet->pravdepodobnosti.dole, svet->pravdepodobnosti.vpravo, svet->pravdepodobnosti.vlavo);
+    //fprintf nepridava ziadne dalsie znaky, zapise presne to, co je uvedene vo formate
 
+    fprintf(subor, "%d;%d;%d;%d;", svet->hranica_x, svet->hranica_y, svet->stred_x, svet->stred_y);
+    fprintf(subor, "%d;%d;", svet->pocet_krokov_K, svet->original_replikacii);
+    //fprintf(subor, "\n");
+    //ukladam pole_pravdepodobnosti
+    for (int i = 0; i < svet->hranica_y; i++)
+    {
+        for (int j = 0; j < svet->hranica_x; j++)
+        {
+            fprintf(subor, "%f;", svet->pole_pravdepodobnosti);
+        }
+    }
 
+    //ukladam pole_priemer_krok
+    for (int i = 0; i < svet->hranica_y; i++)
+    {
+        for (int j = 0; j < svet->hranica_x; j++)
+        {
+            fprintf(subor, "%f;", svet->pole_priemer_krok);
+        }
+    }
+
+        //ukladam strukturu pravdepodobnosti   TODO<>TERAZ, ESTE TOTO NEMAM DOROBENE
+    for (int i = 0; i < svet->hranica_y; i++)
+    {
+        for (int j = 0; j < svet->hranica_x; j++)
+        {
+            fprintf(subor, "%lf;", svet->pole_priemer_krok);
+        }
+    }
+
+    
+
+    //ukladam pole
     for (int i = 0; i < svet->hranica_y; i++)   //najprv y = 0, a x budem zvysovat == idem po riadku
     {
         for (int j = 0; j < svet->hranica_x; j++)
@@ -137,7 +171,7 @@ void svet_uloz_do_suboru(char *cesta_k_suboru, svt_t * svet)
             fprintf(subor, "%d;",svet->pole[j][i]);
             
         }
-        fprintf(subor, "\n");
+        //fprintf(subor, "\n");  kvoli Tomaskovi
     }
     
     fclose(subor);
