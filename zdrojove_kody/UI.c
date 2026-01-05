@@ -157,6 +157,207 @@ void * posli_vsetkym_svet(void * arg) {
 
 }
 
+//rozmerx;rozmery;svetprekazky;pocet_replikacii;...
+//potrebujem poslat rozmery sveta x,y   svet prekazky 1 = true , 0 = normal
+               // dalej pocet replikacii (kym niesom v cieli) 
+                // max pocet krokov K, pravdepodobnosti
+              // cesta k suboru
+              //ci sa ma nacitat zo suboru
+void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
+    char * buf;
+    char tmp[128];
+    int aktual_znakov = 0;
+    int max = 100;
+    buf = calloc(max, sizeof(char));
+    if (buf == NULL) {
+        perror("Chyba pamate v inicializacii");
+        exit(EXIT_FAILURE);
+    }
+    int len = snprintf(tmp, sizeof(tmp), "%d;",data->rozmer_x);
+    if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    memcpy(buf, tmp, len);
+    aktual_znakov += len;
+
+    len = snprintf(tmp,sizeof(tmp), "%d;", data->rozmer_y);
+     if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    memcpy(buf + aktual_znakov, tmp, len);
+    aktual_znakov += len;
+
+    len = 2;
+     if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    
+    if (data->svet_s_prekazkami) {
+        tmp[0] = '1';
+        tmp[1] = ';';
+        memcpy(buf + aktual_znakov, tmp, len);
+       
+    } else {
+        tmp[0] = '0';
+        tmp[1] = ';';
+         memcpy(buf + aktual_znakov, tmp, len);
+    }
+    aktual_znakov += len;
+
+
+    len = snprintf(tmp, sizeof(tmp), "%d;", data->pocet_replikacii);
+    if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    memcpy(buf + aktual_znakov, tmp, len);
+    aktual_znakov += len;
+//rozmerx;rozmery;svetprekazky;pocet_replikacii;...
+//potrebujem poslat rozmery sveta x,y   svet prekazky 1 = true , 0 = normal
+               // dalej pocet replikacii (kym niesom v cieli) 
+                // max pocet krokov K, pravdepodobnosti
+              // cesta k suboru
+              //ci sa ma nacitat zo suboru
+    len = snprintf(tmp, sizeof(tmp), "%d;", data->pocet_krokov_K);
+    if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    memcpy(buf + aktual_znakov, tmp, len);
+    aktual_znakov += len;
+    // hore dole vpravo vlavo
+    len = snprintf(tmp, sizeof(tmp), "%f;", data->pravdepodobnosti.hore);
+    if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    memcpy(buf + aktual_znakov, tmp, len);
+    aktual_znakov += len;
+
+     len = snprintf(tmp, sizeof(tmp), "%f;", data->pravdepodobnosti.dole);
+    if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    memcpy(buf + aktual_znakov, tmp, len);
+    aktual_znakov += len;
+
+    len = snprintf(tmp, sizeof(tmp), "%f;", data->pravdepodobnosti.vpravo);
+    if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+     memcpy(buf + aktual_znakov, tmp, len);
+    aktual_znakov += len;
+
+    len = snprintf(tmp, sizeof(tmp), "%f;", data->pravdepodobnosti.vlavo);
+    if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    memcpy(buf + aktual_znakov, tmp, len);
+    aktual_znakov += len;
+
+    // cesta k suboru
+              //ci sa ma nacitat zo suboru
+    len = snprintf(tmp,sizeof(tmp), "%s;", data->cesta_k_suboru);
+    if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+     memcpy(buf + aktual_znakov, tmp, len);
+    aktual_znakov += len;
+
+    len = 2;
+     if (aktual_znakov + len >= max) {
+        int novy_max = max + 50;
+        char * tmp1 = realloc(buf, novy_max * sizeof(char));
+        if (tmp1 == NULL) {
+            perror("Chyba pamate v inicializacii realokacia");
+            exit(EXIT_FAILURE);
+        }
+        buf = tmp1;
+        max = novy_max;
+    }
+    if (data->nacitaj_zo_suboru) {
+        tmp[0] = '1';
+        tmp[1] = ';';
+        memcpy(buf + aktual_znakov, tmp, len);
+       
+    } else {
+        tmp[0] = '0';
+        tmp[1] = ';';
+         memcpy(buf + aktual_znakov, tmp, len);
+    }
+    aktual_znakov += len;
+
+    socket_write(&socket->activeSocket, buf, aktual_znakov);
+    free(buf);
+}
+
 
 
 void spusti_menu_klient() {

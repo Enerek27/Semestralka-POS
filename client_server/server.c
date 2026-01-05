@@ -121,7 +121,7 @@ svt_t * nastav_server(socket_server_t * server) {
 int main(int argc, char const *argv[])
 {
     
-    
+    srand(time(NULL)); 
     socket_server_t socket_server;
     socket_server_init(&socket_server, 777);
     pthread_t vlakienko;
@@ -144,6 +144,7 @@ int main(int argc, char const *argv[])
     server_vykonavaj_sim(svet_vypis);
     free(svet_vypis);
     sleep(1);
+    svet_destroy(svet);
     socket_server_destroy(&socket_server);
 
 

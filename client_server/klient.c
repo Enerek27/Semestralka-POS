@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 {
 
    
-   srand(time(NULL)); 
+   
 
     socket_client_t socket_client;
 
