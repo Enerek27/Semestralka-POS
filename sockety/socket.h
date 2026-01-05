@@ -12,7 +12,7 @@ typedef struct server_info {
 
 
 
-void * nacuvajklientovy(void * arg);
+void * nacuvajklientovi(void * arg);
 // Štruktúra obsahujúca informácie pre prácu so soketom
 typedef struct SocketData {
     int socket;
@@ -28,6 +28,8 @@ void socket_accept(socket_data_t * this, const socket_data_t * passiveSocket, st
 _Bool socket_connect(socket_data_t * this, const struct sockaddr * clientAddress, socklen_t clientAddressLength);
 void socket_write(socket_data_t * this, const char * buffer, size_t length);
 int socket_read(socket_data_t * this, char * buffer, size_t length);
+
+
 // Štruktúra obsahujúca informácie pre prácu servera
 typedef struct SocketServer {
     //toto je prijimaci socket na pripajanie
@@ -39,9 +41,11 @@ typedef struct SocketServer {
     int port;
     pthread_mutex_t mutex;
     atomic_bool server_bezi;
-    server_info server_info;
+    srv_inf_t server_info;
     int hlavny_klient;
 } socket_server_t;
+
+
 // Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre server
 void socket_server_init(socket_server_t * this, int port);
 void socket_server_accept_connection(socket_server_t * this);

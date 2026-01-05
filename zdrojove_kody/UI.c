@@ -18,6 +18,7 @@ void vykresli_svet(svt_t * svet) {
 
    vycisti_obrazovku();
 
+   
    printf("\033[32m%s: %d/%d\033[0m\n","Pocet replikacii", svet->original_replikacii, svet->pocet_replikacii);
     for (int i = 0; i < svet->hranica_y; i++)   //vonkajsi for, menej sa opakuje, je to y
     {
@@ -92,15 +93,20 @@ void svet_vypis_statistiku(svt_t * svet) {
             printf("\n");
         }
 }
-void * server_vykonavaj_sim(void * arg) {
-    svt_brd_t * data = arg;
+void server_vykonavaj_sim(svt_brd_t * data) {
+    
     
     for (int i = 0; i < data->svet->original_replikacii; i++) {
         for (int j; j < data->svet->pocet_krokov_K; j++) {
             
+            
            
             pthread_mutex_lock(&data->server->mutex);
             int pocet_vlakien = data->server->pocetKlinetov;
+            if (!data->server->server_bezi) {
+                pthread_mutex_unlock(&data->server->mutex);
+                pthread_exit(NULL);
+            }
             pthread_mutex_unlock(&data->server->mutex);
           
           
@@ -140,6 +146,8 @@ void * posli_vsetkym_svet(void * arg) {
     pthread_mutex_unlock(&data->server->mutex);
     for (int i = 0; i < pocet_klientov; i++) {
         //treba pockat na lydku
+        
+        socket_write(posielaj[i]);
     };
     free(posielaj);
     free(data);

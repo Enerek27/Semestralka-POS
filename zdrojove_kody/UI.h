@@ -27,7 +27,7 @@ void vycisti_obrazovku();
 
 void spusti_menu_klient();
 
-void * server_vykonavaj_sim(void * arg);
+void  server_vykonavaj_sim(svt_brd_t * svet);
 
 void * posli_vsetkym_svet(void * arg);
 

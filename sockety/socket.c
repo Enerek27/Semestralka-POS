@@ -14,7 +14,7 @@
 
 
 
-void * nacuvajklientovy(void * arg) {
+void * nacuvajklientovi(void * arg) {
   klient_read_t * info_klient = arg; 
  
   while (atomic_load(&info_klient->server->server_bezi)) {
@@ -50,7 +50,7 @@ void * nacuvajklientovy(void * arg) {
       break;
     } else {
       //prijal som spravu spracovanie
-
+        
 
 
 

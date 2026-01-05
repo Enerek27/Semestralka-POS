@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "../zdrojove_kody/UI.h"
 
 
@@ -40,9 +41,9 @@ svt_t * nastav_server(socket_server_t * server) {
 
     char * prva  = strchr(buf, ';');
 
-    char  medzi_step[20];                               
+    char  medzi_step[20];                               //rozmerx;rozmery;svetprekazky;pocet_replikacii;...
     strncpy(medzi_step, buf, prva - buf); //potrebujem poslat rozmery sveta x,y   svet prekazky 1 = true , 0 = normal
-    medzi_step[prva - buf + 1] = '\0';                  // dalej pocet replikacii (kym niesom v ciely) 
+    medzi_step[prva - buf + 1] = '\0';                  // dalej pocet replikacii (kym niesom v cieli) 
     char * nova_pomocna = prva + 1;                       // max pocet krokov K, pravdepodobnosti
     int rozmer_x = atoi(medzi_step);                 // cesta k suboru
     
@@ -139,8 +140,10 @@ int main(int argc, char const *argv[])
     }
     svet_vypis->svet = svet;
     svet_vypis->server = &socket_server;
+    //TODO
     server_vykonavaj_sim(svet_vypis);
     free(svet_vypis);
+    sleep(1);
     socket_server_destroy(&socket_server);
 
 
