@@ -8,14 +8,16 @@
 #include <unistd.h>
 
 
-void vycisti_obrazovku() {
+char * vycisti_obrazovku() {
     printf("\033[H");
     printf("\033[2J");
     fflush(stdout);
 }
 
-void vykresli_svet(svt_t * svet) {
+char * vykresli_svet(svt_t * svet) {
 
+
+    char * buf;
    vycisti_obrazovku();
 
    
@@ -57,7 +59,7 @@ void vykresli_svet(svt_t * svet) {
 }
 
 
-void svet_vypis_statistiku(svt_t * svet) {
+char * svet_vypis_statistiku(svt_t * svet) {
     vycisti_obrazovku();
     
     printf("\033[1;32m--- STATISTIKA PRAVDEPODOBNOSTI ---\033[0m\n");
@@ -93,6 +95,15 @@ void svet_vypis_statistiku(svt_t * svet) {
             printf("\n");
         }
 }
+
+char * svet_vypis_kroky(svt_t * svet) {
+
+}
+
+
+
+
+
 void server_vykonavaj_sim(svt_brd_t * data) {
     
     
@@ -146,7 +157,7 @@ void * posli_vsetkym_svet(void * arg) {
     pthread_mutex_unlock(&data->server->mutex);
     for (int i = 0; i < pocet_klientov; i++) {
         //treba pockat na lydku
-        
+        //char *
         socket_write(posielaj[i]);
     };
     free(posielaj);
@@ -155,7 +166,6 @@ void * posli_vsetkym_svet(void * arg) {
 
 
 }
-
 
 
 void spusti_menu_klient() {

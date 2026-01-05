@@ -15,12 +15,12 @@ typedef struct  svet_broadcast {
 
 
 //ASCII + ANSI 
-void vykresli_svet(svt_t * svet);
-void svet_vypis_statistiku(svt_t * svet);
+char * vykresli_svet(svt_t * svet);
+char * svet_vypis_statistiku(svt_t * svet);
+char * svet_vypis_kroky(svt_t * svet);
 
 
-
-void vycisti_obrazovku();
+char * vycisti_obrazovku();
 
 
 
