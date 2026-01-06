@@ -9,6 +9,8 @@
 
 typedef struct server_info {
     _Bool zobraz_statistiku;
+    _Bool zobraz_kroky;
+    _Bool zobraz_pole;
 } srv_inf_t;
 
 

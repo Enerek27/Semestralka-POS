@@ -58,7 +58,7 @@ char * vycisti_obrazovku() {
    aktualPocetZnakov += len;
     
     //printf("\033[2J");  //kurzor posunie do laveho horneho rohu
-    fflush(stdout);
+    //fflush(stdout);
 
     return buff;
 }
@@ -93,7 +93,7 @@ char * vykresli_svet(svt_t * svet) {
    }
    memcpy(buff + aktualPocetZnakov, zatial, len);
    aktualPocetZnakov += len;
-
+   free(vycistenieObr);
 
 
    
@@ -163,8 +163,8 @@ char * vykresli_svet(svt_t * svet) {
             memcpy(buff, zatial, len);
             aktualPocetZnakov += len;
         }
-        //putchar('\n');    musim do toho pridat do buffru TO DO
-        len = snprintf(zatial, sizeof(zatial), "\n");
+        //putchar('\n');   
+        len = snprintf(zatial, sizeof(zatial), "\n") + 1;
             if (aktualPocetZnakov + len >= maxPocetZnakov)
             {
                 int novyMax = maxPocetZnakov + 5;
@@ -220,7 +220,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
    }
    memcpy(buff + aktualPocetZnakov, zatial, len);
    aktualPocetZnakov += len;
-
+   free(vycistenieObr);
 
 
    //printf("\033[1;32m--- STATISTIKA PRAVDEPODOBNOSTI ---\033[0m\n");  
@@ -355,6 +355,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
    memcpy(buff + aktualPocetZnakov, zatial, len);
    aktualPocetZnakov += len;
 
+   free(vycistenieObr);
 
 
     //printf("\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
@@ -456,6 +457,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                     memcpy(buff + aktualPocetZnakov, zatial, len);
                     aktualPocetZnakov += len;
         }
+        return buff;
 }
 
 
@@ -471,7 +473,7 @@ void server_vykonavaj_sim(svt_brd_t * data) {
            
             pthread_mutex_lock(&data->server->mutex);
             int pocet_vlakien = data->server->pocetKlinetov;
-            if (!data->server->server_bezi) {
+            if (!data->server->server_bezi || !data->server->server_info.zobraz_pole) {
                 pthread_mutex_unlock(&data->server->mutex);
                 pthread_exit(NULL);
             }
@@ -514,8 +516,9 @@ void * posli_vsetkym_svet(void * arg) {
     pthread_mutex_unlock(&data->server->mutex);
     for (int i = 0; i < pocet_klientov; i++) {
         //treba pockat na lydku
-        
-        socket_write(posielaj[i]);
+        char * buf = vykresli_svet(data->svet);
+        socket_write(&posielaj[i], buf,strlen(buf));
+        free(buf);
     };
     free(posielaj);
     free(data);
@@ -939,7 +942,5 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     vstup.cesta_k_suboru = cesta_k_suboru;
 
     inicializuj_server(&vstup, socket);
-
-
 
 }

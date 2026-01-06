@@ -78,22 +78,25 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket) {
         }
     }
     char cesta_k_suboru[200];
-    memset(cesta_k_suboru, 0, sizeof(cesta_k_suboru));
-    while (1) {
+    if (nacitaj_zo_suboru) {
     
-    
-        char buf [200];
-        memset(buf, 0, sizeof(buf));
-        printf("Zadaj cestu k suboru: \n");
-        if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavanie textu");
-            exit(EXIT_FAILURE);
-        }
-        buf[strcspn(buf, "\n")] = '\0';
-        memcpy(cesta_k_suboru, buf,strlen(buf) + 1);
         
+        memset(cesta_k_suboru, 0, sizeof(cesta_k_suboru));
+        while (1) {
+        
+        
+            char buf [200];
+            memset(buf, 0, sizeof(buf));
+            printf("Zadaj cestu k suboru: \n");
+            if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                perror("Chyba nacitavanie textu");
+                exit(EXIT_FAILURE);
+            }
+            buf[strcspn(buf, "\n")] = '\0';
+            memcpy(cesta_k_suboru, buf,strlen(buf) + 1);
+            
+        }
     }
-
     if (nacitaj_zo_suboru) {
         socket_data_t copy;
         pthread_mutex_lock(&socket->mutex);
@@ -104,7 +107,7 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket) {
         char poslat[230];
         memset(poslat, 0, sizeof(poslat));
         poslat[0] = '7';
-        poslat[1] = ';';
+        poslat[1] = ';';            //7;cestaksuboru
         memcpy(poslat + 2, cesta_k_suboru, strlen(cesta_k_suboru) + 1);
         socket_write(&socket->activeSocket, poslat, strlen(poslat) + 1);
     } else {

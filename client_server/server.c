@@ -19,16 +19,7 @@ void * vlaknoPrijmaniaSpojenia(void * arg) {
 }
 
 
-void pockaj_na_prve_pripojenie(socket_server_t * server) {
-    while (1) {
-        pthread_mutex_lock(&server->mutex);
-        if (server->pocetKlinetov > 0) {
-            pthread_mutex_unlock(&server->mutex);
-            break;
-        }
-        pthread_mutex_unlock(&server->mutex);
-    }
-}
+
 
 
 svt_t * nastav_server(socket_server_t * server) {
@@ -125,11 +116,16 @@ svt_t * server_info_subor(socket_server_t * server) {
     socket_read(&server->activeSocket[server->hlavny_klient - 1], buf, sizeof(buf));
 
     if (buf[0] - '0' == 7) {
-    
+        //true treba subor
+        char cesta_k_suboru[100];
+        memcpy(cesta_k_suboru, buf + 2, strlen(buf + 2));
+        return svet_nacitaj_zo_suboru(cesta_k_suboru);
+        
     } else if (buf[0] - '0' == 5) {
-    
+        return NULL;
     } else {
-    
+        perror("Chyba komunikacie server klient");
+        exit(EXIT_FAILURE);
     }
 
 }
@@ -151,23 +147,39 @@ int main(int argc, char const *argv[])
         svet = skuska;
     }
     
-    
-    
     //treba spravit nekonecny loop kde sa bude posielat ci sa ma vypnut alebo nie bude to aj cakaci loop
     pthread_create(&vlakienko, NULL, vlaknoPrijmaniaSpojenia, &socket_server);
-    pockaj_na_prve_pripojenie(&socket_server);
-    
-    svt_brd_t * svet_vypis;
-    svet_vypis = calloc(1, sizeof(svt_brd_t));
-    if (svet_vypis == NULL) {
-        perror("Chyba vytvarania simulacie pri alokovani pamate");
-        exit(EXIT_FAILURE);
+    pthread_detach(vlakienko);
+
+
+    while (atomic_load(&socket_server.server_bezi)) {
+        pthread_mutex_lock(&socket_server.mutex);
+        _Bool pole = socket_server.server_info.zobraz_pole;
+        _Bool statistika = socket_server.server_info.zobraz_statistiku;
+        _Bool kroky = socket_server.server_info.zobraz_kroky;
+        pthread_mutex_unlock(&socket_server.mutex);
+        if (pole) {
+            svt_brd_t * svet_vypis;
+            svet_vypis = calloc(1, sizeof(svt_brd_t));
+            if (svet_vypis == NULL) {
+                perror("Chyba vytvarania simulacie pri alokovani pamate");
+                exit(EXIT_FAILURE);
+            }
+            svet_vypis->svet = svet;
+            svet_vypis->server = &socket_server;
+            server_vykonavaj_sim(svet_vypis);
+            free(svet_vypis);
+        } else if (statistika) {
+        
+        } else if (kroky) {
+            
+        }
     }
-    svet_vypis->svet = svet;
-    svet_vypis->server = &socket_server;
+
+    
     //TODO
-    server_vykonavaj_sim(svet_vypis);
-    free(svet_vypis);
+    
+    
     sleep(1);
     svet_destroy(svet);
     socket_server_destroy(&socket_server);

@@ -159,7 +159,10 @@ void socket_server_init(socket_server_t * this, int port) {
   this->hlavny_klient = 0;
   srv_inf_t server_info;
   server_info.zobraz_statistiku = 1;
+  server_info.zobraz_kroky = 0;
+  server_info.zobraz_pole = 0;
   this->server_info = server_info;
+  
 }
 // Funkcia na akceptovanie pripojenia klientom, pričom sa jedná o blokovacie volanie
 void socket_server_accept_connection(socket_server_t * this) {
