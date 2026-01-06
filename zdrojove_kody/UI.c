@@ -8,18 +8,115 @@
 #include <unistd.h>
 
 
-void vycisti_obrazovku() {
-    printf("\033[H");
-    printf("\033[2J");
+char * vycisti_obrazovku() {
+
+    char * buff;
+   char zatial[10];
+   int aktualPocetZnakov = 0;
+   int maxPocetZnakov = 5;
+   buff = calloc(maxPocetZnakov, sizeof(char));
+   if (buff == NULL)
+   {
+    perror("Chyba pamate v inicializacii, vo vykresleni sveta");
+    exit(EXIT_FAILURE);
+   }
+
+   int len = snprintf(zatial, sizeof(zatial), "\033[H");
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 10;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff, zatial, len);
+   aktualPocetZnakov += len;
+    //printf("\033[H");   //ako clear
+
+
+   len = snprintf(zatial, sizeof(zatial), "\033[2J");
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 10;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff + aktualPocetZnakov, zatial, len);
+   aktualPocetZnakov += len;
+    
+    //printf("\033[2J");  //kurzor posunie do laveho horneho rohu
     fflush(stdout);
+
+    return buff;
 }
 
 char * vykresli_svet(svt_t * svet) {
+    char * buff;
+   char zatial[128];
+   int aktualPocetZnakov = 0;
+   int maxPocetZnakov = 100;
+   buff = calloc(maxPocetZnakov, sizeof(char));
 
-   vycisti_obrazovku();
+   if (buff == NULL)
+   {
+    perror("Chyba pamate v inicializacii, vo vykresleni sveta");
+    exit(EXIT_FAILURE);
+   }
+
+   char * vycistenieObr = vycisti_obrazovku(); // ona mi posle char, co mam do zaciatku buffru prilepit  TODO
+   int len = snprintf(zatial, sizeof(zatial), "%s", vycistenieObr);
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 50;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff + aktualPocetZnakov, zatial, len);
+   aktualPocetZnakov += len;
+
+
 
    
-   printf("\033[32m%s: %d/%d\033[0m\n","Pocet replikacii", svet->original_replikacii, svet->pocet_replikacii);
+   len = snprintf(zatial, sizeof(zatial), "\033[32m%s: %d/%d\033[0m\n","Pocet replikacii", svet->original_replikacii, svet->pocet_replikacii );
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 50;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff, zatial, len);
+   aktualPocetZnakov += len;
+   
+
+
+   
     for (int i = 0; i < svet->hranica_y; i++)   //vonkajsi for, menej sa opakuje, je to y
     {
         for (int j = 0; j < svet->hranica_x; j++) {    //suradnica x
@@ -35,7 +132,7 @@ char * vykresli_svet(svt_t * svet) {
                 c = '*';
                 farba = "\033[32m"; // zelená
             } else if (svet->pole[j][i] == 0)   //prazdne
-            {vv
+            {
                 c = '-';
                 farba = "\033[37m"; // biela 
             }else if (svet->pole[j][i] == 1)    //chodec
@@ -48,52 +145,322 @@ char * vykresli_svet(svt_t * svet) {
                 farba = "\033[31m"; // červená prekážka
 
             }  
-            printf("%s%c \033[0m", farba, c);
-            
+            //printf("%s%c \033[0m", farba, c);
+            len = snprintf(zatial, sizeof(zatial), "%s%c \033[0m", farba, c);
+            if (aktualPocetZnakov + len >= maxPocetZnakov)
+            {
+                int novyMax = maxPocetZnakov + 50;
+                char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                if (zatial1 == NULL)
+                {
+                    perror("Chyba pamate v inicializacii realokacia");
+                    exit(EXIT_FAILURE);
+                }
+                buff = zatial1;
+                maxPocetZnakov = novyMax;
+                
+            }
+            memcpy(buff, zatial, len);
+            aktualPocetZnakov += len;
         }
-        putchar('\n');
-        
-    }   
+        //putchar('\n');    musim do toho pridat do buffru TO DO
+        len = snprintf(zatial, sizeof(zatial), "\n");
+            if (aktualPocetZnakov + len >= maxPocetZnakov)
+            {
+                int novyMax = maxPocetZnakov + 5;
+                char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                if (zatial1 == NULL)
+                {
+                    perror("Chyba pamate v inicializacii realokacia");
+                    exit(EXIT_FAILURE);
+                }
+                buff = zatial1;
+                maxPocetZnakov = novyMax;
+                
+            }
+            memcpy(buff, zatial, len);
+            aktualPocetZnakov += len;
+        }
+
+          
+
+    return buff;
     
 }
 
 
-void svet_vypis_statistiku(svt_t * svet) {
-    vycisti_obrazovku();
-    
-    printf("\033[1;32m--- STATISTIKA PRAVDEPODOBNOSTI ---\033[0m\n");
+char * svet_vypis_statistiku(svt_t * svet) {
+    //vycisti_obrazovku();
+     char * buff;
+   char zatial[128];
+   int aktualPocetZnakov = 0;
+   int maxPocetZnakov = 100;
+   buff = calloc(maxPocetZnakov, sizeof(char));
+
+   if (buff == NULL)
+   {
+    perror("Chyba pamate v inicializacii, vo vykresleni sveta");
+    exit(EXIT_FAILURE);
+   }
+
+   char * vycistenieObr = vycisti_obrazovku(); 
+   int len = snprintf(zatial, sizeof(zatial), "%s", vycistenieObr);
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 50;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff + aktualPocetZnakov, zatial, len);
+   aktualPocetZnakov += len;
+
+
+
+   //printf("\033[1;32m--- STATISTIKA PRAVDEPODOBNOSTI ---\033[0m\n");  
+    len = snprintf(zatial, sizeof(zatial), "\033[1;32m--- STATISTIKA PRAVDEPODOBNOSTI ---\033[0m\n");
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 50;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff + aktualPocetZnakov, zatial, len);
+   aktualPocetZnakov += len;
+
+
+   
      for (int i = 0; i < svet->hranica_y; i++) {    
         for (int j = 0; j < svet->hranica_x; j++) {
             char buf[16];
             if (svet->pole[j][i] == 2) {
-                printf("\033[31m%7s\033[0m", "X");
+
+                //printf("\033[31m%7s\033[0m", "X");
+                 len = snprintf(zatial, sizeof(zatial), "\033[31m%7s\033[0m", "X");
+                if (aktualPocetZnakov + len >= maxPocetZnakov)
+                    {
+                        int novyMax = maxPocetZnakov + 50;
+                        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                        if (zatial1 == NULL)
+                        {
+                            perror("Chyba pamate v inicializacii  realokacia");
+                            exit(EXIT_FAILURE);
+                        }
+                        buff = zatial1;
+                        maxPocetZnakov = novyMax;
+                    }
+                    memcpy(buff + aktualPocetZnakov, zatial, len);
+                    aktualPocetZnakov += len;
+                
             } else {
-                printf("%7.2f", svet->pole_pravdepodobnosti[j][i]);
+                //printf("%7.2f", svet->pole_pravdepodobnosti[j][i]);
+                len = snprintf(zatial, sizeof(zatial), "%7.2f", svet->pole_pravdepodobnosti[j][i]);
+                if (aktualPocetZnakov + len >= maxPocetZnakov)
+                    {
+                        int novyMax = maxPocetZnakov + 50;
+                        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                        if (zatial1 == NULL)
+                        {
+                            perror("Chyba pamate v inicializacii  realokacia");
+                            exit(EXIT_FAILURE);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                        }
+                        buff = zatial1;
+                        maxPocetZnakov = novyMax;
+                    }
+                    memcpy(buff + aktualPocetZnakov, zatial, len);
+                    aktualPocetZnakov += len;
             
             }
-            printf(" ");
+            //printf(" ");
+            len = snprintf(zatial, sizeof(zatial), " ");
+                if (aktualPocetZnakov + len >= maxPocetZnakov)
+                    {
+                        int novyMax = maxPocetZnakov + 5;
+                        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                        if (zatial1 == NULL)
+                        {
+                            perror("Chyba pamate v inicializacii  realokacia");
+                            exit(EXIT_FAILURE);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+                        }
+                        buff = zatial1;
+                        maxPocetZnakov = novyMax;
+                    }
+                    memcpy(buff + aktualPocetZnakov, zatial, len);
+                    aktualPocetZnakov += len;
         }
 
-        printf("\n");
+        //printf("\n");
+        len = snprintf(zatial, sizeof(zatial), " \n");
+                if (aktualPocetZnakov + len >= maxPocetZnakov)
+                    {
+                        int novyMax = maxPocetZnakov + 5;
+                        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                        if (zatial1 == NULL)
+                        {
+                            perror("Chyba pamate v inicializacii  realokacia");
+                            exit(EXIT_FAILURE);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+                        }
+                        buff = zatial1;
+                        maxPocetZnakov = novyMax;
+                    }
+                    memcpy(buff + aktualPocetZnakov, zatial, len);
+                    aktualPocetZnakov += len;
 
     }
 
-    printf("\n\n");
-    printf("\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
+    return buff;
+}
+char *  svet_vypis_kroky(svt_t * svet) {
+     //vycisti_obrazovku();
+     char * buff;
+   char zatial[128];
+   int aktualPocetZnakov = 0;
+   int maxPocetZnakov = 100;
+   buff = calloc(maxPocetZnakov, sizeof(char));
+
+   if (buff == NULL)
+   {
+    perror("Chyba pamate v inicializacii, vo vykresleni sveta");
+    exit(EXIT_FAILURE);
+   }
+
+   char * vycistenieObr = vycisti_obrazovku(); 
+   int len = snprintf(zatial, sizeof(zatial), "%s", vycistenieObr);
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 50;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff + aktualPocetZnakov, zatial, len);
+   aktualPocetZnakov += len;
+
+
+
+    //printf("\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
+    len = snprintf(zatial, sizeof(zatial), "\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 50;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff + aktualPocetZnakov, zatial, len);
+   aktualPocetZnakov += len;
+
+
+
     for (int i = 0; i < svet->hranica_y; i++) {    
             for (int j = 0; j < svet->hranica_x; j++) {
                 char buf[16];
                 if (svet->pole[j][i] == 2) {
-                    printf("\033[31m%12s\033[0m", "X");
+                    //printf("\033[31m%12s\033[0m", "X");
+                    len = snprintf(zatial, sizeof(zatial), "\033[31m%12s\033[0m", "X");
+
+                    if (aktualPocetZnakov + len >= maxPocetZnakov)
+                    {
+                        int novyMax = maxPocetZnakov + 50;
+                        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                        if (zatial1 == NULL)
+                        {
+                            perror("Chyba pamate v inicializacii  realokacia");
+                            exit(EXIT_FAILURE);
+                        }
+                        buff = zatial1;
+                        maxPocetZnakov = novyMax;
+                    }
+                    memcpy(buff + aktualPocetZnakov, zatial, len);
+                    aktualPocetZnakov += len;
+
+
                 } else {
-                    printf("%12.2f", svet->pole_priemer_krok[j][i]);
+                    //printf("%12.2f", svet->pole_priemer_krok[j][i]); 
+                    len = snprintf(zatial, sizeof(zatial), "%12.2f", svet->pole_priemer_krok[j][i]);
+
+                    if (aktualPocetZnakov + len >= maxPocetZnakov)
+                    {
+                        int novyMax = maxPocetZnakov + 50;
+                        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                        if (zatial1 == NULL)
+                        {
+                            perror("Chyba pamate v inicializacii  realokacia");
+                            exit(EXIT_FAILURE);
+                        }
+                        buff = zatial1;
+                        maxPocetZnakov = novyMax;
+                    }
+                    memcpy(buff + aktualPocetZnakov, zatial, len);
+                    aktualPocetZnakov += len;
                 
                 }
-                printf(" ");
+                //printf(" ");   TO
+                len = snprintf(zatial, sizeof(zatial), " ");
+
+                    if (aktualPocetZnakov + len >= maxPocetZnakov)
+                    {
+                        int novyMax = maxPocetZnakov + 50;
+                        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                        if (zatial1 == NULL)
+                        {
+                            perror("Chyba pamate v inicializacii  realokacia");
+                            exit(EXIT_FAILURE);
+                        }
+                        buff = zatial1;
+                        maxPocetZnakov = novyMax;
+                    }
+                    memcpy(buff + aktualPocetZnakov, zatial, len);
+                    aktualPocetZnakov += len;
             }
-            printf("\n");
+            //printf("\n");    
+            len = snprintf(zatial, sizeof(zatial), "\n");
+
+                    if (aktualPocetZnakov + len >= maxPocetZnakov)
+                    {
+                        int novyMax = maxPocetZnakov + 50;
+                        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                        if (zatial1 == NULL)
+                        {
+                            perror("Chyba pamate v inicializacii  realokacia");
+                            exit(EXIT_FAILURE);
+                        }
+                        buff = zatial1;
+                        maxPocetZnakov = novyMax;
+                    }
+                    memcpy(buff + aktualPocetZnakov, zatial, len);
+                    aktualPocetZnakov += len;
         }
 }
+
+
+
+
 void server_vykonavaj_sim(svt_brd_t * data) {
     
     
