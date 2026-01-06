@@ -1,7 +1,8 @@
 
 #include "UI.h"
-#include <bits/pthreadtypes.h>
+
 #include <pthread.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -303,7 +304,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
         }
 
         //printf("\n");
-        len = snprintf(zatial, sizeof(zatial), " \n");
+        len = snprintf(zatial, sizeof(zatial), " \n") + 1;
                 if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
                         int novyMax = maxPocetZnakov + 5;
@@ -440,7 +441,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                     aktualPocetZnakov += len;
             }
             //printf("\n");    
-            len = snprintf(zatial, sizeof(zatial), "\n");
+            len = snprintf(zatial, sizeof(zatial), "\n") + 1;
 
                     if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
@@ -473,7 +474,7 @@ void server_vykonavaj_sim(svt_brd_t * data) {
            
             pthread_mutex_lock(&data->server->mutex);
             int pocet_vlakien = data->server->pocetKlinetov;
-            if (!data->server->server_bezi || !data->server->server_info.zobraz_pole) {
+            if (!data->server->server_bezi || atomic_load(&data->server->server_info.sumarny_mod)) {
                 pthread_mutex_unlock(&data->server->mutex);
                 pthread_exit(NULL);
             }
@@ -490,6 +491,8 @@ void server_vykonavaj_sim(svt_brd_t * data) {
                 perror("Chyba vytvarania vlakien zla pamat.");
                 exit(EXIT_FAILURE);
                 }
+                vypisovac->server = data->server;
+                vypisovac->svet = data->svet;
                 pthread_create(&vlakno, NULL, posli_vsetkym_svet, &vypisovac);
                 pthread_detach(vlakno);
             }
@@ -511,8 +514,12 @@ void * posli_vsetkym_svet(void * arg) {
         perror("Chyba alokovania pamate pre vypis.");
         exit(EXIT_FAILURE);
     }
+    //treba dorobit
     pthread_mutex_lock(&data->server->mutex);
-    memcpy(posielaj, data->server->activeSocket, sizeof(socket_data_t) * pocet_klientov);
+    for (int i = 0; i < pocet_klientov; i++) {
+        memcpy(&posielaj[i], &data->server->klienti[i]->socket_pocuvaj, sizeof(socket_data_t));
+    }
+    
     pthread_mutex_unlock(&data->server->mutex);
     for (int i = 0; i < pocet_klientov; i++) {
         //treba pockat na lydku
@@ -523,9 +530,70 @@ void * posli_vsetkym_svet(void * arg) {
     free(posielaj);
     free(data);
 
-
-
 }
+void posli_vsetkym_statistiku(svt_brd_t * data) {
+    while (atomic_load(&data->server->server_bezi)) {
+    
+        
+        pthread_mutex_lock(&data->server->mutex);
+        int pocet_vlakien = data->server->pocetKlinetov;
+        if (!data->server->server_bezi || !atomic_load(&data->server->server_info.sumarny_mod)) {
+            pthread_mutex_unlock(&data->server->mutex);
+            break;
+        }
+        pthread_mutex_unlock(&data->server->mutex);
+        
+        for (int i = 0; i < pocet_vlakien; i++) {
+            pthread_t vlakno;
+            svt_vp_t * vypisovac;
+            vypisovac = calloc(1, sizeof(svt_vp_t));
+            if (vypisovac == NULL) {
+                perror("Chyba vytvarania vlakien zla pamat");
+                exit(EXIT_FAILURE);
+            }
+            vypisovac->server = data->server;
+            vypisovac->svet = data->svet;
+            pthread_create(&vlakno, NULL, posli_vsetkym_stat, vypisovac);
+            pthread_detach(vlakno);
+        }
+        sleep(1);
+    }
+    pthread_exit(NULL);
+}
+
+void * posli_vsetkym_stat(void * arg) {
+    svt_brd_t * data = arg;
+     pthread_mutex_lock(&data->server->mutex);
+    int pocet_klientov = data->server->pocetKlinetov;
+    pthread_mutex_unlock(&data->server->mutex);
+    klient_read_t * klienti;
+    klienti = calloc(pocet_klientov, sizeof(klient_read_t));
+    if (klienti == NULL) {
+        perror("Chyba alokovania pamate pre vypis");
+        exit(EXIT_FAILURE);
+    }
+    pthread_mutex_lock(&data->server->mutex);
+    for (int i = 0 ; i < pocet_klientov; i++) {
+        
+        memcpy(&klienti[i], &data->server->klienti[i], sizeof(klient_read_t));
+    }
+    pthread_mutex_unlock(&data->server->mutex);
+    for (int i = 0; i < pocet_klientov; i++) {
+        //treba pockat na lydku
+
+        char * buf;
+        if (atomic_load(&klienti[i].chcem_statistiku)) {
+            buf = svet_vypis_statistiku(data->svet);
+        } else {
+            buf = svet_vypis_kroky(data->svet);
+        }
+        socket_write(&klienti[i].socket_pocuvaj, buf, strlen(buf));
+        free(buf);
+    };
+    free(klienti);
+    free(data);
+}
+
 
 //rozmerx;rozmery;svetprekazky;pocet_replikacii;...
 //potrebujem poslat rozmery sveta x,y   svet prekazky 1 = true , 0 = normal

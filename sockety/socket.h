@@ -1,16 +1,17 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-#include <bits/pthreadtypes.h>
+#include <atomic>
+
 #include <pthread.h>
 #include <stddef.h>
 #include <sys/socket.h>
 #include <stdatomic.h>
 
+
+void * cisti_server(void * arg);
 typedef struct server_info {
-    _Bool zobraz_statistiku;
-    _Bool zobraz_kroky;
-    _Bool zobraz_pole;
+    atomic_bool sumarny_mod;
 } srv_inf_t;
 
 
@@ -32,13 +33,20 @@ _Bool socket_connect(socket_data_t * this, const struct sockaddr * clientAddress
 void socket_write(socket_data_t * this, const char * buffer, size_t length);
 int socket_read(socket_data_t * this, char * buffer, size_t length);
 
-
+typedef struct klient_read {
+    socket_data_t socket_pocuvaj;
+    atomic_bool chcem_statistiku;
+    atomic_bool bezi_klient;
+    atomic_bool vypni_server;
+    atomic_bool prepni_mod;
+}klient_read_t ;
 // Štruktúra obsahujúca informácie pre prácu servera
 typedef struct SocketServer {
     //toto je prijimaci socket na pripajanie
     socket_data_t passiveSocket;
     //pole socketov cize ulozeny klienti
-    socket_data_t * activeSocket;
+    
+    klient_read_t ** klienti;
     int pocetKlinetov;
     int maxPocetKlientov;
     int port;
@@ -64,8 +72,5 @@ typedef struct SocketClient {
 // Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre klienta
 void socket_client_init(socket_client_t * this, char * serverName, char * port);
 void socket_client_destroy(socket_client_t * this);
-typedef struct klient_read {
-    socket_data_t socket_pocuvaj;
-    socket_server_t * server;
-}klient_read_t ;
+
 #endif

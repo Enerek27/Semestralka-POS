@@ -1,6 +1,7 @@
 
 #include "../sockety/socket.h"
 
+#include <cstddef>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdio.h>
@@ -25,7 +26,7 @@ void * vlaknoPrijmaniaSpojenia(void * arg) {
 svt_t * nastav_server(socket_server_t * server) {
     char buf[500];
     pthread_mutex_lock(&server->mutex);
-    socket_data_t klient = server->activeSocket[server->hlavny_klient];
+    socket_data_t klient = server->klienti[server->hlavny_klient]->socket_pocuvaj;
     pthread_mutex_unlock(&server->mutex);
     socket_read(&klient, buf, sizeof(buf));
 
@@ -113,7 +114,7 @@ svt_t * nastav_server(socket_server_t * server) {
 
 svt_t * server_info_subor(socket_server_t * server) {
     char buf[250];
-    socket_read(&server->activeSocket[server->hlavny_klient - 1], buf, sizeof(buf));
+    socket_read(&server->klienti[server->hlavny_klient]->socket_pocuvaj, buf, sizeof(buf));
 
     if (buf[0] - '0' == 7) {
         //true treba subor
@@ -143,6 +144,8 @@ int main(int argc, char const *argv[])
     svt_t * svet;
     if (skuska == NULL) {
         svet = nastav_server(&socket_server);
+        generuj_pravdepodobnost(svet);
+        generuj_priem_krok(svet);
     } else {
         svet = skuska;
     }
@@ -150,34 +153,33 @@ int main(int argc, char const *argv[])
     //treba spravit nekonecny loop kde sa bude posielat ci sa ma vypnut alebo nie bude to aj cakaci loop
     pthread_create(&vlakienko, NULL, vlaknoPrijmaniaSpojenia, &socket_server);
     pthread_detach(vlakienko);
-
-
+    pthread_create(&vlakienko, NULL, nacuvajklientovi, socket_server.klienti[socket_server.hlavny_klient]);
+    pthread_detach(vlakienko);
+    pthread_create(&vlakienko, NULL, cisti_server, &socket_server);
+    pthread_detach(vlakienko);
+    svt_brd_t * svet_vypis;
+    svet_vypis = calloc(1, sizeof(svt_brd_t));
+    if (svet_vypis == NULL) {
+        perror("Chyba vytvarania simulacie pri alokovani pamate");
+        exit(EXIT_FAILURE);
+    }
+    svet_vypis->svet = svet;
+    svet_vypis->server = &socket_server;
+    //treba dorobit ukoncenie a posielanie a skoncenie v sledovaci
     while (atomic_load(&socket_server.server_bezi)) {
-        pthread_mutex_lock(&socket_server.mutex);
-        _Bool pole = socket_server.server_info.zobraz_pole;
-        _Bool statistika = socket_server.server_info.zobraz_statistiku;
-        _Bool kroky = socket_server.server_info.zobraz_kroky;
-        pthread_mutex_unlock(&socket_server.mutex);
-        if (pole) {
-            svt_brd_t * svet_vypis;
-            svet_vypis = calloc(1, sizeof(svt_brd_t));
-            if (svet_vypis == NULL) {
-                perror("Chyba vytvarania simulacie pri alokovani pamate");
-                exit(EXIT_FAILURE);
-            }
-            svet_vypis->svet = svet;
-            svet_vypis->server = &socket_server;
-            server_vykonavaj_sim(svet_vypis);
-            free(svet_vypis);
-        } else if (statistika) {
-        
-        } else if (kroky) {
+        if (atomic_load(&socket_server.server_info.sumarny_mod)) {
+            posli_vsetkym_statistiku(svet_vypis);
             
+        } else {
+            server_vykonavaj_sim(svet_vypis);
+            if (atomic_load(&socket_server.server_info.sumarny_mod)) {
+                atomic_store(&socket_server.server_bezi, 0);
+            }
         }
     }
-
+    printf("Ukoncujem server!!\n");
+    free(svet_vypis);
     
-    //TODO
     
     
     sleep(1);

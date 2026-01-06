@@ -45,5 +45,9 @@ void  server_vykonavaj_sim(svt_brd_t * svet);
 
 void * posli_vsetkym_svet(void * arg);
 
+
 void hlavne_menu_klient();
 
+void posli_vsetkym_statistiku(svt_brd_t * data);
+
+void * posli_vsetkym_stat(void * arg);

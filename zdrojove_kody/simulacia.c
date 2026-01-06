@@ -1,13 +1,13 @@
 #include "simulacia.h"
 
 
-void generuj_pravdepodobnost(int pocet_pokusov_K, svt_t * svet) {
+void generuj_pravdepodobnost(svt_t * svet) {
     
     
     for (int i = 0; i < svet->hranica_x; i++) {
         for (int j = 0; j < svet->hranica_y; j++) {
             if (svet->pole[i][j] != 2) {
-                svet->pole_pravdepodobnosti[i][j] = simuluj_k_stredu_od_policka_statistika(i, j, pocet_pokusov_K, svet) * 100;
+                svet->pole_pravdepodobnosti[i][j] = simuluj_k_stredu_od_policka_statistika(i, j, svet->pocet_krokov_K, svet) * 100;
             }
             
         }

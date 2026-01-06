@@ -13,44 +13,90 @@
 #undef __USE_XOPEN2K
 
 
+void * cisti_server(void * arg) {
+        socket_server_t * server = arg;
+
+    while (atomic_load(&server->server_bezi)) {
+        pthread_mutex_lock(&server->mutex);
+        int prvy = 0;
+        int posledny = server->pocetKlinetov - 1;
+
+        while (prvy <= posledny) {
+            if (!atomic_load(&server->klienti[prvy]->bezi_klient)) {
+                
+                klient_read_t * tmp = server->klienti[prvy];
+                server->klienti[prvy] = server->klienti[posledny];
+                server->klienti[posledny] = tmp;
+
+                
+                server->pocetKlinetov--;
+                posledny--; 
+            } else {
+                prvy++; 
+            }
+        }
+        for (int i = 0; i < server->pocetKlinetov; i++) {
+          if (atomic_load(&server->klienti[i]->vypni_server)) {
+              atomic_store(&server->server_bezi, 0);
+          }
+          if (atomic_load(&server->klienti[i]->prepni_mod)) {
+            if (atomic_load(&server->server_info.sumarny_mod)) {
+              atomic_store(&server->server_info.sumarny_mod, 0);
+            } else {
+              atomic_store(&server->server_info.sumarny_mod, 1);
+            }
+            atomic_store(&server->klienti[i]->prepni_mod, 0);
+          }
+        }
+
+        pthread_mutex_unlock(&server->mutex);
+
+        
+        struct timespec ts = {0, 300 * 1000000}; 
+        nanosleep(&ts, NULL);
+    }
+
+    pthread_exit(NULL);
+}
+
 
 void * nacuvajklientovi(void * arg) {
   klient_read_t * info_klient = arg; 
  
-  while (atomic_load(&info_klient->server->server_bezi)) {
+  while (atomic_load(&info_klient->bezi_klient)) {
     char buf[200];
     int n = socket_read(&info_klient->socket_pocuvaj, buf, sizeof(buf));
     if (n < 0) {
       perror("chyba citania socketu");
       exit(EXIT_FAILURE);
     } else if (n == 0) {
-      pthread_mutex_lock(&info_klient->server->mutex);
-      int id = -1;
-      int posledny_id = info_klient->server->pocetKlinetov - 1;
-
-      for (int i = 0; i < info_klient->server->pocetKlinetov; i++) {
-          if (info_klient->server->activeSocket[i].socket == info_klient->socket_pocuvaj.socket) {
-              id = i;
-              break;
-          }
-      }
-
-      if (id != -1 && id != posledny_id) {
-          
-          socket_data_t tmp = info_klient->server->activeSocket[id];
-          info_klient->server->activeSocket[id] = info_klient->server->activeSocket[posledny_id];
-          info_klient->server->activeSocket[posledny_id] = tmp;
-      }
-
-    
-      info_klient->server->pocetKlinetov--;
-      pthread_mutex_unlock(&info_klient->server->mutex);
       
+      atomic_store(&info_klient->bezi_klient, 0);
       socket_destroy(&info_klient->socket_pocuvaj);
       break;
     } else {
       //prijal som spravu spracovanie
-        
+        int signal = buf[0] - '0';
+        switch (signal) {
+          case 0:
+            //signal vypnutie
+            atomic_store(&info_klient->vypni_server, 1);
+            break;
+          case 1:
+            //signal prepni mod
+            atomic_store(&info_klient->prepni_mod, 1);
+            break;
+          case 2:
+            //signal v prepnutom mode chcem teraz statistiku
+            atomic_store(&info_klient->chcem_statistiku, 1);
+            break;
+          case 3:
+            //signal v prepnutom mode chcem teraz kroky
+            atomic_store(&info_klient->chcem_statistiku, 0);
+            break;
+          default:
+            break;
+        }
 
 
 
@@ -59,7 +105,7 @@ void * nacuvajklientovi(void * arg) {
 
   }
 
-  free(info_klient);
+  
   //sem prichadza od klienta info
 }
 
@@ -149,18 +195,27 @@ void socket_server_init(socket_server_t * this, int port) {
   this->port = port;
   this->maxPocetKlientov = 5;
   this->pocetKlinetov = 0;
-  this->activeSocket = malloc(this->maxPocetKlientov * sizeof(socket_data_t));
-  if (this->activeSocket == NULL) {
-    perror("Zle inicializovana pamat pre atkiv sockety!");
+  this->klienti = malloc(this->maxPocetKlientov * sizeof(klient_read_t*));
+  for (int i = 0; i < this->maxPocetKlientov; i++) {
+    this->klienti[i] = calloc(1, sizeof(klient_read_t));
+  }
+  if (this->klienti == NULL) {
+    perror("Zle inicializovana pamat pre klientov!");
     exit(EXIT_FAILURE);
   }
+  for (int i = 0; i < this->maxPocetKlientov; i++) {
+    atomic_store(&this->klienti[i]->bezi_klient, 0);
+    atomic_store(&this->klienti[i]->chcem_statistiku, 0);
+    atomic_store(&this->klienti[i]->vypni_server, 0);
+    atomic_store(&this->klienti[i]->prepni_mod, 0);
+  }
+
+
   pthread_mutex_init(&this->mutex, NULL);
   this->server_bezi = (atomic_bool)1;
   this->hlavny_klient = 0;
   srv_inf_t server_info;
-  server_info.zobraz_statistiku = 1;
-  server_info.zobraz_kroky = 0;
-  server_info.zobraz_pole = 0;
+  atomic_store(&this->server_info.sumarny_mod, 0);
   this->server_info = server_info;
   
 }
@@ -168,13 +223,7 @@ void socket_server_init(socket_server_t * this, int port) {
 void socket_server_accept_connection(socket_server_t * this) {
   // Adresa klienta
   struct sockaddr_in clientAddress;
-  klient_read_t * klient_info;
-  klient_info = malloc(sizeof(klient_read_t));
-  if (klient_info == NULL) {
-      perror("Chyba pamate pre vlakno klienta");
-      exit(EXIT_FAILURE);
-  }
-  klient_info->server = this;
+ 
   // Ukladanie veľkosti adresy klienta
   socklen_t clientAddressSize = sizeof(clientAddress);
   socket_data_t tempSocket;
@@ -183,53 +232,70 @@ void socket_server_accept_connection(socket_server_t * this) {
   // Pripojenie klienta na server, pričom sa nastaví všetko potrebné v adrese klienta, nastaví sa veľkosť adresy a vráti sa popisovač soketu určeného pre komunikáciu
   if (this->maxPocetKlientov == this->pocetKlinetov) {
     int naviac = this->maxPocetKlientov + 5;
-    socket_data_t * tmp = realloc(this->activeSocket, sizeof(socket_data_t) * naviac);
+    klient_read_t ** tmp = realloc(this->klienti, sizeof(klient_read_t*) * naviac);
     if (tmp == NULL) {
       perror("Chyba zvacsania pamate!");
       exit(EXIT_FAILURE);
     }
-    this->activeSocket = tmp;
-
+    this->klienti = tmp;
     for (int i = this->maxPocetKlientov; i < naviac; i++) {
-      this->activeSocket[i].socket = 0;
+        this->klienti[i] = calloc(1, sizeof(klient_read_t));
     }
+    for (int i = this->maxPocetKlientov; i < naviac; i++) {
+      atomic_store(&this->klienti[i]->chcem_statistiku, 0);
+      atomic_store(&this->klienti[i]->bezi_klient, 0);
+      atomic_store(&this->klienti[i]->vypni_server, 0);
+      atomic_store(&this->klienti[i]->prepni_mod, 0);
+    }
+    
     this->maxPocetKlientov = naviac;
-
   }
-  this->activeSocket[this->pocetKlinetov] = tempSocket;
-  klient_info->socket_pocuvaj = this->activeSocket[this->pocetKlinetov];
+  this->klienti[this->pocetKlinetov]->socket_pocuvaj = tempSocket;
+  atomic_store(&this->klienti[this->pocetKlinetov]->bezi_klient, 1);
+  memset(this->klienti[this->pocetKlinetov], 0, sizeof(*this->klienti[this->pocetKlinetov]));          
+  this->klienti[this->pocetKlinetov]->socket_pocuvaj = tempSocket;
+  atomic_store(&this->klienti[this->pocetKlinetov]->bezi_klient, 1);
+  atomic_store(&this->klienti[this->pocetKlinetov]->vypni_server, 0);
+  atomic_store(&this->klienti[this->pocetKlinetov]->chcem_statistiku, 0);
+  atomic_store(&this->klienti[this->pocetKlinetov]->prepni_mod, 0);
   this->pocetKlinetov++;
   pthread_t vlakno;
-  if (this->pocetKlinetov == 0) {
+  if (this->pocetKlinetov == 1) {
     this->hlavny_klient = this->pocetKlinetov - 1;
     char buff[2];
     buff[0] = '7';
     buff[1] = '\0';
-    socket_write(&this->activeSocket[this->hlavny_klient - 1], buff, strlen(buff));
+    socket_write(&this->klienti[this->hlavny_klient]->socket_pocuvaj, buff, strlen(buff));
   } else {
     char buff[2];
     buff[0] = '5';
     buff[1] = '\0';
-    socket_write(&this->activeSocket[this->hlavny_klient - 1], buff, strlen(buff));
+    socket_write(&this->klienti[this->pocetKlinetov - 1]->socket_pocuvaj, buff, strlen(buff));
+    pthread_create(&vlakno, NULL, nacuvajklientovi, this->klienti[this->pocetKlinetov - 1]);
+    pthread_detach(vlakno);
   }
   
-  pthread_create(&vlakno, NULL, nacuvajklientovi, klient_info);
-  pthread_detach(vlakno);
+  
 
   pthread_mutex_unlock(&this->mutex);
 }
 // Funkcia na zničenie servera, čo momentálne znamená zničenie pasívneho a aktívneho soketu
 void socket_server_destroy(socket_server_t * this) {
+  atomic_store(&this->server_bezi, 1);
+  shutdown(this->passiveSocket.socket, SHUT_RDWR);
   // Zničenie pasívneho soketu na prijímanie pripojení
   socket_destroy(&this->passiveSocket);
   // Zničenie aktívneho soketu pre komunikáciu s klientom
   for (int i = 0; i < this->pocetKlinetov; i++) {
-    socket_destroy(&this->activeSocket[i]);
+    socket_destroy(&this->klienti[i]->socket_pocuvaj);
+    free(this->klienti[i]);
   }
-  free(this->activeSocket);
+  
+  free(this->klienti);
+  
   pthread_mutex_destroy(&this->mutex);
-  atomic_store(&this->server_bezi, 0);
-  shutdown(this->passiveSocket.socket, SHUT_RDWR);
+  
+  
 }
 // Funkcia na inicializáciu klienta, pričom je potrebné uviesť aj názov servera a port, na ktorom bude zadaný server čakať na pripojenia
 void socket_client_init(socket_client_t * this, char * serverName, char * port) {
