@@ -22,7 +22,6 @@ typedef struct poslat_server {
     int rozmer_x;
     int rozmer_y;
     _Bool svet_s_prekazkami;
-    _Bool nacitaj_zo_suboru;
     int pocet_replikacii;
     int pocet_krokov_K;
     prvd_t pravdepodobnosti;
@@ -40,9 +39,11 @@ char * vycisti_obrazovku();
 
 void inicializuj_server(srv_p_t * data,  socket_client_t * socket);
 
-void spusti_menu_klient();
+void spusti_initmenu_klient(socket_client_t * socket);
 
 void  server_vykonavaj_sim(svt_brd_t * svet);
 
 void * posli_vsetkym_svet(void * arg);
+
+
 

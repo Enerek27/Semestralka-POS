@@ -1,6 +1,7 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
+#include <bits/pthreadtypes.h>
 #include <pthread.h>
 #include <stddef.h>
 #include <sys/socket.h>
@@ -55,6 +56,8 @@ typedef struct SocketClient {
     socket_data_t activeSocket;
     char * serverName;
     int port;
+    atomic_bool klien_bezi;
+    pthread_mutex_t mutex;
 } socket_client_t;
 // Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre klienta
 void socket_client_init(socket_client_t * this, char * serverName, char * port);

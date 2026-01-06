@@ -175,7 +175,7 @@ void socket_server_accept_connection(socket_server_t * this) {
   // Ukladanie veľkosti adresy klienta
   socklen_t clientAddressSize = sizeof(clientAddress);
   socket_data_t tempSocket;
-    socket_accept(&tempSocket, &this->passiveSocket, (struct sockaddr * ) &clientAddress, &clientAddressSize);
+  socket_accept(&tempSocket, &this->passiveSocket, (struct sockaddr * ) &clientAddress, &clientAddressSize);
   pthread_mutex_lock(&this->mutex);
   // Pripojenie klienta na server, pričom sa nastaví všetko potrebné v adrese klienta, nastaví sa veľkosť adresy a vráti sa popisovač soketu určeného pre komunikáciu
   if (this->maxPocetKlientov == this->pocetKlinetov) {
@@ -193,11 +193,26 @@ void socket_server_accept_connection(socket_server_t * this) {
     this->maxPocetKlientov = naviac;
 
   }
+  this->activeSocket[this->pocetKlinetov] = tempSocket;
   klient_info->socket_pocuvaj = this->activeSocket[this->pocetKlinetov];
   this->pocetKlinetov++;
   pthread_t vlakno;
-  pthread_create(&vlakno, NULL, nacuvajklientovy, klient_info);
+  if (this->pocetKlinetov == 0) {
+    this->hlavny_klient = this->pocetKlinetov - 1;
+    char buff[2];
+    buff[0] = '7';
+    buff[1] = '\0';
+    socket_write(&this->activeSocket[this->hlavny_klient - 1], buff, strlen(buff));
+  } else {
+    char buff[2];
+    buff[0] = '5';
+    buff[1] = '\0';
+    socket_write(&this->activeSocket[this->hlavny_klient - 1], buff, strlen(buff));
+  }
+  
+  pthread_create(&vlakno, NULL, nacuvajklientovi, klient_info);
   pthread_detach(vlakno);
+
   pthread_mutex_unlock(&this->mutex);
 }
 // Funkcia na zničenie servera, čo momentálne znamená zničenie pasívneho a aktívneho soketu
@@ -253,6 +268,8 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
       freeaddrinfo(server);
       this->serverName = serverName;
       this->port = atoi(port);
+      atomic_store(&this->klien_bezi, 1);
+      pthread_mutex_init(&this->mutex, NULL);
       return;
     }
   }
@@ -265,4 +282,6 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
 void socket_client_destroy(socket_client_t * this) {
   // Zničenie aktívneho soketu pre komunikáciu so serverom
   socket_destroy(&this->activeSocket);
+  atomic_store(&this->klien_bezi, 0);
+  pthread_mutex_destroy(&this->mutex);
 }

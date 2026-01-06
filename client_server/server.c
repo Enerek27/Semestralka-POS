@@ -23,7 +23,6 @@ void pockaj_na_prve_pripojenie(socket_server_t * server) {
     while (1) {
         pthread_mutex_lock(&server->mutex);
         if (server->pocetKlinetov > 0) {
-            server->hlavny_klient = server->pocetKlinetov - 1;
             pthread_mutex_unlock(&server->mutex);
             break;
         }
@@ -99,6 +98,9 @@ svt_t * nastav_server(socket_server_t * server) {
     char cesta_k_suboru[100];
     strncpy(cesta_k_suboru, nova_pomocna, prva - nova_pomocna);
     cesta_k_suboru[prva - nova_pomocna + 1] = '\0';   
+    nova_pomocna = prva + 1;
+
+   
     
     prvd_t pravdepodobnosti;
     pravdepodobnosti.hore = pravd_hore;
@@ -106,16 +108,31 @@ svt_t * nastav_server(socket_server_t * server) {
     pravdepodobnosti.vlavo = pravd_vlavo;
     pravdepodobnosti.vpravo = pravd_vpravo;
     svt_t * navrat;
+    
     if (prekazky) {
         navrat = svet_init_prekazky(rozmer_x, rozmer_y, 20, pravdepodobnosti, pocet_krokov_K, pocet_replikacii, cesta_k_suboru);
     } else {
         navrat = svet_init_normal(rozmer_x, rozmer_y, pravdepodobnosti, pocet_krokov_K, pocet_replikacii, cesta_k_suboru);
     }
+
+
     return navrat;
     
 }
 
+svt_t * server_info_subor(socket_server_t * server) {
+    char buf[250];
+    socket_read(&server->activeSocket[server->hlavny_klient - 1], buf, sizeof(buf));
 
+    if (buf[0] - '0' == 7) {
+    
+    } else if (buf[0] - '0' == 5) {
+    
+    } else {
+    
+    }
+
+}
 
 
 int main(int argc, char const *argv[])
@@ -125,13 +142,21 @@ int main(int argc, char const *argv[])
     socket_server_t socket_server;
     socket_server_init(&socket_server, 777);
     pthread_t vlakienko;
+    socket_server_accept_connection(&socket_server);
+    svt_t * skuska = server_info_subor(&socket_server);
+    svt_t * svet;
+    if (skuska == NULL) {
+        svet = nastav_server(&socket_server);
+    } else {
+        svet = skuska;
+    }
+    
+    
+    
+    //treba spravit nekonecny loop kde sa bude posielat ci sa ma vypnut alebo nie bude to aj cakaci loop
     pthread_create(&vlakienko, NULL, vlaknoPrijmaniaSpojenia, &socket_server);
-
-
     pockaj_na_prve_pripojenie(&socket_server);
     
-    svt_t * svet = nastav_server(&socket_server);
-
     svt_brd_t * svet_vypis;
     svet_vypis = calloc(1, sizeof(svt_brd_t));
     if (svet_vypis == NULL) {

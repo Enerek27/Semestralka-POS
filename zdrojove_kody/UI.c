@@ -698,37 +698,247 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
      memcpy(buf + aktual_znakov, tmp, len);
     aktual_znakov += len;
 
-    len = 2;
-     if (aktual_znakov + len >= max) {
-        int novy_max = max + 50;
-        char * tmp1 = realloc(buf, novy_max * sizeof(char));
-        if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia");
-            exit(EXIT_FAILURE);
-        }
-        buf = tmp1;
-        max = novy_max;
-    }
-    if (data->nacitaj_zo_suboru) {
-        tmp[0] = '1';
-        tmp[1] = ';';
-        memcpy(buf + aktual_znakov, tmp, len);
-       
-    } else {
-        tmp[0] = '0';
-        tmp[1] = ';';
-         memcpy(buf + aktual_znakov, tmp, len);
-    }
-    aktual_znakov += len;
-
     socket_write(&socket->activeSocket, buf, aktual_znakov);
     free(buf);
 }
 
 
 
-void spusti_menu_klient() {
+void spusti_initmenu_klient(socket_client_t * socket) {
 
+    srv_p_t vstup;
+    char cesta_k_suboru[200];
+
+
+
+    int pocet_krokov_K;
+
+    int pocet_replikacii;
+
+    prvd_t pravdepodobnosti;
+
+    int rozmer_x;
+
+    int rozmer_y;
+
+    _Bool svet_s_prekazkami;
+
+    
+    while (1) {
+    
+    
+        char buf [200];
+        memset(buf, 0, sizeof(buf));
+        printf("Zadaj sirku pola(rozmer_x): \n");
+        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            perror("Chyba nacitavanie textu");
+            exit(EXIT_FAILURE);
+        }
+        char * kontrola;
+        rozmer_x = strtol(buf, &kontrola, 10);
+        if (kontrola == buf) {
+            printf("To nie je cislo zadaj znova!!\n");
+        } else {
+            break;
+        }
+    }
+
+    while (1) {
+    
+    
+        char buf [200];
+        memset(buf, 0, sizeof(buf));
+        printf("Zadaj vysku pola(rozmer_y): \n");
+        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            perror("Chyba nacitavanie textu");
+            exit(EXIT_FAILURE);
+        }
+        char * kontrola;
+        rozmer_y = strtol(buf, &kontrola, 10);
+        if (kontrola == buf) {
+            printf("To nie je cislo zadaj znova!!\n");
+        } else {
+            break;
+        }
+    }
+
+    while (1) {
+    
+    
+        char buf [200];
+        memset(buf, 0, sizeof(buf));
+        printf("Zadaj pocet replikacii simulacie: \n");
+        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            perror("Chyba nacitavanie textu");
+            exit(EXIT_FAILURE);
+        }
+        char * kontrola;
+        pocet_replikacii = strtol(buf, &kontrola, 10);
+        if (kontrola == buf) {
+            printf("To nie je cislo zadaj znova!!\n");
+        } else {
+            break;
+        }
+    }
+
+    while (1) {
+        printf("Zadaj pravdepodobnosti v tvare s desatinou bodkou.\n");
+        printf("Ich súčet musí byť 1\n");
+    
+        while (1) {
+        
+            char buf [200];
+            memset(buf, 0, sizeof(buf));
+            printf("Zadaj pravdepodobnost pohybu smer hore: \n");
+            if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                perror("Chyba nacitavanie textu");
+                exit(EXIT_FAILURE);
+            }
+            char * kontrola;
+            pravdepodobnosti.hore = strtof(buf, &kontrola);
+            if (kontrola == buf) {
+                printf("To nie je cislo zadaj znova!!\n");
+            } else {
+                break;
+            }
+        }
+
+        while (1) {
+        
+            char buf [200];
+            memset(buf, 0, sizeof(buf));
+            printf("Zadaj pravdepodobnost pohybu smer dole: \n");
+            if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                perror("Chyba nacitavanie textu");
+                exit(EXIT_FAILURE);
+            }
+            char * kontrola;
+            pravdepodobnosti.dole = strtof(buf, &kontrola);
+            if (kontrola == buf) {
+                printf("To nie je cislo zadaj znova!!\n");
+            } else {
+                break;
+            }
+        }
+
+        while (1) {
+        
+            char buf [200];
+            memset(buf, 0, sizeof(buf));
+            printf("Zadaj pravdepodobnost pohybu smer vpravo: \n");
+            if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                perror("Chyba nacitavanie textu");
+                exit(EXIT_FAILURE);
+            }
+            char * kontrola;
+            pravdepodobnosti.vpravo = strtof(buf, &kontrola);
+            if (kontrola == buf) {
+                printf("To nie je cislo zadaj znova!!\n");
+            } else {
+                break;
+            }
+        }
+
+        while (1) {
+        
+            char buf [200];
+            memset(buf, 0, sizeof(buf));
+            printf("Zadaj pravdepodobnost pohybu smer vlavo: \n");
+            if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                perror("Chyba nacitavanie textu");
+                exit(EXIT_FAILURE);
+            }
+            char * kontrola;
+            pravdepodobnosti.vlavo = strtof(buf, &kontrola);
+            if (kontrola == buf) {
+                printf("To nie je cislo zadaj znova!!\n");
+            } else {
+                break;
+            }
+        }
+
+        float sucet = 0;
+        sucet += pravdepodobnosti.dole;
+        sucet += pravdepodobnosti.hore;
+        sucet += pravdepodobnosti.vpravo;
+        sucet += pravdepodobnosti.vlavo;
+        if (sucet == 1.0) {
+            break;
+        } else {
+            printf("Sucet nie je 1 !!!!\n");
+        }
+    }
+
+    while (1) {
+    
+    
+        char buf [200];
+        memset(buf, 0, sizeof(buf));
+        printf("Zadaj hodnotu K maximalny pocet krokov chodca: \n");
+        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            perror("Chyba nacitavanie textu");
+            exit(EXIT_FAILURE);
+        }
+        char * kontrola;
+        pocet_krokov_K = strtol(buf, &kontrola, 10);
+        if (kontrola == buf) {
+            printf("To nie je cislo zadaj znova!!\n");
+        } else {
+            break;
+        }
+    }
+    while (1) {
+    
+    
+        char buf [200];
+        memset(buf, 0, sizeof(buf));
+        printf("Zadaj ci sa ma byt svet s prekazkami(1) alebo bez(0) (1/0): \n");
+        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            perror("Chyba nacitavanie textu");
+            exit(EXIT_FAILURE);
+        }
+        char * kontrola;
+        int tmp_int;
+        tmp_int = strtol(buf, &kontrola, 10);
+        if (kontrola == buf) {
+            printf("To nie je cislo zadaj znova!!\n");
+        } else {
+            if (tmp_int == 1 || tmp_int == 0) {
+                svet_s_prekazkami = (_Bool)tmp_int;
+                break;
+            } else {
+                printf("Zle zadane cislo skus znova");
+            }
+
+            
+        }
+    }
+
+    while (1) {
+    
+    
+        char buf [200];
+        memset(buf, 0, sizeof(buf));
+        printf("Zadaj cestu k suboru na ulozenie: \n");
+        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            perror("Chyba nacitavanie textu");
+            exit(EXIT_FAILURE);
+        }
+        buf[strcspn(buf, "\n")] = '\0';
+        memcpy(cesta_k_suboru, buf, strlen(buf));
+        break;
+    }
+
+
+    vstup.svet_s_prekazkami = svet_s_prekazkami;
+    vstup.rozmer_y = rozmer_y;
+    vstup.rozmer_x = rozmer_x;
+    vstup.pravdepodobnosti = pravdepodobnosti; 
+    vstup.pocet_replikacii = pocet_replikacii;
+    vstup.pocet_krokov_K = pocet_krokov_K;
+    vstup.cesta_k_suboru = cesta_k_suboru;
+
+    inicializuj_server(&vstup, socket);
 
 
 
