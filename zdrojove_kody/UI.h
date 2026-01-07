@@ -33,6 +33,7 @@ char * vykresli_svet(svt_t * svet);
 char * svet_vypis_statistiku(svt_t * svet);
 char * svet_vypis_kroky(svt_t * svet);
 
+char * vrat_menu_klient();
 
 char * vycisti_obrazovku();
 

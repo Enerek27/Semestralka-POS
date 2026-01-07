@@ -9,6 +9,11 @@
 #include <unistd.h>
 
 
+
+char * vrat_menu_klient() {
+
+}
+
 char * vycisti_obrazovku() {
 
     char * buff;
@@ -60,7 +65,7 @@ char * vycisti_obrazovku() {
     
     //printf("\033[2J");  //kurzor posunie do laveho horneho rohu
     //fflush(stdout);
-
+   
     return buff;
 }
 

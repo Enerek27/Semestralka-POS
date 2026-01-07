@@ -129,7 +129,15 @@ int main(int argc, char const *argv[])
 {
 
    
-   
+   while (1) {
+    //tvoje menu
+    //bude vracat strukturu
+    //
+    // switch co lydkine menu vrati podla toho sa bude nieco robit
+   }
+
+
+
 
     socket_client_t socket_client;
 
