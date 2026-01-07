@@ -247,6 +247,51 @@ int main(int argc, char const *argv[])
                         //lubim ju :)
 
 
+                        char stlacene[10];
+                        int stlacenePismeno;
+                        char * endptr;
+                        int maxPocetPismen = 10;
+                        if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
+                            printf("Nezadal si cislo, skus znova\n");
+                            break;
+                        }
+                        stlacenePismeno = strtol(stlacene, &endptr, 10);
+                        if (stlacene == endptr) {
+                            printf("Nie je to cislo.\n");
+                            break;
+                        }
+                        
+                        char buff[2];
+                        switch (stlacenePismeno) {
+                            case 0:
+                                //signal vypnutie
+                                buff[0] = '0';
+                                buff[1] = '\0';
+                                socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                break;
+                            case 1:
+                                //signal prepni mod
+                                buff[0] = '1';
+                                buff[1] = '\0';
+                                socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                break;
+                            case 2:
+                                //signal v prepnutom mode chcem teraz statistiku
+                                buff[0] = '2';
+                                buff[1] = '\0';
+                                socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                break;
+                            case 3:
+                                //signal v prepnutom mode chcem teraz kroky
+                                buff[0] = '3';
+                                buff[1] = '\0';
+                                socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                break;
+                            default:
+                                printf("Take cislo nie je uvedene.\n");
+                                break;
+                        }
+
 
                     }
                     socket_client_destroy(&socket_client);
@@ -300,6 +345,7 @@ int main(int argc, char const *argv[])
             break;
         case 4:
                 idem = 0;
+
             break;
 
     };
