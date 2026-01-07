@@ -1,6 +1,7 @@
 
 #include "UI.h"
 
+#include <cstring>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdio.h>
@@ -11,7 +12,24 @@
 
 
 char * vrat_menu_klient() {
+    char * buff;
+    int maxPocetZnakov = 120;
+    buff = calloc(maxPocetZnakov, sizeof(char));
+    if (buff == NULL)
+   {
+    perror("Chyba pamate v inicializacii, vo vykresleni sveta.");
+    exit(EXIT_FAILURE);
+   }
 
+   int len = 0;
+   
+   len += snprintf(buff + len, maxPocetZnakov - len, "MENU:\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "1. NOVA SIMULACIA\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "2. PRIPOJENIE K SIMULACII\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "3. OPATOVNE SPUSTENIE SIMULACIE\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "4. KONIEC\n");
+   
+   return buff;
 }
 
 char * vycisti_obrazovku() {
@@ -66,6 +84,24 @@ char * vycisti_obrazovku() {
     //printf("\033[2J");  //kurzor posunie do laveho horneho rohu
     //fflush(stdout);
    
+    char * opatovneMenu = vrat_menu_klient();
+    len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu);
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 150;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia.");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff + aktualPocetZnakov, zatial, len);
+   aktualPocetZnakov += len;
+
     return buff;
 }
 
@@ -187,6 +223,26 @@ char * vykresli_svet(svt_t * svet) {
             memcpy(buff, zatial, len);
             aktualPocetZnakov += len;
         }
+
+
+
+            char * opatovneMenu = vrat_menu_klient();
+            len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu);
+
+            if (aktualPocetZnakov + len >= maxPocetZnakov)
+            {
+                int novyMax = maxPocetZnakov + 150;
+                char * zatial1 = realloc(buff, novyMax * sizeof(char));
+                if (zatial1 == NULL)
+                {
+                    perror("Chyba pamate v inicializacii  realokacia.");
+                    exit(EXIT_FAILURE);
+                }
+                buff = zatial1;
+                maxPocetZnakov = novyMax;
+            }
+            memcpy(buff + aktualPocetZnakov, zatial, len);
+            aktualPocetZnakov += len;
 
           
 
@@ -327,6 +383,24 @@ char * svet_vypis_statistiku(svt_t * svet) {
 
     }
 
+    char * opatovneMenu = vrat_menu_klient();
+    len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu);
+
+    if (aktualPocetZnakov + len >= maxPocetZnakov)
+    {
+        int novyMax = maxPocetZnakov + 150;
+        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+        if (zatial1 == NULL)
+        {
+            perror("Chyba pamate v inicializacii  realokacia.");
+            exit(EXIT_FAILURE);
+        }
+        buff = zatial1;
+        maxPocetZnakov = novyMax;
+    }
+    memcpy(buff + aktualPocetZnakov, zatial, len);
+    aktualPocetZnakov += len;
+
     return buff;
 }
 char *  svet_vypis_kroky(svt_t * svet) {
@@ -463,6 +537,28 @@ char *  svet_vypis_kroky(svt_t * svet) {
                     memcpy(buff + aktualPocetZnakov, zatial, len);
                     aktualPocetZnakov += len;
         }
+
+
+    char * opatovneMenu = vrat_menu_klient();
+    len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu);
+
+    if (aktualPocetZnakov + len >= maxPocetZnakov)
+    {
+        int novyMax = maxPocetZnakov + 150;
+        char * zatial1 = realloc(buff, novyMax * sizeof(char));
+        if (zatial1 == NULL)
+        {
+            perror("Chyba pamate v inicializacii  realokacia.");
+            exit(EXIT_FAILURE);
+        }
+        buff = zatial1;
+        maxPocetZnakov = novyMax;
+    }
+    memcpy(buff + aktualPocetZnakov, zatial, len);
+    aktualPocetZnakov += len;
+
+
+
         return buff;
 }
 
@@ -1018,7 +1114,7 @@ void spusti_initmenu_klient(socket_client_t * socket) {
 
 }
 
-void hlavne_menu_klient(){
+int hlavne_menu_klient(){
     while (1) {
     
         printf("Vitaj v aplikacii menom Nahodna pochodzka.\n K dispozicii mas tento manual, v ktorom si mozes vybrat priebeh pochodzky.\n\n");
@@ -1035,140 +1131,14 @@ void hlavne_menu_klient(){
         moznost = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
             printf("To nie je cislo zadaj znova!!\n");
+        } else if(moznost == 1) {
+            return 1;
+        } else if (moznost == 2) {
+            return 2;
+        }  else if (moznost == 3) {
+            return 3;
         } else {
-            switch (moznost) {
-            case 1:     ////// NOVA SIMULACIA
-                    ///////////////////KTORY TYP
-                int ktoryTyp;
-                char buf [200];
-                memset(buf, 0, sizeof(buf));
-                printf("Typ simulovaneho sveta: interaktivny -> napis 1 ; sumarny -> napis 2. \n");
-                if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                    perror("Chyba nacitavania textu.");
-                    exit(EXIT_FAILURE);
-                }
-                char * kontrola;    //ak nieco ostane v nej, znamena, ze zachytilo aspon nejake cislo
-                ktoryTyp = strtol(buf, &kontrola, 10);
-                if (kontrola == buf) {
-                    printf("To nie je cislo zadaj znova!!\n");
-                } else {
-                    if (ktoryTyp == 1) {
-                        ////spusti interaktivny
-                        
-                    } else {
-                        //spusti sumarny
-                    }
-                }
-
-                //////////////// KTORY SUBOR
-                printf("Zo suboru -> stlac 1; od nuly -> stlac 0. \n");
-                if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                    perror("Chyba nacitavania textu.");
-                    exit(EXIT_FAILURE);
-                }
-
-                int ciChceZoSuboru;
-                ciChceZoSuboru = strtol(buf, &kontrola, 10);
-                char * nazovSuboru;
-                if (kontrola == buf) {
-                    printf("To nie je cislo zadaj znova!!\n");
-                } else {
-                    if (ciChceZoSuboru == 0) {
-                        // TO DO : idem pustit z tomiho srandy
-                    } else if (ciChceZoSuboru == 1) {
-                        printf("Napis cestu k suboru, odkial sa nacita svet. \n");
-                        nazovSuboru = fgets(buf, sizeof(buf), stdin);
-                        if (nazovSuboru == NULL) {
-                            perror("Chyba nacitavania textu.");
-                            exit(EXIT_FAILURE);
-                        } else{
-                            //nic sa nedeje, idem ho pouzit
-                            printf("NAcitavam zo suboru: %s.", nazovSuboru);
-                        }   
-                    }
-                }
-
-
-                //////////////  KOLKO POUZIVATELOV
-                int pocetPouzivatelov;
-                _Bool dobreZadal = 1;
-                while (dobreZadal) {
-
-                printf("Napis pre kolko pouzivatelov ma byt urcena aplikacia. \n");
-                if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                    perror("Chyba nacitavania textu.");
-                    exit(EXIT_FAILURE);
-                }
-
-                pocetPouzivatelov = strtol(buf, &kontrola, 10);
-                if (kontrola == buf) {
-                    printf("To nie je cislo zadaj znova!!\n");
-                } else {
-                    if (pocetPouzivatelov == 1) {
-                        printf("Aplikacia je nastavena pre %d klienta.\n", pocetPouzivatelov);
-                        dobreZadal = 0;
-                        break;
-                    } else if(pocetPouzivatelov > 1) {
-                        printf("Aplikacia je nastavena pre %d klientov.\n", pocetPouzivatelov);
-                        dobreZadal = 0;
-                        break;
-                    } else {
-                        dobreZadal = 1;
-                    }
-                }
-
-                }  //zatvroka while
-                break;
-            case 2:
-                //pripojenie k simulacii
-                //treba si vypytat adresu pripojenia- string
-                printf("Napis adresu pripojenia. \n");
-                char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
-                if (adresaPripojenia == NULL) {
-                    perror("Chyba nacitavanie textu");
-                    exit(EXIT_FAILURE);
-                } else {
-                    printf("Adresa pripojenia je: %s.",adresaPripojenia);
-                }
-                break;
-            case 3:
-                //opatovne spustenie simulacii
-                //treba vypytat cestu k suboru
-                printf("Napis cestu k suboru. \n");
-                char * nameFile  = fgets(buf, sizeof(buf), stdin);
-                if (nameFile == NULL) {
-                    perror("Chyba nacitavania textu.");
-                    exit(EXIT_FAILURE);
-                } else {
-                    printf("NAzov suboru je: %s.",nameFile);
-                }
-                break;
-            case 4:
-                //koniec - ukoncenie aplikacie
-                //ci chce ukoncit server alebo nie
-                //AKO vyjdeme z vajlu, ked sa skonci toooto
-                int ciChceUkoncitServer;
-                printf("Chces ukoncit aj server -> napis 1, ak nehces -> napis 0. \n");
-                
-                ciChceUkoncitServer = strtol(buf, &kontrola, 10);
-                
-                if (kontrola == buf) {
-                    printf("To nie je cislo zadaj znova!!\n");
-                } else {
-                    if (ciChceUkoncitServer == 1) {
-                        //ukoncujem server
-                    } else {
-                        //nechce ukoncit server
-                    }
-                } 
-                break;
-            }
-
+            return 4;
         }
-
-        printf("Spsustame simulaciu.\n");
-
     } //zatvorka pre while
-
-
 }

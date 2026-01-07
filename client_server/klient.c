@@ -127,13 +127,128 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket) {
 
 int main(int argc, char const *argv[])
 {
-
-   
    while (1) {
     //tvoje menu
     //bude vracat strukturu
     //
     // switch co lydkine menu vrati podla toho sa bude nieco robit
+
+    switch (hlavne_menu_klient()) {
+        case 1:
+                ////// NOVA SIMULACIA
+                ///////////////////KTORY TYP
+                int ktoryTyp;
+                char buf [200];
+                memset(buf, 0, sizeof(buf));
+                printf("Typ simulovaneho sveta: interaktivny -> napis 1 ; sumarny -> napis 2. \n");
+                if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                    perror("Chyba nacitavania textu.");
+                    exit(EXIT_FAILURE);
+                }
+                char * kontrola;    //ak nieco ostane v nej, znamena, ze zachytilo aspon nejake cislo
+                ktoryTyp = strtol(buf, &kontrola, 10);
+                if (kontrola == buf) {
+                    printf("To nie je cislo zadaj znova!!\n");
+                } else {
+                    if (ktoryTyp == 1) {
+                        ////spusti interaktivny
+                        
+                    } else {
+                        //spusti sumarny
+                    }
+                }
+
+               
+                //NACITAVANIE ZO SUBORU SOM DALA PREC
+
+                //////////////  KOLKO POUZIVATELOV
+                int pocetPouzivatelov;
+                _Bool dobreZadal = 1;
+                while (dobreZadal) {
+
+                printf("Napis pre kolko pouzivatelov ma byt urcena aplikacia:  \n");
+                if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                    perror("Chyba nacitavania textu.");
+                    exit(EXIT_FAILURE);
+                }
+
+                pocetPouzivatelov = strtol(buf, &kontrola, 10);
+                if (kontrola == buf) {
+                    printf("To nie je cislo zadaj znova!!\n");
+                } else {
+                    if (pocetPouzivatelov == 1) {
+                        printf("Aplikacia je nastavena pre %d klienta.\n", pocetPouzivatelov);
+                        dobreZadal = 0;
+                        break;
+                    } else if(pocetPouzivatelov > 1) {
+                        printf("Aplikacia je nastavena pre %d klientov.\n", pocetPouzivatelov);
+                        dobreZadal = 0;
+                        break;
+                    } else {
+                        dobreZadal = 1;
+                    }
+                } 
+
+                }  //zatvroka while
+                  
+            break;
+        case 2:
+                //pripojenie k simulacii
+                //treba si vypytat adresu pripojenia- string
+                printf("Napis adresu pripojenia : ");
+                char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
+                if (adresaPripojenia == NULL) {
+                    perror("Chyba nacitavanie textu");
+                    exit(EXIT_FAILURE);
+                } else {
+                    printf("Adresa pripojenia je: %s.",adresaPripojenia);
+                }   
+            break;
+        case 3:
+                //opatovne spustenie simulacii
+                //treba vypytat cestu k suboru
+                printf("Napis cestu k suboru:  \n");
+                char * nameFile  = fgets(buf, sizeof(buf), stdin);
+                if (nameFile == NULL) {
+                    perror("Chyba nacitavania textu.");
+                    exit(EXIT_FAILURE);
+                } else {
+                    printf("Nazov suboru je: %s.",nameFile);
+                }     
+            break;
+        case 4:
+                //koniec - ukoncenie aplikacie
+                //ci chce ukoncit server alebo nie
+                //AKO vyjdeme z vajlu, ked sa skonci toooto
+                int ciChceUkoncitServer;
+                printf("Chces ukoncit aj server -> napis 1, ak nehces -> napis 0. \n");
+                
+                ciChceUkoncitServer = strtol(buf, &kontrola, 10);
+                
+                if (kontrola == buf) {
+                    printf("To nie je cislo zadaj znova!!\n");
+                } else {
+                    if (ciChceUkoncitServer == 1) {
+                        //ukoncujem server
+                    } else {
+                        //nechce ukoncit server
+                    }
+                } 
+            break;
+
+    };
+
+
+
+
+
+
+
+
+
+
+
+
    }
 
 
