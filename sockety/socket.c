@@ -250,9 +250,7 @@ void socket_server_accept_connection(socket_server_t * this) {
     
     this->maxPocetKlientov = naviac;
   }
-  this->klienti[this->pocetKlinetov]->socket_pocuvaj = tempSocket;
-  atomic_store(&this->klienti[this->pocetKlinetov]->bezi_klient, 1);
-  memset(this->klienti[this->pocetKlinetov], 0, sizeof(*this->klienti[this->pocetKlinetov]));          
+  memset(this->klienti[this->pocetKlinetov], 0, sizeof(*this->klienti[this->pocetKlinetov]));  
   this->klienti[this->pocetKlinetov]->socket_pocuvaj = tempSocket;
   atomic_store(&this->klienti[this->pocetKlinetov]->bezi_klient, 1);
   atomic_store(&this->klienti[this->pocetKlinetov]->vypni_server, 0);

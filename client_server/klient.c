@@ -93,9 +93,10 @@ void * vypisujObraz(void * arg) {
     free(buf);
 }
 
-_Bool nacitaj_zo_suboru(socket_client_t * socket) {
+_Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
     _Bool nacitaj_zo_suboru;
-     while (1) {
+    if (mozno_cesta_subor == NULL) {
+        while (1) {
     
     
         char buf [200];
@@ -138,7 +139,7 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket) {
             }
             buf[strcspn(buf, "\n")] = '\0';
             memcpy(cesta_k_suboru, buf,strlen(buf) + 1);
-            
+            break;
         }
     }
     if (nacitaj_zo_suboru) {
@@ -166,6 +167,22 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket) {
     }
 
     return nacitaj_zo_suboru;
+    } else {
+        socket_data_t copy;
+        pthread_mutex_lock(&socket->mutex);
+        copy = socket->activeSocket;
+        pthread_mutex_unlock(&socket->mutex);
+        
+        
+        char poslat[230];
+        memset(poslat, 0, sizeof(poslat));
+        poslat[0] = '7';
+        poslat[1] = ';';            //7;cestaksuboru
+        memcpy(poslat + 2, mozno_cesta_subor, strlen(mozno_cesta_subor) + 1);
+        socket_write(&socket->activeSocket, poslat, strlen(poslat) + 1);
+        return 1;
+    }
+     
 
 }
 
@@ -173,62 +190,242 @@ int main(int argc, char const *argv[])
 {
     _Bool idem = 1;
    while (idem) {
-    //tvoje menu
-    //
-    //
-    // switch co lydkine menu vrati podla toho sa bude nieco robit
-     int odpoved = hlavne_menu_klient();
+        //tvoje menu
+        //
+        //
+        // switch co lydkine menu vrati podla toho sa bude nieco robit
+        int odpoved = hlavne_menu_klient();
 
 
-    switch (odpoved) {
-        case 1:
-                ////// NOVA SIMULACIA
-               
-                //////////////  KOLKO POUZIVATELOV
-                char buf [200];
-                memset(buf, 0, sizeof(buf));
+        switch (odpoved) {
+            case 1:
+                    ////// NOVA SIMULACIA
                 
-                char * kontrola; 
-                int pocetPouzivatelov;
-                _Bool dobreZadal = 1;
-                while (dobreZadal) {
+                    //////////////  KOLKO POUZIVATELOV
+                    char buf [200];
+                    memset(buf, 0, sizeof(buf));
+                    
+                    char * kontrola; 
+                    int pocetPouzivatelov;
+                    _Bool dobreZadal = 1;
+                    while (dobreZadal) {
 
-                    printf("Napis pre kolko pouzivatelov ma byt urcena aplikacia:  \n");
-                    if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                        perror("Chyba nacitavania textu.");
+                        printf("Napis pre kolko pouzivatelov ma byt urcena aplikacia:  \n");
+                        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                            perror("Chyba nacitavania textu.");
+                            exit(EXIT_FAILURE);
+                        }
+
+                        pocetPouzivatelov = strtol(buf, &kontrola, 10);
+                        if (kontrola == buf) {
+                            printf("To nie je cislo zadaj znova!!\n");
+                        } else {
+                            if (pocetPouzivatelov == 1) {
+                            
+                                dobreZadal = 0;
+                                break;
+                            } else if(pocetPouzivatelov > 1) {
+                            
+                                dobreZadal = 0;
+                                break;
+                            } else {
+                                dobreZadal = 1;
+                            }
+                        } 
+
+                    }  
+
+                    pid_t pid = fork();
+                    if (pid == 0) {
+                        //treba zmenit na execl
+                        execl("./server","server", NULL);
+                        perror("Chyba pri spusteni servera");
+                        _exit(EXIT_FAILURE);
+                    } else if (pid > 0) {
+                        //tu bezi klient
+                        socket_client_t socket_client;
+                        socket_client_init(&socket_client, "192.168.1.10", "777");
+                        if (je_klient_hlavny(&socket_client)) {
+                            if (!nacitaj_zo_suboru(&socket_client, NULL)) {
+                                spusti_initmenu_klient(&socket_client);
+                            }   
+                        }
+
+                        pthread_t vlakno;
+                        pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
+                        pthread_detach(vlakno);
+                        while (atomic_load(&socket_client.klien_bezi)) {
+                            
+                                
+
+
+                                //bude tu fgets s prevodom na cislo a kontrolou prevodu a bude tu switch podla cisla 
+                                //je to reakcia na menu ktore lydka robiiiii stlacenie klavesnice 
+                                //reakcia na menu ktore sa robilo na 2 krat to nepochopene menu ktore robit mala 
+                                //lubim ju :)
+
+
+                            char stlacene[10];
+                            int stlacenePismeno;
+                            char * endptr;
+                            int maxPocetPismen = 10;
+                            if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
+                                printf("Nezadal si cislo, skus znova\n");
+                                break;
+                            }
+                            stlacenePismeno = strtol(stlacene, &endptr, 10);
+                            if (stlacene == endptr) {
+                                printf("Nie je to cislo.\n");
+                                break;
+                            }
+                            
+                            char buff[2];
+                            switch (stlacenePismeno) {
+                                case 0:
+                                    //signal vypnutie
+                                    buff[0] = '0';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    atomic_store(&socket_client.klien_bezi, 0);
+                                    break;
+                                case 1:
+                                    //signal prepni mod
+                                    buff[0] = '1';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                case 2:
+                                    //signal v prepnutom mode chcem teraz statistiku
+                                    buff[0] = '2';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                case 3:
+                                    //signal v prepnutom mode chcem teraz kroky
+                                    buff[0] = '3';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                default:
+                                    printf("Take cislo nie je uvedene.\n");
+                                    break;
+                            }
+
+
+                        }
+                        socket_client_destroy(&socket_client);
+                        int status;
+                        waitpid(pid, &status,0);
+                        printf("Server skoncil so statusom %d", status);
+                        sleep(1);
+                    } else {
+                        perror("Chyba vytvorenia procesu");
                         exit(EXIT_FAILURE);
                     }
+                    break;
 
-                    pocetPouzivatelov = strtol(buf, &kontrola, 10);
-                    if (kontrola == buf) {
-                        printf("To nie je cislo zadaj znova!!\n");
-                    } else {
-                        if (pocetPouzivatelov == 1) {
-                        
-                            dobreZadal = 0;
-                            break;
-                        } else if(pocetPouzivatelov > 1) {
-                        
-                            dobreZadal = 0;
-                            break;
-                        } else {
-                            dobreZadal = 1;
-                        }
+
+
+
+                    
+                break;
+            case 2:
+                    //treba upravit vypinanie aby tam bola dalsia moznost
+                    printf("Napis adresu pripojenia : ");
+                    char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
+                    if (adresaPripojenia == NULL) {
+                        perror("Chyba nacitavanie textu");
+                        exit(EXIT_FAILURE);
                     } 
+                    socket_client_t socket_client;
+                    socket_client_init(&socket_client, adresaPripojenia, "777");
+                    je_klient_hlavny(&socket_client);
+                    pthread_t vlakno;
+                    pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
+                    pthread_detach(vlakno);
 
-                }  
+                    while (atomic_load(&socket_client.klien_bezi)) {
+                           char stlacene[10];
+                            int stlacenePismeno;
+                            char * endptr;
+                            int maxPocetPismen = 10;
+                            if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
+                                printf("Nezadal si cislo, skus znova\n");
+                                break;
+                            }
+                            stlacenePismeno = strtol(stlacene, &endptr, 10);
+                            if (stlacene == endptr) {
+                                printf("Nie je to cislo.\n");
+                                break;
+                            }
+                            
+                            char buff[2];
+                            switch (stlacenePismeno) {
+                                case 0:
+                                    //signal vypnutie
+                                    buff[0] = '0';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    atomic_store(&socket_client.klien_bezi, 0);
+                                    break;
+                                case 1:
+                                    //signal prepni mod
+                                    buff[0] = '1';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                case 2:
+                                    //signal v prepnutom mode chcem teraz statistiku
+                                    buff[0] = '2';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                case 3:
+                                    //signal v prepnutom mode chcem teraz kroky
+                                    buff[0] = '3';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                default:
+                                    printf("Take cislo nie je uvedene.\n");
+                                    break;
+                            }
+                    }
+                    socket_client_destroy(&socket_client);
+                    
+                    
 
-                pid_t pid = fork();
-                if (pid == 0) {
+                break;
+            case 3:
+                //treba upravit vypinanie aby tam bola dalsia moznost
+                char cesta_k_suboru[200];
+                memset(cesta_k_suboru, 0, sizeof(cesta_k_suboru));
+                while (1) {
+                
+                
+                    char buf [200];
+                    memset(buf, 0, sizeof(buf));
+                    printf("Zadaj cestu k suboru: \n");
+                    if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                        perror("Chyba nacitavanie textu");
+                        exit(EXIT_FAILURE);
+                    }
+                    buf[strcspn(buf, "\n")] = '\0';
+                    memcpy(cesta_k_suboru, buf,strlen(buf) + 1);
+                    break;
+                }
+                pid_t pid1 = fork();
+                if (pid1 == 0) {
                     //treba zmenit na execl
-                    spusti_server();
-                    _exit(0);
-                } else if (pid > 0) {
+                    execl("./server","server", NULL);
+                    perror("Chyba pri spusteni servera");
+                    _exit(EXIT_FAILURE);
+                } else if (pid1 > 0) {
                     //tu bezi klient
                     socket_client_t socket_client;
                     socket_client_init(&socket_client, "192.168.1.10", "777");
                     if (je_klient_hlavny(&socket_client)) {
-                        if (!nacitaj_zo_suboru(&socket_client)) {
+                        if (!nacitaj_zo_suboru(&socket_client, cesta_k_suboru)) {
                             spusti_initmenu_klient(&socket_client);
                         }   
                     }
@@ -245,114 +442,68 @@ int main(int argc, char const *argv[])
                         //je to reakcia na menu ktore lydka robiiiii stlacenie klavesnice 
                         //reakcia na menu ktore sa robilo na 2 krat to nepochopene menu ktore robit mala 
                         //lubim ju :)
-
-
-                        char stlacene[10];
-                        int stlacenePismeno;
-                        char * endptr;
-                        int maxPocetPismen = 10;
-                        if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
-                            printf("Nezadal si cislo, skus znova\n");
-                            break;
-                        }
-                        stlacenePismeno = strtol(stlacene, &endptr, 10);
-                        if (stlacene == endptr) {
-                            printf("Nie je to cislo.\n");
-                            break;
-                        }
                         
-                        char buff[2];
-                        switch (stlacenePismeno) {
-                            case 0:
-                                //signal vypnutie
-                                buff[0] = '0';
-                                buff[1] = '\0';
-                                socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                           char stlacene[10];
+                            int stlacenePismeno;
+                            char * endptr;
+                            int maxPocetPismen = 10;
+                            if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
+                                printf("Nezadal si cislo, skus znova\n");
                                 break;
-                            case 1:
-                                //signal prepni mod
-                                buff[0] = '1';
-                                buff[1] = '\0';
-                                socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                            }
+                            stlacenePismeno = strtol(stlacene, &endptr, 10);
+                            if (stlacene == endptr) {
+                                printf("Nie je to cislo.\n");
                                 break;
-                            case 2:
-                                //signal v prepnutom mode chcem teraz statistiku
-                                buff[0] = '2';
-                                buff[1] = '\0';
-                                socket_write(&socket_client.activeSocket, buff , sizeof(buff));
-                                break;
-                            case 3:
-                                //signal v prepnutom mode chcem teraz kroky
-                                buff[0] = '3';
-                                buff[1] = '\0';
-                                socket_write(&socket_client.activeSocket, buff , sizeof(buff));
-                                break;
-                            default:
-                                printf("Take cislo nie je uvedene.\n");
-                                break;
-                        }
-
+                            }
+                            
+                            char buff[2];
+                            switch (stlacenePismeno) {
+                                case 0:
+                                    //signal vypnutie
+                                    buff[0] = '0';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    atomic_store(&socket_client.klien_bezi, 0);
+                                    break;
+                                case 1:
+                                    //signal prepni mod
+                                    buff[0] = '1';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                case 2:
+                                    //signal v prepnutom mode chcem teraz statistiku
+                                    buff[0] = '2';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                case 3:
+                                    //signal v prepnutom mode chcem teraz kroky
+                                    buff[0] = '3';
+                                    buff[1] = '\0';
+                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    break;
+                                default:
+                                    printf("Take cislo nie je uvedene.\n");
+                                    break;
+                            }
 
                     }
                     socket_client_destroy(&socket_client);
                     int status;
-                    waitpid(pid, &status,0);
+                    waitpid(pid1, &status,0);
                     printf("Server skoncil so statusom %d", status);
                     sleep(1);
-                } else {
-                    perror("Chyba vytvorenia procesu");
-                    exit(EXIT_FAILURE);
                 }
                 break;
+            case 4:
+                    idem = 0;
+                break;
+            default:
 
-
-
-
-                  
-            break;
-        case 2:
-                //pripojenie k simulacii
-                //treba si vypytat adresu pripojenia- string
-                printf("Napis adresu pripojenia : ");
-                char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
-                if (adresaPripojenia == NULL) {
-                    perror("Chyba nacitavanie textu");
-                    exit(EXIT_FAILURE);
-                } 
-                socket_client_t socket_client;
-                socket_client_init(&socket_client, adresaPripojenia, "777");
-                je_klient_hlavny(&socket_client);
-                pthread_t vlakno;
-                pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
-                pthread_detach(vlakno);
-
-                while (atomic_load(&socket_client.klien_bezi)) {
-                
-                }
-
-            break;
-        case 3:
-                //opatovne spustenie simulacii
-                //treba vypytat cestu k suboru
-                printf("Napis cestu k suboru:  \n");
-                char * nameFile  = fgets(buf, sizeof(buf), stdin);
-                if (nameFile == NULL) {
-                    perror("Chyba nacitavania textu.");
-                    exit(EXIT_FAILURE);
-                } else {
-                    printf("Nazov suboru je: %s.",nameFile);
-                }     
-            break;
-        case 4:
-                idem = 0;
-
-            break;
-
-    };
-
-
-
-   }
+        };
+    }
 
 
 

@@ -1097,7 +1097,7 @@ void spusti_initmenu_klient(socket_client_t * socket) {
 
 }
 
-int hlavne_menu_klient(){
+
 int hlavne_menu_klient(){
     while (1) {
     
