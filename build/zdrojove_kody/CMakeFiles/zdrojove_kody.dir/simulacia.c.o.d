@@ -23,11 +23,4 @@ zdrojove_kody/CMakeFiles/zdrojove_kody.dir/simulacia.c.o: \
  /usr/include/bits/atomic_wide_counter.h /usr/include/bits/struct_mutex.h \
  /usr/include/bits/struct_rwlock.h /usr/include/bits/setjmp.h \
  /usr/include/bits/types/__sigset_t.h \
- /usr/include/bits/types/struct___jmp_buf_tag.h /usr/include/stdio.h \
- /usr/include/bits/libc-header-start.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdarg.h \
- /usr/include/bits/types/__fpos_t.h /usr/include/bits/types/__mbstate_t.h \
- /usr/include/bits/types/__fpos64_t.h /usr/include/bits/types/__FILE.h \
- /usr/include/bits/types/FILE.h /usr/include/bits/types/struct_FILE.h \
- /usr/include/bits/stdio_lim.h /usr/include/bits/floatn.h \
- /usr/include/bits/floatn-common.h
+ /usr/include/bits/types/struct___jmp_buf_tag.h

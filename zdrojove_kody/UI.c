@@ -689,24 +689,24 @@ void  posli_vsetkym_stat(svt_vp_t * data) {
     for (int i = 0; i < pocet_klientov; i++) {
         //treba pockat na lydku
 
-        printf("Idem poslat klientovi cislo: %d\n", i + 1);
-        sleep(2);
+        //printf("Idem poslat klientovi cislo: %d\n", i + 1);
+        
         if (atomic_load(&data->server->klienti[i]->chcem_statistiku)) {
            
             if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
                  pthread_mutex_lock(&data->server->mutex);
-                 printf("Lokol som sa idem poslat stat\n");
+                // printf("Lokol som sa idem poslat stat\n");
                  socket_write(&data->server->klienti[i]->socket_pocuvaj, buf1, strlen(buf1) + 1);
                 pthread_mutex_unlock(&data->server->mutex);
-                printf("unlock\n");
+               // printf("unlock\n");
             }
         } else {
             if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
                 pthread_mutex_lock(&data->server->mutex);
-                printf("Lokol som sa idem poslat kroky\n");
+                //printf("Lokol som sa idem poslat kroky\n");
                 socket_write(&data->server->klienti[i]->socket_pocuvaj, buf, strlen(buf) + 1);
                 pthread_mutex_unlock(&data->server->mutex);
-                printf("unlock\n");
+               // printf("unlock\n");
             }
         }
         

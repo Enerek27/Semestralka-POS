@@ -54,7 +54,7 @@ typedef struct SocketServer {
     srv_inf_t server_info;
     int hlavny_klient;
 } socket_server_t;
-
+void client_zavri(socket_server_t * server);
 
 // Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre server
 void socket_server_init(socket_server_t * this, int port);

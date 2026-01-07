@@ -69,7 +69,7 @@ void * cisti_server(void * arg) {
 void * nacuvajklientovi(void * arg) {
   klient_read_t * info_klient = arg; 
  
-  while (atomic_load(&info_klient->bezi_klient)) {
+  while (atomic_load(&info_klient->bezi_klient )) {
     char buf[200];
 
     fd_set readfds;
@@ -296,18 +296,25 @@ void socket_server_accept_connection(socket_server_t * this) {
   
   pthread_mutex_unlock(&this->mutex);
 }
-// Funkcia na zničenie servera, čo momentálne znamená zničenie pasívneho a aktívneho soketu
-void socket_server_destroy(socket_server_t * this) {
-  atomic_store(&this->server_bezi, 0);
-  for (int i = 0; i < this->pocetKlinetov; i++) {
+
+void client_zavri(socket_server_t * server) {
+  pthread_mutex_lock(&server->mutex);
+  for (int i = 0; i < server->pocetKlinetov; i++) {
     char buff[4];
     buff[0] = 'o';
     buff[1] = 'f';
     buff[2] = 'f';
     buff[3] = '\0';
-    socket_write(&this->klienti[i]->socket_pocuvaj, buff, strlen(buff) + 1);
+    socket_write(&server->klienti[i]->socket_pocuvaj, buff, strlen(buff) + 1);
+    atomic_store(&server->klienti[i]->bezi_klient, 0);
   }
-  shutdown(this->passiveSocket.socket, SHUT_RDWR);
+  pthread_mutex_unlock(&server->mutex);
+}
+
+// Funkcia na zničenie servera, čo momentálne znamená zničenie pasívneho a aktívneho soketu
+void socket_server_destroy(socket_server_t * this) {
+  atomic_store(&this->server_bezi, 0);
+
   // Zničenie pasívneho soketu na prijímanie pripojení
   socket_destroy(&this->passiveSocket);
   // Zničenie aktívneho soketu pre komunikáciu s klientom

@@ -154,18 +154,14 @@ int main(int argc, char const *argv[])
         
         
        
-        svt_vp_t * vypisovac;
-        vypisovac = calloc(1, sizeof(svt_vp_t));
-        if (vypisovac == NULL) {
-            perror("Chyba vytvarania vlakien zla pamat.");
-            exit(EXIT_FAILURE);
-        }
-        vypisovac->server = &socket_server;
-        vypisovac->svet = svet;
+        svt_vp_t  vypisovac;
+        
+        vypisovac.server = &socket_server;
+        vypisovac.svet = svet;
        
-        printf("Vygenerovany svet :\n");
-        posli_vsetkym_svet(vypisovac);
-         sleep(1);
+        
+        posli_vsetkym_svet(&vypisovac);
+        sleep(1);
         generuj_pravdepodobnost(svet);
        
         generuj_priem_krok(svet);
@@ -176,7 +172,7 @@ int main(int argc, char const *argv[])
     }
     pthread_t vlakienko[3];
     //treba spravit nekonecny loop kde sa bude posielat ci sa ma vypnut alebo nie bude to aj cakaci loop
-    printf("server som uz tu bol1\n");
+    
     pthread_create(&vlakienko[0], NULL, vlaknoPrijmaniaSpojenia, &socket_server);
     
     pthread_create(&vlakienko[1], NULL, nacuvajklientovi, socket_server.klienti[socket_server.hlavny_klient]);
@@ -195,8 +191,8 @@ int main(int argc, char const *argv[])
     
     while (atomic_load(&socket_server.server_bezi)) {
         if (atomic_load(&socket_server.server_info.sumarny_mod)) {
-            printf("Idem poslat statistiku\n");
-            sleep(2);
+            
+            
             posli_vsetkym_statistiku(svet_vypis);
             
         } else {
@@ -206,9 +202,15 @@ int main(int argc, char const *argv[])
             } 
         }
     }
+    printf("Zavri klientov\n");
+    client_zavri(&socket_server);
+    printf("Server Cakam na vlakna\n");
     pthread_join(vlakienko[0], NULL);
+    printf("Vlakno prijmania ukoncene\n");
     pthread_join(vlakienko[1], NULL);
+    printf("Vlakno nacuvania ukoncene\n");
     pthread_join(vlakienko[2], NULL);
+    printf("Vlakno cistic ukoncene\n");
     printf("Ukoncujem server!!\n");
     free(svet_vypis);
     

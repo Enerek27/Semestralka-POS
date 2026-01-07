@@ -1,6 +1,6 @@
 #include "simulacia.h"
 #include <pthread.h>
-#include <stdio.h>
+
 
 
 

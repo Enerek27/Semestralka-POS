@@ -102,15 +102,11 @@ zdrojove_kody/CMakeFiles/zdrojove_kody.dir/simulacia.c.o: /home/nereke/Dokumenty
   /usr/include/bits/cpu-set.h \
   /usr/include/bits/endian.h \
   /usr/include/bits/endianness.h \
-  /usr/include/bits/floatn-common.h \
-  /usr/include/bits/floatn.h \
-  /usr/include/bits/libc-header-start.h \
   /usr/include/bits/long-double.h \
   /usr/include/bits/pthreadtypes-arch.h \
   /usr/include/bits/pthreadtypes.h \
   /usr/include/bits/sched.h \
   /usr/include/bits/setjmp.h \
-  /usr/include/bits/stdio_lim.h \
   /usr/include/bits/struct_mutex.h \
   /usr/include/bits/struct_rwlock.h \
   /usr/include/bits/thread-shared-types.h \
@@ -118,14 +114,8 @@ zdrojove_kody/CMakeFiles/zdrojove_kody.dir/simulacia.c.o: /home/nereke/Dokumenty
   /usr/include/bits/time64.h \
   /usr/include/bits/timesize.h \
   /usr/include/bits/types.h \
-  /usr/include/bits/types/FILE.h \
-  /usr/include/bits/types/__FILE.h \
-  /usr/include/bits/types/__fpos64_t.h \
-  /usr/include/bits/types/__fpos_t.h \
-  /usr/include/bits/types/__mbstate_t.h \
   /usr/include/bits/types/__sigset_t.h \
   /usr/include/bits/types/clock_t.h \
-  /usr/include/bits/types/struct_FILE.h \
   /usr/include/bits/types/struct___jmp_buf_tag.h \
   /usr/include/bits/types/struct_sched_param.h \
   /usr/include/bits/types/struct_timespec.h \
@@ -140,10 +130,8 @@ zdrojove_kody/CMakeFiles/zdrojove_kody.dir/simulacia.c.o: /home/nereke/Dokumenty
   /usr/include/pthread.h \
   /usr/include/sched.h \
   /usr/include/stdc-predef.h \
-  /usr/include/stdio.h \
   /usr/include/sys/cdefs.h \
   /usr/include/time.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdarg.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stddef.h
 
 zdrojove_kody/CMakeFiles/zdrojove_kody.dir/svet.c.o: /home/nereke/Dokumenty/skola/POS/Semestralka/zdrojove_kody/svet.c \

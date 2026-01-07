@@ -312,6 +312,7 @@ int main(int argc, char const *argv[])
                                     socket_write(&socket_client.activeSocket, buff , strlen(buff));
                                     pthread_mutex_unlock(&socket_client.mutex);
                                     printf("Posielam signal na vypnutie serveru\n");
+                                    sleep(1);
                                     atomic_store(&socket_client.klien_bezi, 0);
                                     break;
                                 case 2:
