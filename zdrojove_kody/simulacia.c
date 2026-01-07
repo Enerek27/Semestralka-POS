@@ -1,19 +1,23 @@
 #include "simulacia.h"
+#include <pthread.h>
+#include <stdio.h>
 
 
-void generuj_pravdepodobnost(svt_t * svet) {
+
+void   generuj_pravdepodobnost(svt_t * svet) {
     
     
     for (int i = 0; i < svet->hranica_x; i++) {
         for (int j = 0; j < svet->hranica_y; j++) {
             if (svet->pole[i][j] != 2) {
                 svet->pole_pravdepodobnosti[i][j] = simuluj_k_stredu_od_policka_statistika(i, j, svet->pocet_krokov_K, svet) * 100;
+                
             }
             
         }
     
     }
-    
+    return;
 }
 
 
@@ -56,39 +60,49 @@ float simuluj_k_stredu_od_policka_statistika(int sur_x, int sur_y, int pocet_pok
 
 
 
-void generuj_priem_krok(svt_t * svet) {
+void  generuj_priem_krok(svt_t * svet) {
+    
     for (int i = 0; i < svet->hranica_x; i++) {
         for (int j = 0; j < svet->hranica_y; j++) {
             if (svet->pole[i][j] != 2) {
+                
                 svet->pole_priemer_krok[i][j] = daj_priem_krok_policko(i, j, svet) * 100;
+                
             }
             
         }
     
     }
+    return;
 }
 
 float daj_priem_krok_policko(int sur_x, int sur_y, svt_t * svet) {
     int pocet_simulacii = 1000;
 
     svt_t * kopia_sveta = svet_copy(svet);
+  
     posun_chodca_na(kopia_sveta,  sur_x, sur_y);
+   
     int pocet_krokov_aktual = 0;
     int pocet_krokov_celkovo = 0;
 
     for (int i = 0; i < pocet_simulacii; i++) {
+            
         while (kopia_sveta->stred_x != kopia_sveta->chodec->x || kopia_sveta->stred_y != kopia_sveta->chodec->y) {
+            
             posun_chodca(daj_nahodny_smer_pre_chodca(kopia_sveta), kopia_sveta);
             pocet_krokov_aktual++;
+            //printf("Chodec je na X: %d, y: %d a je jeho %d posun\n", kopia_sveta->chodec->x, kopia_sveta->chodec->y, pocet_krokov_aktual);
         }
         pocet_krokov_celkovo += pocet_krokov_aktual;
         pocet_krokov_aktual = 0;
         svet_destroy(kopia_sveta);
         kopia_sveta = svet_copy(svet);
         posun_chodca_na(kopia_sveta,  sur_x, sur_y);
+       
     }
     svet_destroy(kopia_sveta);
     return  (float)pocet_krokov_celkovo / (float)pocet_simulacii;
-
+   
 
 }

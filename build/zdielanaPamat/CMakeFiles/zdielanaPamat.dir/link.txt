@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC -shared -Wl,--dependency-file=CMakeFiles/zdielanaPamat.dir/link.d -Wl,-soname,libzdielanaPamat.so -o libzdielanaPamat.so CMakeFiles/zdielanaPamat.dir/pipe.c.o

@@ -1,7 +1,6 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-#include <atomic>
 
 #include <pthread.h>
 #include <stddef.h>

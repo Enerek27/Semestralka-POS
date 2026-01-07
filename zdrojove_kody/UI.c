@@ -1,13 +1,15 @@
 
+#define _POSIX_C_SOURCE 199309L   
 #include "UI.h"
 
-#include <cstring>
+
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 
 
 
@@ -24,10 +26,10 @@ char * vrat_menu_klient() {
    int len = 0;
    
    len += snprintf(buff + len, maxPocetZnakov - len, "MENU:\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "1. NOVA SIMULACIA\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "2. PRIPOJENIE K SIMULACII\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "3. OPATOVNE SPUSTENIE SIMULACIE\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "4. KONIEC\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "1. VYPNI SIMULACIU\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "2. ZMEN MOD SIMULACIE\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "3. ZOBRAZ STATISTIKU\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "4. ZOBRAZ KROKY\n");
    
    return buff;
 }
@@ -135,7 +137,24 @@ char * vykresli_svet(svt_t * svet) {
     buff = zatial1;
     maxPocetZnakov = novyMax;
    }
-   memcpy(buff, zatial, len);
+   memcpy(buff + aktualPocetZnakov, zatial, len);
+   aktualPocetZnakov += len;
+
+   len = snprintf(zatial, sizeof(zatial), "\033[32m%s: %d/%d\033[0m\n","Pocet krokov", svet->pocet_krokov_K_origo, svet->pocet_krokov_K);
+
+   if (aktualPocetZnakov + len >= maxPocetZnakov)
+   {
+    int novyMax = maxPocetZnakov + 50;
+    char * zatial1 = realloc(buff, novyMax * sizeof(char));
+    if (zatial1 == NULL)
+    {
+        perror("Chyba pamate v inicializacii  realokacia.");
+        exit(EXIT_FAILURE);
+    }
+    buff = zatial1;
+    maxPocetZnakov = novyMax;
+   }
+   memcpy(buff + aktualPocetZnakov, zatial, len);
    aktualPocetZnakov += len;
    
 
@@ -184,7 +203,7 @@ char * vykresli_svet(svt_t * svet) {
                 maxPocetZnakov = novyMax;
                 
             }
-            memcpy(buff, zatial, len);
+            memcpy(buff + aktualPocetZnakov, zatial, len);
             aktualPocetZnakov += len;
         }
         //putchar('\n');   
@@ -202,7 +221,7 @@ char * vykresli_svet(svt_t * svet) {
                 maxPocetZnakov = novyMax;
                 
             }
-            memcpy(buff, zatial, len);
+            memcpy(buff + aktualPocetZnakov, zatial, len);
             aktualPocetZnakov += len;
         }
 
@@ -329,7 +348,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
             
             }
             //printf(" ");
-            len = snprintf(zatial, sizeof(zatial), " ");
+            len = snprintf(zatial, sizeof(zatial), "%s", " ");
                 if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
                         int novyMax = maxPocetZnakov + 5;
@@ -347,7 +366,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
         }
 
         //printf("\n");
-        len = snprintf(zatial, sizeof(zatial), " \n");
+        len = snprintf(zatial, sizeof(zatial), " %s", "\n");
                 if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
                         int novyMax = maxPocetZnakov + 5;
@@ -370,7 +389,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
 
     if (aktualPocetZnakov + len >= maxPocetZnakov)
     {
-        int novyMax = maxPocetZnakov + 150;
+        int novyMax = maxPocetZnakov + 200;
         char * zatial1 = realloc(buff, novyMax * sizeof(char));
         if (zatial1 == NULL)
         {
@@ -405,7 +424,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
-    int novyMax = maxPocetZnakov + 50;
+    int novyMax = maxPocetZnakov + 100;
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
@@ -422,7 +441,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
 
 
     //printf("\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
-    len = snprintf(zatial, sizeof(zatial), "\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
+    len = snprintf(zatial, sizeof(zatial), "%s", "\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -443,14 +462,14 @@ char *  svet_vypis_kroky(svt_t * svet) {
 
     for (int i = 0; i < svet->hranica_y; i++) {    
             for (int j = 0; j < svet->hranica_x; j++) {
-                char buf[16];
+                
                 if (svet->pole[j][i] == 2) {
                     //printf("\033[31m%12s\033[0m", "X");
                     len = snprintf(zatial, sizeof(zatial), "\033[31m%12s\033[0m", "X");
 
                     if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
-                        int novyMax = maxPocetZnakov + 50;
+                        int novyMax = maxPocetZnakov + 100;
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
@@ -485,7 +504,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                 
                 }
                 //printf(" ");   TO
-                len = snprintf(zatial, sizeof(zatial), " ");
+                len = snprintf(zatial, sizeof(zatial), "%s", " ");
 
                     if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
@@ -503,7 +522,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                     aktualPocetZnakov += len;
             }
             //printf("\n");    
-            len = snprintf(zatial, sizeof(zatial), "\n");
+            len = snprintf(zatial, sizeof(zatial), "%s", "\n");
 
                     if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
@@ -527,7 +546,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
 
     if (aktualPocetZnakov + len >= maxPocetZnakov)
     {
-        int novyMax = maxPocetZnakov + 150;
+        int novyMax = maxPocetZnakov + 200;
         char * zatial1 = realloc(buff, novyMax * sizeof(char));
         if (zatial1 == NULL)
         {
@@ -540,7 +559,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
     memcpy(buff + aktualPocetZnakov, zatial, len);
     aktualPocetZnakov += len;
 
-
+    free(opatovneMenu);
 
         return buff;
 }
@@ -552,43 +571,37 @@ void server_vykonavaj_sim(svt_brd_t * data) {
     
     
     for (int i = 0; i < data->svet->original_replikacii; i++) {
-        for (int j; j < data->svet->pocet_krokov_K; j++) {
+        
+        for (int j = 0; j < data->svet->pocet_krokov_K_origo; j++) {
             
             
-           
-            pthread_mutex_lock(&data->server->mutex);
-            int pocet_vlakien = data->server->pocetKlinetov;
-            if (!data->server->server_bezi || atomic_load(&data->server->server_info.sumarny_mod)) {
-                pthread_mutex_unlock(&data->server->mutex);
-                pthread_exit(NULL);
+            if (!atomic_load(&data->server->server_bezi)|| atomic_load(&data->server->server_info.sumarny_mod)) {
+                
+                return;
             }
-            pthread_mutex_unlock(&data->server->mutex);
-          
-          
-            
 
-            for (int k = 0; k < pocet_vlakien; k++) {
-                pthread_t vlakno;
-                svt_vp_t * vypisovac;
-                vypisovac = calloc(1, sizeof(svt_vp_t));
-                if (vypisovac == NULL) {
-                perror("Chyba vytvarania vlakien zla pamat.");
-                exit(EXIT_FAILURE);
-                }
-                vypisovac->server = data->server;
-                vypisovac->svet = data->svet;
-                pthread_create(&vlakno, NULL, posli_vsetkym_svet, &vypisovac);
-                pthread_detach(vlakno);
+            if (data->svet->pocet_krokov_K == 0 && data->svet->pocet_replikacii == 0) {
+                return;
             }
+            
+            svt_vp_t vypisovac;
+            
+            
+            vypisovac.server = data->server;
+            vypisovac.svet = data->svet;
+            posli_vsetkym_svet( &vypisovac);
             posun_chodca(daj_nahodny_smer_pre_chodca(data->svet), data->svet);
-            data->svet->pocet_replikacii--;
+            data->svet->pocet_krokov_K--;
             sleep(1);
         }
+        data->svet->pocet_krokov_K = data->svet->pocet_krokov_K_origo;
+        data->svet->pocet_replikacii--;
     }
 }
 
-void * posli_vsetkym_svet(void * arg) {
-    svt_vp_t * data = arg;
+void  posli_vsetkym_svet(svt_vp_t * data) {
+    
+    
     pthread_mutex_lock(&data->server->mutex);
     int pocet_klientov = data->server->pocetKlinetov;
     pthread_mutex_unlock(&data->server->mutex);
@@ -605,15 +618,21 @@ void * posli_vsetkym_svet(void * arg) {
     }
     
     pthread_mutex_unlock(&data->server->mutex);
+    char * buf = vykresli_svet(data->svet);
     for (int i = 0; i < pocet_klientov; i++) {
         //treba pockat na lydku
-        char * buf = vykresli_svet(data->svet);
-        socket_write(&posielaj[i], buf,strlen(buf));
-        free(buf);
+        if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
+            pthread_mutex_lock(&data->server->mutex);
+            socket_write(&posielaj[i], buf,strlen(buf) + 1);
+            pthread_mutex_unlock(&data->server->mutex);
+        }
     };
+    sleep(1);
+    free(buf);
     free(posielaj);
-    free(data);
-
+    
+    
+    
 }
 void posli_vsetkym_statistiku(svt_brd_t * data) {
     while (atomic_load(&data->server->server_bezi)) {
@@ -621,32 +640,29 @@ void posli_vsetkym_statistiku(svt_brd_t * data) {
         
         pthread_mutex_lock(&data->server->mutex);
         int pocet_vlakien = data->server->pocetKlinetov;
+        pthread_mutex_unlock(&data->server->mutex);
         if (!data->server->server_bezi || !atomic_load(&data->server->server_info.sumarny_mod)) {
-            pthread_mutex_unlock(&data->server->mutex);
+            
             break;
         }
-        pthread_mutex_unlock(&data->server->mutex);
         
-        for (int i = 0; i < pocet_vlakien; i++) {
-            pthread_t vlakno;
-            svt_vp_t * vypisovac;
-            vypisovac = calloc(1, sizeof(svt_vp_t));
-            if (vypisovac == NULL) {
-                perror("Chyba vytvarania vlakien zla pamat");
-                exit(EXIT_FAILURE);
-            }
-            vypisovac->server = data->server;
-            vypisovac->svet = data->svet;
-            pthread_create(&vlakno, NULL, posli_vsetkym_stat, vypisovac);
-            pthread_detach(vlakno);
-        }
+        
+        
+        
+        svt_vp_t  vypisovac;
+       
+        vypisovac.server = data->server;
+        vypisovac.svet = data->svet;
+        posli_vsetkym_stat(&vypisovac);
+            
+        
         sleep(1);
     }
-    pthread_exit(NULL);
+    
 }
 
-void * posli_vsetkym_stat(void * arg) {
-    svt_brd_t * data = arg;
+void  posli_vsetkym_stat(svt_vp_t * data) {
+
      pthread_mutex_lock(&data->server->mutex);
     int pocet_klientov = data->server->pocetKlinetov;
     pthread_mutex_unlock(&data->server->mutex);
@@ -662,20 +678,45 @@ void * posli_vsetkym_stat(void * arg) {
         memcpy(&klienti[i], &data->server->klienti[i], sizeof(klient_read_t));
     }
     pthread_mutex_unlock(&data->server->mutex);
+    char * buf1;
+    char * buf;
+    
+    
+    buf = svet_vypis_kroky(data->svet);
+    
+    
+    buf1 = svet_vypis_statistiku(data->svet);
     for (int i = 0; i < pocet_klientov; i++) {
         //treba pockat na lydku
 
-        char * buf;
-        if (atomic_load(&klienti[i].chcem_statistiku)) {
-            buf = svet_vypis_statistiku(data->svet);
+        printf("Idem poslat klientovi cislo: %d\n", i + 1);
+        sleep(2);
+        if (atomic_load(&data->server->klienti[i]->chcem_statistiku)) {
+           
+            if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
+                 pthread_mutex_lock(&data->server->mutex);
+                 printf("Lokol som sa idem poslat stat\n");
+                 socket_write(&data->server->klienti[i]->socket_pocuvaj, buf1, strlen(buf1) + 1);
+                pthread_mutex_unlock(&data->server->mutex);
+                printf("unlock\n");
+            }
         } else {
-            buf = svet_vypis_kroky(data->svet);
+            if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
+                pthread_mutex_lock(&data->server->mutex);
+                printf("Lokol som sa idem poslat kroky\n");
+                socket_write(&data->server->klienti[i]->socket_pocuvaj, buf, strlen(buf) + 1);
+                pthread_mutex_unlock(&data->server->mutex);
+                printf("unlock\n");
+            }
         }
-        socket_write(&klienti[i].socket_pocuvaj, buf, strlen(buf));
-        free(buf);
-    };
+        
+        
+    }
+    free(buf);
+    free(buf1);
     free(klienti);
-    free(data);
+    
+
 }
 
 
@@ -747,7 +788,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
     }
     aktual_znakov += len;
 
-
+    
     len = snprintf(tmp, sizeof(tmp), "%d;", data->pocet_replikacii);
     if (aktual_znakov + len >= max) {
         int novy_max = max + 50;
@@ -759,6 +800,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         buf = tmp1;
         max = novy_max;
     }
+    
     memcpy(buf + aktual_znakov, tmp, len);
     aktual_znakov += len;
 //rozmerx;rozmery;svetprekazky;pocet_replikacii;...
@@ -929,12 +971,17 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         }
         char * kontrola;
         pocet_replikacii = strtol(buf, &kontrola, 10);
+        
+        
         if (kontrola == buf) {
             printf("To nie je cislo zadaj znova!!\n");
         } else {
             break;
         }
     }
+
+    
+    
 
     while (1) {
         printf("Zadaj pravdepodobnosti v tvare s desatinou bodkou.\n");

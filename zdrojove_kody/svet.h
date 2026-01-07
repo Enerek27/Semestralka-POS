@@ -25,6 +25,7 @@ typedef struct Svet {
   int stred_y;
   prvd_t pravdepodobnosti;
   int pocet_krokov_K;
+  int pocet_krokov_K_origo;
   int pocet_replikacii;
   int original_replikacii;
   char cesta_k_suboru[100];

@@ -44,11 +44,11 @@ void spusti_initmenu_klient(socket_client_t * socket);
 
 void  server_vykonavaj_sim(svt_brd_t * svet);
 
-void * posli_vsetkym_svet(void * arg);
+void  posli_vsetkym_svet(svt_vp_t * data);
 
 
 int hlavne_menu_klient();
 
 void posli_vsetkym_statistiku(svt_brd_t * data);
 
-void * posli_vsetkym_stat(void * arg);
+void  posli_vsetkym_stat(svt_vp_t * data);

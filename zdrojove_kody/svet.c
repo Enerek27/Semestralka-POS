@@ -39,6 +39,7 @@ svt_t * svet_init_normal(int hranica_x, int hranica_y, prvd_t pravdepodobnosti, 
     svet->pocet_krokov_K = pocet_krokov_K;
     svet->pocet_replikacii = pocet_replikacii;
     svet->original_replikacii = pocet_replikacii;
+    svet->pocet_krokov_K_origo = pocet_krokov_K;
     return svet;
 }
 
@@ -77,7 +78,7 @@ void posun_chodca(smer_t smer_posunu, svt_t * svet)
             } else{
                 nova_poloha_x = aktualna_poloha_x - 1;
             }
-            
+            //printf("Idem vlavo\n");
             break;
         case Vpravo:
             if (aktualna_poloha_x == svet->hranica_x - 1)
@@ -86,7 +87,7 @@ void posun_chodca(smer_t smer_posunu, svt_t * svet)
             } else {
                 nova_poloha_x = aktualna_poloha_x + 1;
             }
-            
+             //printf("Idem vpravo\n");
             break;
         case Hore:
             if (aktualna_poloha_y == 0)
@@ -95,7 +96,7 @@ void posun_chodca(smer_t smer_posunu, svt_t * svet)
             } else {
                 nova_poloha_y = aktualna_poloha_y -1;
             }
-            
+            // printf("Idem hore\n");
             break;
         default:
             //dole
@@ -105,7 +106,7 @@ void posun_chodca(smer_t smer_posunu, svt_t * svet)
             } else {
                 nova_poloha_y = aktualna_poloha_y + 1;
             }
-            
+             //printf("Idem vlavo\n");
             break;
     }
 
@@ -132,7 +133,7 @@ void svet_uloz_do_suboru(svt_t * svet)
     //fprintf nepridava ziadne dalsie znaky, zapise presne to, co je uvedene vo formate
 
     fprintf(subor, "%d;%d;%d;%d;", svet->hranica_x, svet->hranica_y, svet->stred_x, svet->stred_y);
-    fprintf(subor, "%d;%d;", svet->pocet_krokov_K, svet->original_replikacii);
+    fprintf(subor, "%d;%d;", svet->pocet_krokov_K_origo, svet->original_replikacii);
 
     //ukladam pole_pravdepodobnosti
     for (int i = 0; i < svet->hranica_y; i++)
@@ -321,6 +322,7 @@ svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku,
     svet->hranica_x = hranica_x;
     svet->hranica_y = hranica_y;
     svet->original_replikacii = pocet_replikacii;
+    svet->pocet_krokov_K_origo = pocet_krokov_K;
     svet->pole[hranica_x - 1][hranica_y - 1] = 1;
     do {
 
@@ -480,7 +482,7 @@ smer_t daj_nahodny_smer_pre_chodca(svt_t * svet) {
 
 
 svt_t * svet_copy(svt_t * svet_nakopirovanie) {
-    svt_t * fiktivny = svet_init_normal(svet_nakopirovanie->hranica_x, svet_nakopirovanie->hranica_y, svet_nakopirovanie->pravdepodobnosti);
+    svt_t * fiktivny = svet_init_normal(svet_nakopirovanie->hranica_x, svet_nakopirovanie->hranica_y, svet_nakopirovanie->pravdepodobnosti, svet_nakopirovanie->pocet_krokov_K, svet_nakopirovanie->pocet_replikacii, svet_nakopirovanie->cesta_k_suboru);
     for (int i = 0; i < svet_nakopirovanie->hranica_x; i++) {
         for (int j = 0; j < svet_nakopirovanie->hranica_y; j++) {
             fiktivny->pole[i][j] = svet_nakopirovanie->pole[i][j];

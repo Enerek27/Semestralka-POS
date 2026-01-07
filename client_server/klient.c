@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include "../sockety/socket.h"
 #include "../zdielanaPamat/pipe.h"
-#include "server.h"
+#include <sys/select.h>
 #include <sys/wait.h>
 
 _Bool je_klient_hlavny(socket_client_t * socket) {
@@ -41,9 +41,7 @@ _Bool je_klient_hlavny(socket_client_t * socket) {
 
 void * vypisujObraz(void * arg) {
     socket_client_t * klient = arg;
-    pthread_mutex_lock(&klient->mutex);
-    socket_data_t copy = klient->activeSocket;
-    pthread_mutex_unlock(&klient->mutex);
+    
     char * buf;
     char nacitaj[50];
     int maxVelkost = 100;
@@ -54,43 +52,62 @@ void * vypisujObraz(void * arg) {
         perror("Chyba alokovania pamate!!!");
         exit(EXIT_FAILURE);
     }
-
+    
     while (atomic_load(&klient->klien_bezi)) {
         
-        
-       int n = socket_read(&copy, nacitaj, sizeof(nacitaj));
-
-       if (n <= 0) {
-        //chyba alebo sa zavrej socket
+       fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(klient->activeSocket.socket, &readfds);
+    struct timeval tv = {0, 300000}; // 0.3 s
+    int rv = select(klient->activeSocket.socket + 1, &readfds, NULL, NULL, &tv);
+     if (rv == -1) {
+        perror("select");
         break;
-       }
-
-       for (int i = 0; i < n; i++) {
-            if (maxVelkost - 1 == aktualVelkost) {
-                int novaVelkost = maxVelkost + 50;
-                char * tmp = realloc(buf, novaVelkost);
-                if (tmp == NULL) {
-                    perror("Chyba pri zvacseni pamate");
-                    free(buf);
-                    exit(EXIT_FAILURE);
-                }
-                buf = tmp;
-                maxVelkost = novaVelkost;
-
-                
+        } else if (rv == 0) {
+          continue; 
+        } else {
+                int n = socket_read(&klient->activeSocket, nacitaj, 50);
+            if (n <= 0) {
+                //chyba alebo sa zavrej socket
+                atomic_store(&klient->klien_bezi, 0);
+                break;
             }
-            buf[aktualVelkost] = nacitaj[i];
-            aktualVelkost++;
-            if (buf[aktualVelkost - 1] == '\0') {
-                printf("%s", buf);
-                fflush(stdout);
-                memset(buf, 0, maxVelkost);
-                aktualVelkost = 0;
+
+            if (strstr(nacitaj, "off") != NULL) {
+                atomic_store(&klient->klien_bezi, 0);
+                break;
             }
-       }
+            for (int i = 0; i < n; i++) {
+                    if (maxVelkost - 1 == aktualVelkost + aktualVelkost) {
+                        int novaVelkost = maxVelkost + 50;
+                        char * tmp = realloc(buf, novaVelkost);
+                        if (tmp == NULL) {
+                            perror("Chyba pri zvacseni pamate");
+                            free(buf);
+                            exit(EXIT_FAILURE);
+                        }
+                        buf = tmp;
+                        maxVelkost = novaVelkost;
+
+                        
+                    }
+                    buf[aktualVelkost] = nacitaj[i];
+                    aktualVelkost++;
+                    //treba odstranit iba na test
+                // printf("%s", buf);
+                    
+                    if (buf[aktualVelkost - 1] == '\0') {
+                        printf("%s", buf);
+                        fflush(stdout);
+                        memset(buf, 0, maxVelkost);
+                        aktualVelkost = 0;
+                    }
+            }
+        }
 
     }
     free(buf);
+    pthread_exit(NULL);
 }
 
 _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
@@ -215,7 +232,7 @@ int main(int argc, char const *argv[])
                             perror("Chyba nacitavania textu.");
                             exit(EXIT_FAILURE);
                         }
-
+                        
                         pocetPouzivatelov = strtol(buf, &kontrola, 10);
                         if (kontrola == buf) {
                             printf("To nie je cislo zadaj znova!!\n");
@@ -243,8 +260,9 @@ int main(int argc, char const *argv[])
                         _exit(EXIT_FAILURE);
                     } else if (pid > 0) {
                         //tu bezi klient
+                        sleep(1);
                         socket_client_t socket_client;
-                        socket_client_init(&socket_client, "192.168.1.10", "777");
+                        socket_client_init(&socket_client, "127.0.0.1", "2000");
                         if (je_klient_hlavny(&socket_client)) {
                             if (!nacitaj_zo_suboru(&socket_client, NULL)) {
                                 spusti_initmenu_klient(&socket_client);
@@ -253,7 +271,8 @@ int main(int argc, char const *argv[])
 
                         pthread_t vlakno;
                         pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
-                        pthread_detach(vlakno);
+                        
+                        
                         while (atomic_load(&socket_client.klien_bezi)) {
                             
                                 
@@ -273,38 +292,55 @@ int main(int argc, char const *argv[])
                                 printf("Nezadal si cislo, skus znova\n");
                                 break;
                             }
+                            stlacene[strcspn(stlacene, "\n")] = '\0';
                             stlacenePismeno = strtol(stlacene, &endptr, 10);
                             if (stlacene == endptr) {
                                 printf("Nie je to cislo.\n");
                                 break;
                             }
-                            
+                            if (!atomic_load(&socket_client.klien_bezi)) {
+                                break;
+                            }
                             char buff[2];
                             switch (stlacenePismeno) {
-                                case 0:
+                                case 1:
                                     //signal vypnutie
                                     buff[0] = '0';
                                     buff[1] = '\0';
-                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    printf("Posielam toto %s\n", buff);
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
+                                    printf("Posielam signal na vypnutie serveru\n");
                                     atomic_store(&socket_client.klien_bezi, 0);
                                     break;
-                                case 1:
+                                case 2:
                                     //signal prepni mod
                                     buff[0] = '1';
                                     buff[1] = '\0';
-                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                     printf("Posielam toto %s\n", buff);
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
+                                    printf("Posielam signal na prepni mod\n");
                                     break;
-                                case 2:
+                                case 3:
                                     //signal v prepnutom mode chcem teraz statistiku
                                     buff[0] = '2';
                                     buff[1] = '\0';
-                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                     printf("Posielam toto %s\n", buff);
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
                                     break;
-                                case 3:
+                                case 4:
                                     //signal v prepnutom mode chcem teraz kroky
                                     buff[0] = '3';
                                     buff[1] = '\0';
-                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    printf("Posielam toto %s\n", buff);
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
                                     break;
                                 default:
                                     printf("Take cislo nie je uvedene.\n");
@@ -312,7 +348,9 @@ int main(int argc, char const *argv[])
                             }
 
 
+
                         }
+                        pthread_join(vlakno, NULL);
                         socket_client_destroy(&socket_client);
                         int status;
                         waitpid(pid, &status,0);

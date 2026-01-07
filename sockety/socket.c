@@ -1,3 +1,8 @@
+
+#define _POSIX_C_SOURCE 199309L   
+
+
+#include <sys/select.h>
 #include "socket.h"
 #include <netinet/in.h>
 #include <pthread.h>
@@ -7,6 +12,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <time.h>
 // pridané kvôli funkcii getaddrinfo a vecí okolo nej
 #define __USE_XOPEN2K
 #include <netdb.h>
@@ -65,48 +71,63 @@ void * nacuvajklientovi(void * arg) {
  
   while (atomic_load(&info_klient->bezi_klient)) {
     char buf[200];
-    int n = socket_read(&info_klient->socket_pocuvaj, buf, sizeof(buf));
-    if (n < 0) {
-      perror("chyba citania socketu");
-      exit(EXIT_FAILURE);
-    } else if (n == 0) {
-      
-      atomic_store(&info_klient->bezi_klient, 0);
-      socket_destroy(&info_klient->socket_pocuvaj);
-      break;
-    } else {
-      //prijal som spravu spracovanie
-        int signal = buf[0] - '0';
-        switch (signal) {
-          case 0:
-            //signal vypnutie
-            atomic_store(&info_klient->vypni_server, 1);
+
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(info_klient->socket_pocuvaj.socket, &readfds);
+    struct timeval tv = {0, 300000}; // 0.3 s
+    int rv = select(info_klient->socket_pocuvaj.socket + 1, &readfds, NULL, NULL, &tv);
+     if (rv == -1) {
+        perror("select");
+        break;
+        } else if (rv == 0) {
+          continue; 
+        } else {
+          int n = socket_read(&info_klient->socket_pocuvaj, buf, sizeof(buf));
+          
+          if (n < 0) {
+            printf("klient sa zavrel\n");
+          } else if (n == 0) {
+            
+            atomic_store(&info_klient->bezi_klient, 0);
+            socket_destroy(&info_klient->socket_pocuvaj);
             break;
-          case 1:
-            //signal prepni mod
-            atomic_store(&info_klient->prepni_mod, 1);
-            break;
-          case 2:
-            //signal v prepnutom mode chcem teraz statistiku
-            atomic_store(&info_klient->chcem_statistiku, 1);
-            break;
-          case 3:
-            //signal v prepnutom mode chcem teraz kroky
-            atomic_store(&info_klient->chcem_statistiku, 0);
-            break;
-          default:
-            break;
-        }
+          } else {
+            //prijal som spravu spracovanie
+              int signal = buf[0] - '0';
+              switch (signal) {
+                case 0:
+                  //signal vypnutie
+                  atomic_store(&info_klient->vypni_server, 1);
+                  break;
+                case 1:
+                  //signal prepni mod
+                  atomic_store(&info_klient->prepni_mod, 1);
+                  
+                  break;
+                case 2:
+                  //signal v prepnutom mode chcem teraz statistiku
+                  atomic_store(&info_klient->chcem_statistiku, 1);
+                  break;
+                case 3:
+                  //signal v prepnutom mode chcem teraz kroky
+                  atomic_store(&info_klient->chcem_statistiku, 0);
+                  break;
+                default:
+                  break;
+              }
 
 
 
-    }
+            } 
+          }
 
 
   }
 
   
   //sem prichadza od klienta info
+  pthread_exit(NULL);
 }
 
 
@@ -273,13 +294,19 @@ void socket_server_accept_connection(socket_server_t * this) {
     pthread_detach(vlakno);
   }
   
-  
-
   pthread_mutex_unlock(&this->mutex);
 }
 // Funkcia na zničenie servera, čo momentálne znamená zničenie pasívneho a aktívneho soketu
 void socket_server_destroy(socket_server_t * this) {
-  atomic_store(&this->server_bezi, 1);
+  atomic_store(&this->server_bezi, 0);
+  for (int i = 0; i < this->pocetKlinetov; i++) {
+    char buff[4];
+    buff[0] = 'o';
+    buff[1] = 'f';
+    buff[2] = 'f';
+    buff[3] = '\0';
+    socket_write(&this->klienti[i]->socket_pocuvaj, buff, strlen(buff) + 1);
+  }
   shutdown(this->passiveSocket.socket, SHUT_RDWR);
   // Zničenie pasívneho soketu na prijímanie pripojení
   socket_destroy(&this->passiveSocket);
