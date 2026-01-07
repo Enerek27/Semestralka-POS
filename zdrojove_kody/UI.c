@@ -84,24 +84,6 @@ char * vycisti_obrazovku() {
     //printf("\033[2J");  //kurzor posunie do laveho horneho rohu
     //fflush(stdout);
    
-    char * opatovneMenu = vrat_menu_klient();
-    len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu);
-
-   if (aktualPocetZnakov + len >= maxPocetZnakov)
-   {
-    int novyMax = maxPocetZnakov + 150;
-    char * zatial1 = realloc(buff, novyMax * sizeof(char));
-    if (zatial1 == NULL)
-    {
-        perror("Chyba pamate v inicializacii  realokacia.");
-        exit(EXIT_FAILURE);
-    }
-    buff = zatial1;
-    maxPocetZnakov = novyMax;
-   }
-   memcpy(buff + aktualPocetZnakov, zatial, len);
-   aktualPocetZnakov += len;
-
     return buff;
 }
 
@@ -206,7 +188,7 @@ char * vykresli_svet(svt_t * svet) {
             aktualPocetZnakov += len;
         }
         //putchar('\n');   
-        len = snprintf(zatial, sizeof(zatial), "\n") + 1;
+        len = snprintf(zatial, sizeof(zatial), "\n");
             if (aktualPocetZnakov + len >= maxPocetZnakov)
             {
                 int novyMax = maxPocetZnakov + 5;
@@ -227,7 +209,7 @@ char * vykresli_svet(svt_t * svet) {
 
 
             char * opatovneMenu = vrat_menu_klient();
-            len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu);
+            len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu) + 1;
 
             if (aktualPocetZnakov + len >= maxPocetZnakov)
             {
@@ -243,7 +225,7 @@ char * vykresli_svet(svt_t * svet) {
             }
             memcpy(buff + aktualPocetZnakov, zatial, len);
             aktualPocetZnakov += len;
-
+            free(opatovneMenu);
           
 
     return buff;
@@ -365,7 +347,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
         }
 
         //printf("\n");
-        len = snprintf(zatial, sizeof(zatial), " \n") + 1;
+        len = snprintf(zatial, sizeof(zatial), " \n");
                 if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
                         int novyMax = maxPocetZnakov + 5;
@@ -384,7 +366,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
     }
 
     char * opatovneMenu = vrat_menu_klient();
-    len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu);
+    len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu) + 1;
 
     if (aktualPocetZnakov + len >= maxPocetZnakov)
     {
@@ -400,6 +382,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
     }
     memcpy(buff + aktualPocetZnakov, zatial, len);
     aktualPocetZnakov += len;
+    free(opatovneMenu);
 
     return buff;
 }
@@ -520,7 +503,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                     aktualPocetZnakov += len;
             }
             //printf("\n");    
-            len = snprintf(zatial, sizeof(zatial), "\n") + 1;
+            len = snprintf(zatial, sizeof(zatial), "\n");
 
                     if (aktualPocetZnakov + len >= maxPocetZnakov)
                     {
@@ -540,7 +523,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
 
 
     char * opatovneMenu = vrat_menu_klient();
-    len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu);
+    len = snprintf(zatial, sizeof(zatial), "%s", opatovneMenu) + 1;
 
     if (aktualPocetZnakov + len >= maxPocetZnakov)
     {
@@ -1114,6 +1097,7 @@ void spusti_initmenu_klient(socket_client_t * socket) {
 
 }
 
+int hlavne_menu_klient(){
 int hlavne_menu_klient(){
     while (1) {
     

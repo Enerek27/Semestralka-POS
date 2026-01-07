@@ -5,13 +5,17 @@
 
 #include "../zdrojove_kody/UI.h"
 #include <pthread.h>
+#include <sched.h>
 #include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include "../sockety/socket.h"
 #include "../zdielanaPamat/pipe.h"
+#include "server.h"
+#include <sys/wait.h>
 
 _Bool je_klient_hlavny(socket_client_t * socket) {
     char buff[20];
@@ -40,13 +44,53 @@ void * vypisujObraz(void * arg) {
     pthread_mutex_lock(&klient->mutex);
     socket_data_t copy = klient->activeSocket;
     pthread_mutex_unlock(&klient->mutex);
-    while (atomic_load(&klient->klien_bezi)) {
-        char buf[100];
-        memset(buf, 0, sizeof(buf));
-         
-        socket_read(&copy, buf, sizeof(buf));
-        printf("%s", buf);
+    char * buf;
+    char nacitaj[50];
+    int maxVelkost = 100;
+    
+    int aktualVelkost = 0;
+    buf = calloc(maxVelkost, sizeof(char));
+    if (buf == NULL) {
+        perror("Chyba alokovania pamate!!!");
+        exit(EXIT_FAILURE);
     }
+
+    while (atomic_load(&klient->klien_bezi)) {
+        
+        
+       int n = socket_read(&copy, nacitaj, sizeof(nacitaj));
+
+       if (n <= 0) {
+        //chyba alebo sa zavrej socket
+        break;
+       }
+
+       for (int i = 0; i < n; i++) {
+            if (maxVelkost - 1 == aktualVelkost) {
+                int novaVelkost = maxVelkost + 50;
+                char * tmp = realloc(buf, novaVelkost);
+                if (tmp == NULL) {
+                    perror("Chyba pri zvacseni pamate");
+                    free(buf);
+                    exit(EXIT_FAILURE);
+                }
+                buf = tmp;
+                maxVelkost = novaVelkost;
+
+                
+            }
+            buf[aktualVelkost] = nacitaj[i];
+            aktualVelkost++;
+            if (buf[aktualVelkost - 1] == '\0') {
+                printf("%s", buf);
+                fflush(stdout);
+                memset(buf, 0, maxVelkost);
+                aktualVelkost = 0;
+            }
+       }
+
+    }
+    free(buf);
 }
 
 _Bool nacitaj_zo_suboru(socket_client_t * socket) {
@@ -127,69 +171,98 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket) {
 
 int main(int argc, char const *argv[])
 {
-   while (1) {
+    _Bool idem = 1;
+   while (idem) {
     //tvoje menu
-    //bude vracat strukturu
+    //
     //
     // switch co lydkine menu vrati podla toho sa bude nieco robit
+     int odpoved = hlavne_menu_klient();
 
-    switch (hlavne_menu_klient()) {
+
+    switch (odpoved) {
         case 1:
                 ////// NOVA SIMULACIA
-                ///////////////////KTORY TYP
-                int ktoryTyp;
+               
+                //////////////  KOLKO POUZIVATELOV
                 char buf [200];
                 memset(buf, 0, sizeof(buf));
-                printf("Typ simulovaneho sveta: interaktivny -> napis 1 ; sumarny -> napis 2. \n");
-                if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                    perror("Chyba nacitavania textu.");
-                    exit(EXIT_FAILURE);
-                }
-                char * kontrola;    //ak nieco ostane v nej, znamena, ze zachytilo aspon nejake cislo
-                ktoryTyp = strtol(buf, &kontrola, 10);
-                if (kontrola == buf) {
-                    printf("To nie je cislo zadaj znova!!\n");
-                } else {
-                    if (ktoryTyp == 1) {
-                        ////spusti interaktivny
-                        
-                    } else {
-                        //spusti sumarny
-                    }
-                }
-
-               
-                //NACITAVANIE ZO SUBORU SOM DALA PREC
-
-                //////////////  KOLKO POUZIVATELOV
+                
+                char * kontrola; 
                 int pocetPouzivatelov;
                 _Bool dobreZadal = 1;
                 while (dobreZadal) {
 
-                printf("Napis pre kolko pouzivatelov ma byt urcena aplikacia:  \n");
-                if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                    perror("Chyba nacitavania textu.");
+                    printf("Napis pre kolko pouzivatelov ma byt urcena aplikacia:  \n");
+                    if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                        perror("Chyba nacitavania textu.");
+                        exit(EXIT_FAILURE);
+                    }
+
+                    pocetPouzivatelov = strtol(buf, &kontrola, 10);
+                    if (kontrola == buf) {
+                        printf("To nie je cislo zadaj znova!!\n");
+                    } else {
+                        if (pocetPouzivatelov == 1) {
+                        
+                            dobreZadal = 0;
+                            break;
+                        } else if(pocetPouzivatelov > 1) {
+                        
+                            dobreZadal = 0;
+                            break;
+                        } else {
+                            dobreZadal = 1;
+                        }
+                    } 
+
+                }  
+
+                pid_t pid = fork();
+                if (pid == 0) {
+                    //treba zmenit na execl
+                    spusti_server();
+                    _exit(0);
+                } else if (pid > 0) {
+                    //tu bezi klient
+                    socket_client_t socket_client;
+                    socket_client_init(&socket_client, "192.168.1.10", "777");
+                    if (je_klient_hlavny(&socket_client)) {
+                        if (!nacitaj_zo_suboru(&socket_client)) {
+                            spusti_initmenu_klient(&socket_client);
+                        }   
+                    }
+
+                    pthread_t vlakno;
+                    pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
+                    pthread_detach(vlakno);
+                    while (atomic_load(&socket_client.klien_bezi)) {
+                        
+                        
+
+
+                        //bude tu fgets s prevodom na cislo a kontrolou prevodu a bude tu switch podla cisla 
+                        //je to reakcia na menu ktore lydka robiiiii stlacenie klavesnice 
+                        //reakcia na menu ktore sa robilo na 2 krat to nepochopene menu ktore robit mala 
+                        //lubim ju :)
+
+
+
+                    }
+                    socket_client_destroy(&socket_client);
+                    int status;
+                    waitpid(pid, &status,0);
+                    printf("Server skoncil so statusom %d", status);
+                    sleep(1);
+                } else {
+                    perror("Chyba vytvorenia procesu");
                     exit(EXIT_FAILURE);
                 }
+                break;
 
-                pocetPouzivatelov = strtol(buf, &kontrola, 10);
-                if (kontrola == buf) {
-                    printf("To nie je cislo zadaj znova!!\n");
-                } else {
-                    if (pocetPouzivatelov == 1) {
-                        printf("Aplikacia je nastavena pre %d klienta.\n", pocetPouzivatelov);
-                        dobreZadal = 0;
-                        break;
-                    } else if(pocetPouzivatelov > 1) {
-                        printf("Aplikacia je nastavena pre %d klientov.\n", pocetPouzivatelov);
-                        dobreZadal = 0;
-                        break;
-                    } else {
-                        dobreZadal = 1;
-                    }
-                } 
 
-                }  //zatvroka while
+
+
                   
             break;
         case 2:
@@ -200,9 +273,18 @@ int main(int argc, char const *argv[])
                 if (adresaPripojenia == NULL) {
                     perror("Chyba nacitavanie textu");
                     exit(EXIT_FAILURE);
-                } else {
-                    printf("Adresa pripojenia je: %s.",adresaPripojenia);
-                }   
+                } 
+                socket_client_t socket_client;
+                socket_client_init(&socket_client, adresaPripojenia, "777");
+                je_klient_hlavny(&socket_client);
+                pthread_t vlakno;
+                pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
+                pthread_detach(vlakno);
+
+                while (atomic_load(&socket_client.klien_bezi)) {
+                
+                }
+
             break;
         case 3:
                 //opatovne spustenie simulacii
@@ -217,35 +299,10 @@ int main(int argc, char const *argv[])
                 }     
             break;
         case 4:
-                //koniec - ukoncenie aplikacie
-                //ci chce ukoncit server alebo nie
-                //AKO vyjdeme z vajlu, ked sa skonci toooto
-                int ciChceUkoncitServer;
-                printf("Chces ukoncit aj server -> napis 1, ak nehces -> napis 0. \n");
-                
-                ciChceUkoncitServer = strtol(buf, &kontrola, 10);
-                
-                if (kontrola == buf) {
-                    printf("To nie je cislo zadaj znova!!\n");
-                } else {
-                    if (ciChceUkoncitServer == 1) {
-                        //ukoncujem server
-                    } else {
-                        //nechce ukoncit server
-                    }
-                } 
+                idem = 0;
             break;
 
     };
-
-
-
-
-
-
-
-
-
 
 
 
@@ -253,34 +310,11 @@ int main(int argc, char const *argv[])
 
 
 
-
-    socket_client_t socket_client;
-
-    socket_client_init(&socket_client, "192.168.1.10", "777");
-    if (je_klient_hlavny(&socket_client)) {
-        if (!nacitaj_zo_suboru(&socket_client)) {
-            spusti_initmenu_klient(&socket_client);
-        }
-        
-    }
     
-    pthread_t vlakno;
-    pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
-    pthread_detach(vlakno);
 
-    while (atomic_load(&socket_client.klien_bezi)) {
+   
+
         
-    }
-
-    char buffer[256];
-    memset(buffer, 0, sizeof(buffer));
-
-    socket_read(&socket_client.activeSocket, buffer, sizeof(buffer));
-
-    printf("Sprava co poslal server je: %s\n", buffer);
-
-    socket_client_destroy(&socket_client);
-    
  /*
     pipe_data_t klient;
 

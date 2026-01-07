@@ -9,7 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "../zdrojove_kody/UI.h"
-
+#include "server.h"
 
 
 void * vlaknoPrijmaniaSpojenia(void * arg) {
@@ -132,7 +132,7 @@ svt_t * server_info_subor(socket_server_t * server) {
 }
 
 
-int main(int argc, char const *argv[])
+int spusti_server()
 {
     
     srand(time(NULL)); 
