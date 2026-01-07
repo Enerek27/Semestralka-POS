@@ -3,6 +3,7 @@
 // treba potom zmenit na svet.h
 
 
+
 #include "../zdrojove_kody/UI.h"
 #include <pthread.h>
 #include <sched.h>
@@ -10,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+
 #include <unistd.h>
 #include "../sockety/socket.h"
 #include "../zdielanaPamat/pipe.h"
@@ -39,6 +40,10 @@ _Bool je_klient_hlavny(socket_client_t * socket) {
 
 }
 
+//TODO treba resetovat vsetko pred dalsou simulaciuo skusit nacitanie a ulozenie do suboru a viacej klientov 
+// pridat moznost iba odist z simulacie a znova sa pripojit
+
+
 void * vypisujObraz(void * arg) {
     socket_client_t * klient = arg;
     
@@ -55,7 +60,7 @@ void * vypisujObraz(void * arg) {
     
     while (atomic_load(&klient->klien_bezi)) {
         
-       fd_set readfds;
+    fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(klient->activeSocket.socket, &readfds);
     struct timeval tv = {0, 300000}; // 0.3 s
@@ -78,7 +83,7 @@ void * vypisujObraz(void * arg) {
                 break;
             }
             for (int i = 0; i < n; i++) {
-                    if (maxVelkost - 1 == aktualVelkost + aktualVelkost) {
+                    if (maxVelkost - 1 >= aktualVelkost) {
                         int novaVelkost = maxVelkost + 50;
                         char * tmp = realloc(buf, novaVelkost);
                         if (tmp == NULL) {
@@ -160,10 +165,8 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
         }
     }
     if (nacitaj_zo_suboru) {
-        socket_data_t copy;
-        pthread_mutex_lock(&socket->mutex);
-        copy = socket->activeSocket;
-        pthread_mutex_unlock(&socket->mutex);
+        
+      
         
         
         char poslat[230];
@@ -173,22 +176,16 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
         memcpy(poslat + 2, cesta_k_suboru, strlen(cesta_k_suboru) + 1);
         socket_write(&socket->activeSocket, poslat, strlen(poslat) + 1);
     } else {
-        socket_data_t copy;
-        pthread_mutex_lock(&socket->mutex);
-        copy = socket->activeSocket;
-        pthread_mutex_unlock(&socket->mutex);
+        
         char buf[2];
         buf[0] = '5';
         buf[1] = ';';
-        socket_write(&copy,buf, 2);
+        socket_write(&socket->activeSocket,buf, 2);
     }
 
     return nacitaj_zo_suboru;
     } else {
-        socket_data_t copy;
-        pthread_mutex_lock(&socket->mutex);
-        copy = socket->activeSocket;
-        pthread_mutex_unlock(&socket->mutex);
+       
         
         
         char poslat[230];
@@ -219,6 +216,7 @@ int main(int argc, char const *argv[])
                     ////// NOVA SIMULACIA
                 
                     //////////////  KOLKO POUZIVATELOV
+                    {
                     char buf [200];
                     memset(buf, 0, sizeof(buf));
                     
@@ -262,6 +260,7 @@ int main(int argc, char const *argv[])
                         //tu bezi klient
                         sleep(1);
                         socket_client_t socket_client;
+                        sleep(1);
                         socket_client_init(&socket_client, "127.0.0.1", "2000");
                         if (je_klient_hlavny(&socket_client)) {
                             if (!nacitaj_zo_suboru(&socket_client, NULL)) {
@@ -287,7 +286,7 @@ int main(int argc, char const *argv[])
                             char stlacene[10];
                             int stlacenePismeno;
                             char * endptr;
-                            int maxPocetPismen = 10;
+                            
                             if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
                                 printf("Nezadal si cislo, skus znova\n");
                                 break;
@@ -307,11 +306,11 @@ int main(int argc, char const *argv[])
                                     //signal vypnutie
                                     buff[0] = '0';
                                     buff[1] = '\0';
-                                    printf("Posielam toto %s\n", buff);
+                                    
                                     pthread_mutex_lock(&socket_client.mutex);
                                     socket_write(&socket_client.activeSocket, buff , strlen(buff));
                                     pthread_mutex_unlock(&socket_client.mutex);
-                                    printf("Posielam signal na vypnutie serveru\n");
+                                  
                                     sleep(1);
                                     atomic_store(&socket_client.klien_bezi, 0);
                                     break;
@@ -319,17 +318,17 @@ int main(int argc, char const *argv[])
                                     //signal prepni mod
                                     buff[0] = '1';
                                     buff[1] = '\0';
-                                     printf("Posielam toto %s\n", buff);
+                                     
                                     pthread_mutex_lock(&socket_client.mutex);
                                     socket_write(&socket_client.activeSocket, buff , strlen(buff));
                                     pthread_mutex_unlock(&socket_client.mutex);
-                                    printf("Posielam signal na prepni mod\n");
+                                   
                                     break;
                                 case 3:
                                     //signal v prepnutom mode chcem teraz statistiku
                                     buff[0] = '2';
                                     buff[1] = '\0';
-                                     printf("Posielam toto %s\n", buff);
+                                     
                                     pthread_mutex_lock(&socket_client.mutex);
                                     socket_write(&socket_client.activeSocket, buff , strlen(buff));
                                     pthread_mutex_unlock(&socket_client.mutex);
@@ -338,7 +337,7 @@ int main(int argc, char const *argv[])
                                     //signal v prepnutom mode chcem teraz kroky
                                     buff[0] = '3';
                                     buff[1] = '\0';
-                                    printf("Posielam toto %s\n", buff);
+                                    
                                     pthread_mutex_lock(&socket_client.mutex);
                                     socket_write(&socket_client.activeSocket, buff , strlen(buff));
                                     pthread_mutex_unlock(&socket_client.mutex);
@@ -355,12 +354,13 @@ int main(int argc, char const *argv[])
                         socket_client_destroy(&socket_client);
                         int status;
                         waitpid(pid, &status,0);
-                        printf("Server skoncil so statusom %d", status);
+                        printf("Server skoncil so statusom %d\n", status);
                         sleep(1);
                     } else {
                         perror("Chyba vytvorenia procesu");
                         exit(EXIT_FAILURE);
                     }
+                }
                     break;
 
 
@@ -369,6 +369,8 @@ int main(int argc, char const *argv[])
                     
                 break;
             case 2:
+            //TODO prestavit ako 1 aby bolo dobre :)
+                    { char buf[200];
                     //treba upravit vypinanie aby tam bola dalsia moznost
                     printf("Napis adresu pripojenia : ");
                     char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
@@ -387,7 +389,7 @@ int main(int argc, char const *argv[])
                            char stlacene[10];
                             int stlacenePismeno;
                             char * endptr;
-                            int maxPocetPismen = 10;
+                            
                             if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
                                 printf("Nezadal si cislo, skus znova\n");
                                 break;
@@ -433,10 +435,11 @@ int main(int argc, char const *argv[])
                     socket_client_destroy(&socket_client);
                     
                     
-
+                }
                 break;
             case 3:
                 //treba upravit vypinanie aby tam bola dalsia moznost
+                {
                 char cesta_k_suboru[200];
                 memset(cesta_k_suboru, 0, sizeof(cesta_k_suboru));
                 while (1) {
@@ -485,7 +488,7 @@ int main(int argc, char const *argv[])
                            char stlacene[10];
                             int stlacenePismeno;
                             char * endptr;
-                            int maxPocetPismen = 10;
+                            
                             if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
                                 printf("Nezadal si cislo, skus znova\n");
                                 break;
@@ -535,11 +538,12 @@ int main(int argc, char const *argv[])
                     printf("Server skoncil so statusom %d", status);
                     sleep(1);
                 }
+            }
                 break;
             case 4:
                     idem = 0;
                 break;
-            default:
+            
 
         };
     }

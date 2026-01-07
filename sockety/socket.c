@@ -44,6 +44,7 @@ void * cisti_server(void * arg) {
         for (int i = 0; i < server->pocetKlinetov; i++) {
           if (atomic_load(&server->klienti[i]->vypni_server)) {
               atomic_store(&server->server_bezi, 0);
+              break;
           }
           if (atomic_load(&server->klienti[i]->prepni_mod)) {
             if (atomic_load(&server->server_info.sumarny_mod)) {
@@ -78,6 +79,9 @@ void * nacuvajklientovi(void * arg) {
     struct timeval tv = {0, 300000}; // 0.3 s
     int rv = select(info_klient->socket_pocuvaj.socket + 1, &readfds, NULL, NULL, &tv);
      if (rv == -1) {
+        if (!atomic_load(&info_klient->bezi_klient)) {
+          pthread_exit(NULL);
+        }
         perror("select");
         break;
         } else if (rv == 0) {
@@ -87,6 +91,9 @@ void * nacuvajklientovi(void * arg) {
           
           if (n < 0) {
             printf("klient sa zavrel\n");
+            if (!atomic_load(&info_klient->bezi_klient)) {
+              pthread_exit(NULL);
+            }
           } else if (n == 0) {
             
             atomic_store(&info_klient->bezi_klient, 0);
@@ -166,12 +173,16 @@ void socket_listen(socket_data_t * this, int backlog) {
   }
 }
 // Funkcia, ktorá obaľuje funkciu accept, pričom je potrebné uviesť aj pasívny soket, miesto, kam sa uloží adresa klienta a miesto, kam sa uloží veľkosť adresy klienta
-void socket_accept(socket_data_t * this, const socket_data_t * passiveSocket, struct sockaddr * clientAddress, socklen_t * clientAddressLength) {
+_Bool socket_accept(socket_data_t * this, const socket_data_t * passiveSocket, struct sockaddr * clientAddress, socklen_t * clientAddressLength, socket_server_t * server) {
   this->socket = accept(passiveSocket->socket, clientAddress, clientAddressLength);
   if (this->socket < 0) {
+    if (!atomic_load(&server->server_bezi)) {
+      return 1;
+    }
     perror("socket_accept: zlyhanie funkcie accept!");
     exit(EXIT_FAILURE);
   }
+  return 0;
 }
 // Funkcia, ktorá obaľuje funkciu connect, pričom je potrebné uviesť aj adresu servera a veľkosť adresy servera
 _Bool socket_connect(socket_data_t * this, const struct sockaddr * serverAddress, socklen_t serverAddressLength) {
@@ -248,7 +259,11 @@ void socket_server_accept_connection(socket_server_t * this) {
   // Ukladanie veľkosti adresy klienta
   socklen_t clientAddressSize = sizeof(clientAddress);
   socket_data_t tempSocket;
-  socket_accept(&tempSocket, &this->passiveSocket, (struct sockaddr * ) &clientAddress, &clientAddressSize);
+  fd_set readfds;
+  if (socket_accept(&tempSocket, &this->passiveSocket, (struct sockaddr * ) &clientAddress, &clientAddressSize, this)) {
+    return;
+  }
+  
   pthread_mutex_lock(&this->mutex);
   // Pripojenie klienta na server, pričom sa nastaví všetko potrebné v adrese klienta, nastaví sa veľkosť adresy a vráti sa popisovač soketu určeného pre komunikáciu
   if (this->maxPocetKlientov == this->pocetKlinetov) {
@@ -293,8 +308,10 @@ void socket_server_accept_connection(socket_server_t * this) {
     pthread_create(&vlakno, NULL, nacuvajklientovi, this->klienti[this->pocetKlinetov - 1]);
     pthread_detach(vlakno);
   }
-  
+    
   pthread_mutex_unlock(&this->mutex);
+    
+  
 }
 
 void client_zavri(socket_server_t * server) {

@@ -17,7 +17,9 @@ void * vlaknoPrijmaniaSpojenia(void * arg) {
     socket_server_t * server = arg;
     while (atomic_load(&server->server_bezi)) {
         socket_server_accept_connection(server);
+        printf("halooo halooo\n");
     }
+    pthread_exit(NULL);
 }
 
 
@@ -202,16 +204,13 @@ int main(int argc, char const *argv[])
             } 
         }
     }
-    printf("Zavri klientov\n");
+
+    
     client_zavri(&socket_server);
-    printf("Server Cakam na vlakna\n");
+    shutdown(socket_server.passiveSocket.socket, SHUT_RDWR);
     pthread_join(vlakienko[0], NULL);
-    printf("Vlakno prijmania ukoncene\n");
     pthread_join(vlakienko[1], NULL);
-    printf("Vlakno nacuvania ukoncene\n");
     pthread_join(vlakienko[2], NULL);
-    printf("Vlakno cistic ukoncene\n");
-    printf("Ukoncujem server!!\n");
     free(svet_vypis);
     
     
