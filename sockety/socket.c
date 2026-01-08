@@ -1,6 +1,6 @@
 
 #define _POSIX_C_SOURCE 199309L   
-#define RED "\033[31m"
+#define RED  "\033[31m"
 #define RESET "\033[0m"
 
 #include <sys/select.h>
@@ -373,7 +373,7 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
   // Zisťovanie adresy servera podľa mena, portu a uvedených informácií o type komunikácie
   int s = getaddrinfo(serverName, port, &hints, &server);
   if (s != 0) {
-    fprintf(RED stderr, "socket_client_init: zlyhanie funkcie getaddrinfo(%d): %s\n" RESET, s, gai_strerror(s));
+    fprintf( stderr, RED "socket_client_init: zlyhanie funkcie getaddrinfo(%d): %s\n" RESET, s, gai_strerror(s));
     exit(EXIT_FAILURE);
   }
   // Pozor! V určitých prípadoch môže existovať aj viac dostupných adries
