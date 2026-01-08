@@ -1,8 +1,7 @@
+#define _POSIX_C_SOURCE 199309L 
+
 #define RED "\033[31m"
 #define RESET "\033[0m"
-
-
-#define _POSIX_C_SOURCE 199309L 
 
 #include "../sockety/socket.h"
 #include <signal.h>
