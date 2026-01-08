@@ -1,8 +1,8 @@
 
-//TODO
-// treba potom zmenit na svet.h
-
-
+#define RED "\033[31m"
+#define GREEN "\033[31m"
+#define ORANGE "\033[38;5;9m"
+#define RESET "\033[0m"
 
 #include "../zdrojove_kody/UI.h"
 #include <pthread.h>
@@ -32,7 +32,7 @@ _Bool je_klient_hlavny(socket_client_t * socket) {
         //nie je to hlavny klient
         navrat = 0;
     } else {
-        perror("Chybne pripojenie na server!!");
+        perror(RED "Chybne pripojenie na server." RESET);
         exit(EXIT_FAILURE);
     }
     
@@ -54,7 +54,7 @@ void * vypisujObraz(void * arg) {
     int aktualVelkost = 0;
     buf = calloc(maxVelkost, sizeof(char));
     if (buf == NULL) {
-        perror("Chyba alokovania pamate!!!");
+        perror(RED "Chyba alokovania pamäte." RESET);
         exit(EXIT_FAILURE);
     }
     
@@ -84,7 +84,7 @@ void * vypisujObraz(void * arg) {
                         int novaVelkost = maxVelkost + 50;
                         char * tmp = realloc(buf, novaVelkost);
                         if (tmp == NULL) {
-                            perror("Chyba pri zvacseni pamate");
+                            perror(RED "Chyba pri zväčšení pamäte." RESET);
                             free(buf);
                             exit(EXIT_FAILURE);
                         }
@@ -96,7 +96,7 @@ void * vypisujObraz(void * arg) {
                     buf[aktualVelkost] = nacitaj[i];
                     aktualVelkost++;
                     //treba odstranit iba na test
-                // printf("%s", buf);
+                    // printf("%s", buf);
                     
                     if (buf[aktualVelkost - 1] == '\0') {
                         printf("%s", buf);
@@ -120,22 +120,22 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf("Zadaj ci sa svet ma nacitat zo suboru? (1-ano/0-nie)): \n");
+        printf(GREEN "Zadaj, či sa svet ma načítať zo súboru(1) alebo nie(0)?: " RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavanie textu");
+            perror("Chyba načitavania textu");
             exit(EXIT_FAILURE);
         }
         char * kontrola;
         int tmp_int;
         tmp_int = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
-            printf("To nie je cislo zadaj znova!!\n");
+            printf(RED "To nie je číslo, zadaj znova.\n" RESET);
         } else {
             if (tmp_int == 1 || tmp_int == 0) {
                 nacitaj_zo_suboru = (_Bool)tmp_int;
                 break;
             } else {
-                printf("Zle zadane cislo skus znova");
+                printf(ORANGE "Zle zadané číslo, skús znova." RESET);
             }
 
             
@@ -151,9 +151,9 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
         
             char buf [200];
             memset(buf, 0, sizeof(buf));
-            printf("Zadaj cestu k suboru: \n");
+            printf(GREEN "Zadaj cestu k súboru: " RESET);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                perror("Chyba nacitavanie textu");
+                perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
             buf[strcspn(buf, "\n")] = '\0';
@@ -223,15 +223,15 @@ int main(int argc, char const *argv[])
                     _Bool dobreZadal = 1;
                     while (dobreZadal) {
 
-                        printf("Napis pre kolko pouzivatelov ma byt urcena aplikacia:  \n");
+                        printf(GREEN "Napíš pre koľko používateľov má byť určená aplikácia:  " RESET);
                         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                            perror("Chyba nacitavania textu.");
+                            perror(RED "Chyba načitavania textu." RESET);
                             exit(EXIT_FAILURE);
                         }
                         
                         pocetPouzivatelov = strtol(buf, &kontrola, 10);
                         if (kontrola == buf) {
-                            printf("To nie je cislo zadaj znova!!\n");
+                            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
                         } else {
                             if (pocetPouzivatelov == 1) {
                             
@@ -252,7 +252,7 @@ int main(int argc, char const *argv[])
                     if (pid == 0) {
                         //treba zmenit na execl
                         execl("./server","server", NULL);
-                        perror("Chyba pri spusteni servera");
+                        perror(RED "Chyba pri spustení servera." RESET);
                         _exit(EXIT_FAILURE);
                     } else if (pid > 0) {
                         //tu bezi klient
@@ -285,13 +285,13 @@ int main(int argc, char const *argv[])
                             char * endptr;
                             
                             if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
-                                printf("Nezadal si cislo, skus znova\n");
+                                printf(ORANGE "Nezadal si číslo, skús znova.\n" RESET);
                                 break;
                             }
                             stlacene[strcspn(stlacene, "\n")] = '\0';
                             stlacenePismeno = strtol(stlacene, &endptr, 10);
                             if (stlacene == endptr) {
-                                printf("Nie je to cislo.\n");
+                                printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
                                 break;
                             }
                             if (!atomic_load(&socket_client.klien_bezi)) {
@@ -348,7 +348,7 @@ int main(int argc, char const *argv[])
                                     socket_write(&socket_client.activeSocket, buff , strlen(buff));
                                     pthread_mutex_unlock(&socket_client.mutex);
                                 default:
-                                    printf("Take cislo nie je uvedene.\n");
+                                    printf(ORANGE "Také číslo nie je uvedené.\n" RESET);
                                     break;
                             }
 
@@ -359,29 +359,26 @@ int main(int argc, char const *argv[])
                         socket_client_destroy(&socket_client);
                         int status;
                         waitpid(pid, &status,0);
-                        printf("Server skoncil so statusom %d\n", status);
+                        printf("\033[38;5;61m Server skončil so statusom %d.\n" RESET, status);
                         
                     } else {
-                        perror("Chyba vytvorenia procesu");
+                        perror(RED "Chyba vytvorenia procesu." RESET);
                         exit(EXIT_FAILURE);
                     }
                 }
                     break;
-
-
-
-
                     
+
                 break;
             case 2:
             //TODO prestavit ako 1 aby bolo dobre :)
                     { char buf[200];
                     //treba upravit vypinanie aby tam bola dalsia moznost
-                    printf("Napis adresu pripojenia : ");
+                    printf(GREEN "Napíš adresu pripojenia: " RESET);
                     char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
                     adresaPripojenia[strcspn(adresaPripojenia, "\n")] = '\0';
                     if (adresaPripojenia == NULL) {
-                        perror("Chyba nacitavanie textu");
+                        perror(RED "Chyba načitavania textu." RESET);
                         exit(EXIT_FAILURE);
                     } 
                     socket_client_t socket_client;
@@ -397,13 +394,13 @@ int main(int argc, char const *argv[])
                             char * endptr;
                             
                             if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
-                                printf("Nezadal si cislo, skus znova\n");
+                                printf(ORANGE "Nezadal si číslo, skús znova.\n" RESET);
                                 break;
                             }
                             stlacene[strcspn(stlacene, "\n")] = '\0';
                             stlacenePismeno = strtol(stlacene, &endptr, 10);
                             if (stlacene == endptr) {
-                                printf("Nie je to cislo.\n");
+                                printf(ORANGE "Nie je to číslo.\n" RESET);
                                 break;
                             }
                             if (!atomic_load(&socket_client.klien_bezi)) {
@@ -460,7 +457,7 @@ int main(int argc, char const *argv[])
                                     socket_write(&socket_client.activeSocket, buff , strlen(buff));
                                     pthread_mutex_unlock(&socket_client.mutex);
                                 default:
-                                    printf("Take cislo nie je uvedene.\n");
+                                    printf(ORANGE "Také číslo nie je uvedené.\n" RESET);
                                     break;
                             
                             }
@@ -481,9 +478,9 @@ int main(int argc, char const *argv[])
                 
                     char buf [200];
                     memset(buf, 0, sizeof(buf));
-                    printf("Zadaj cestu k suboru: \n");
+                    printf(GREEN "Zadaj cestu k súboru: \n" RESET);
                     if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                        perror("Chyba nacitavanie textu");
+                        perror(RED "Chyba načitavania textu." RESET);
                         exit(EXIT_FAILURE);
                     }
                     buf[strcspn(buf, "\n")] = '\0';
@@ -494,7 +491,7 @@ int main(int argc, char const *argv[])
                 if (pid1 == 0) {
                     //treba zmenit na execl
                     execl("./server","server", NULL);
-                    perror("Chyba pri spusteni servera");
+                    perror(RED "Chyba pri spustení servera." RESET);
                     _exit(EXIT_FAILURE);
                 } else if (pid1 > 0) {
                     //tu bezi klient
@@ -510,9 +507,6 @@ int main(int argc, char const *argv[])
                     pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
                     pthread_detach(vlakno);
                     while (atomic_load(&socket_client.klien_bezi)) {
-                        
-                        
-
 
                         //bude tu fgets s prevodom na cislo a kontrolou prevodu a bude tu switch podla cisla 
                         //je to reakcia na menu ktore lydka robiiiii stlacenie klavesnice 
@@ -524,12 +518,12 @@ int main(int argc, char const *argv[])
                             char * endptr;
                             
                             if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
-                                printf("Nezadal si cislo, skus znova\n");
+                                printf(ORANGE "Nezadal si číslo, skús znova.\n" RESET);
                                 break;
                             }
                             stlacenePismeno = strtol(stlacene, &endptr, 10);
                             if (stlacene == endptr) {
-                                printf("Nie je to cislo.\n");
+                                printf(ORANGE "Nie je to číslo.\n" RESET);
                                 break;
                             }
                             
@@ -561,7 +555,7 @@ int main(int argc, char const *argv[])
                                     socket_write(&socket_client.activeSocket, buff , sizeof(buff));
                                     break;
                                 default:
-                                    printf("Take cislo nie je uvedene.\n");
+                                    printf(ORANGE "Take číslo nie je uvedené.\n" RESET);
                                     break;
                             }
 
@@ -569,7 +563,7 @@ int main(int argc, char const *argv[])
                     socket_client_destroy(&socket_client);
                     int status;
                     waitpid(pid1, &status,0);
-                    printf("Server skoncil so statusom %d", status);
+                    printf("\033[38;5;61m Server skoncil so statusom %d" RESET, status);
                     sleep(1);
                 }
             }

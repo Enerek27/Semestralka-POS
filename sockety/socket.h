@@ -39,6 +39,8 @@ typedef struct klient_read {
     atomic_bool vypni_server;
     atomic_bool prepni_mod;
 }klient_read_t ;
+
+
 // Štruktúra obsahujúca informácie pre prácu servera
 typedef struct SocketServer {
     //toto je prijimaci socket na pripajanie
@@ -54,12 +56,7 @@ typedef struct SocketServer {
     srv_inf_t server_info;
     int hlavny_klient;
 } socket_server_t;
-void client_zavri(socket_server_t * server);
-_Bool socket_accept(socket_data_t * this, const socket_data_t * passiveSocket, struct sockaddr * clientAddress, socklen_t * clientAddressLength, socket_server_t * server );
-// Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre server
-void socket_server_init(socket_server_t * this, int port);
-void socket_server_accept_connection(socket_server_t * this);
-void socket_server_destroy(socket_server_t * this);
+
 // Štruktúra obsahujúca informácie pre prácu klienta
 typedef struct SocketClient {
     socket_data_t activeSocket;
@@ -68,6 +65,17 @@ typedef struct SocketClient {
     atomic_bool klien_bezi;
     pthread_mutex_t mutex;
 } socket_client_t;
+
+
+
+void client_zavri(socket_server_t * server);
+_Bool socket_accept(socket_data_t * this, const socket_data_t * passiveSocket, struct sockaddr * clientAddress, socklen_t * clientAddressLength, socket_server_t * server );
+// Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre server
+void socket_server_init(socket_server_t * this, int port);
+void socket_server_accept_connection(socket_server_t * this);
+void socket_server_destroy(socket_server_t * this);
+
+
 // Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre klienta
 void socket_client_init(socket_client_t * this, char * serverName, char * port);
 void socket_client_destroy(socket_client_t * this);

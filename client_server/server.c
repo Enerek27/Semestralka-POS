@@ -1,7 +1,8 @@
+#define RED "\033[31m"
+#define RESET "\033[0m"
+
 
 #include "../sockety/socket.h"
-
-
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdio.h>
@@ -133,7 +134,7 @@ svt_t * server_info_subor(socket_server_t * server) {
     } else if (buf[0] - '0' == 5) {
         return NULL;
     } else {
-        perror("Chyba komunikacie server klient");
+        perror(RED "Chyba komunikácie server-klient." RESET);
         exit(EXIT_FAILURE);
     }
 
@@ -146,17 +147,13 @@ int main(int argc, char const *argv[])
     srand(time(NULL)); 
     socket_server_t socket_server;
     socket_server_init(&socket_server, 2000);
-    
     socket_server_accept_connection(&socket_server);
-    
     svt_t * skuska = server_info_subor(&socket_server);
     svt_t * svet;
     
     if (skuska == NULL) {
         svet = nastav_server(&socket_server);
         
-        
-       
         svt_vp_t  vypisovac;
         
         vypisovac.server = &socket_server;
@@ -185,7 +182,7 @@ int main(int argc, char const *argv[])
     svt_brd_t * svet_vypis;
     svet_vypis = calloc(1, sizeof(svt_brd_t));
     if (svet_vypis == NULL) {
-        perror("Chyba vytvarania simulacie pri alokovani pamate");
+        perror(RED "Chyba vytvárania simulácie pri alokovaní pamäte." RESET);
         exit(EXIT_FAILURE);
     }
     svet_vypis->svet = svet;

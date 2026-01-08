@@ -1,3 +1,7 @@
+#define RED "\033[31m"
+#define ORANGE "\033[38;5;9m"
+#define RESET "\033[0m"
+
 #include "svet.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -124,7 +128,7 @@ void svet_uloz_do_suboru(svt_t * svet)
     FILE * subor = fopen(svet->cesta_k_suboru, "w");
 
     if(!subor){
-        perror("Chyba:  subor sa zrejme neotvoril. \n ");
+        perror(RED "Chyba:  subor sa zrejme neotvoril. \n " RESET);
         fclose(subor);
         return;
     }
@@ -178,7 +182,7 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
     FILE* subor = fopen(cesta_k_suboru, "r");
 
     if (subor == NULL) {
-        printf("Subor sa nepodarilo najst");
+        printf(ORANGE "Súbor sa nepodarilo nájsť." RESET);
         return NULL;
     }
  
@@ -198,9 +202,6 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
 
         //nacitam pole_pravepodobnosti  -float
         float  pole_pravdepodobnosti[ciselkoHranicaX][ciselkoHranicaY];
-        
-        
-
         for (int i = 0; i < ciselkoHranicaY; i++)
         {
             for (int j = 0; j < ciselkoHranicaX; j++)
@@ -211,9 +212,6 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
 
         //nacitam priemer_krok  -float
         float  pole_priemerKrok[ciselkoHranicaX][ciselkoHranicaY];
-        
-        
-
         for (int i = 0; i < ciselkoHranicaY; i++)
         {
             for (int j = 0; j < ciselkoHranicaX; j++)
@@ -224,18 +222,14 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
 
 
         //nacitam struktura pravdepodobnosti
-
         prvd_t pravedpodobnosti;
-
         fscanf(subor, "%f;", &pravedpodobnosti.hore);
         fscanf(subor, "%f;", &pravedpodobnosti.dole);
         fscanf(subor, "%f;", &pravedpodobnosti.vpravo);
         fscanf(subor, "%f;", &pravedpodobnosti.vlavo);
 
-
         //nacitam pole  - char
         svt_t * svetNacitany = svet_init_normal(ciselkoHranicaX, ciselkoHranicaY, pravedpodobnosti, pocetKrokov, svetOriginalReplikacii, cesta_k_suboru);
-
 
         char znak;
         char oddelovac;
@@ -261,16 +255,10 @@ svt_t * svet_nacitaj_zo_suboru(char *cesta_k_suboru)
         }
 
         
-        
         posun_chodca_na(svetNacitany, sur_x_chodec, sur_y_chodec);
-
-
-
 
         fclose(subor);
         return svetNacitany;
-        
-
 }
 
 
@@ -310,7 +298,6 @@ svt_t * svet_init_prekazky(int hranica_x, int hranica_y,  int sanca_na_prekazku,
     svet->pocet_krokov_K_origo = pocet_krokov_K;
     svet->pole[hranica_x - 1][hranica_y - 1] = 1;
     do {
-
 
 
         for (int i = 0; i < hranica_x; i++) {
@@ -457,9 +444,7 @@ smer_t daj_nahodny_smer_pre_chodca(svt_t * svet) {
                 // ide vlavo
                 return Vlavo;
             }
-        } 
-    
-
+    } 
 }
 
 
