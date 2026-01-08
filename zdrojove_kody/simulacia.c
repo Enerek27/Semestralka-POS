@@ -1,8 +1,6 @@
+
 #include "simulacia.h"
 #include <pthread.h>
-
-
-
 
 void   generuj_pravdepodobnost(svt_t * svet) {
     
@@ -11,29 +9,19 @@ void   generuj_pravdepodobnost(svt_t * svet) {
         for (int j = 0; j < svet->hranica_y; j++) {
             if (svet->pole[i][j] != 2) {
                 svet->pole_pravdepodobnosti[i][j] = simuluj_k_stredu_od_policka_statistika(i, j, svet->pocet_krokov_K, svet) * 100;
-                
-            }
-            
+            }  
         }
-    
     }
     return;
 }
 
 
 float simuluj_k_stredu_od_policka_statistika(int sur_x, int sur_y, int pocet_pokusov_K, svt_t * svet) {
-    
     int pocet_opakovanii_pre_policko = 1000;
-
     int uspesne_pokusy = 0;
-
-    
     svt_t * kopia_sveta = svet_copy(svet);
     posun_chodca_na(kopia_sveta,  sur_x, sur_y);
     
-    
-    
-
     for (int i = 0; i < pocet_opakovanii_pre_policko; i++) {
         for (int j = 0; j < pocet_pokusov_K; j++) {
             
@@ -52,10 +40,7 @@ float simuluj_k_stredu_od_policka_statistika(int sur_x, int sur_y, int pocet_pok
         posun_chodca_na(kopia_sveta,  sur_x, sur_y);
     }
     svet_destroy(kopia_sveta);
-
     return (float)uspesne_pokusy / (float)pocet_opakovanii_pre_policko;
-    
-
 }
 
 

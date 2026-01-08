@@ -1,6 +1,7 @@
 
 #define _POSIX_C_SOURCE 199309L   
-
+#define RED "\033[31m"
+#define RESET "\033[0m"
 
 #include <sys/select.h>
 #include "socket.h"
@@ -147,15 +148,11 @@ void * nacuvajklientovi(void * arg) {
   pthread_exit(NULL);
 }
 
-
-
-
-
 // Funkcia na inicializáciu soketu, pričom je potrebné uviesť komunikačnú doménu, typ komunikácie a protokol
 void socket_init(socket_data_t * this, int domain, int type, int protocol) {
   this->socket = socket(domain, type, protocol);
   if (this->socket < 0) {
-    perror("socket_init: zlyhanie vytvorenia soketu!");
+    perror(RED "socket_init: zlyhanie vytvorenia soketu." RESET);
     exit(EXIT_FAILURE);
   }
 }
@@ -171,14 +168,14 @@ _Bool socket_is_valid(socket_data_t * this) {
 // Funkcia, ktorá obaľuje funkciu bind, pričom je potrebné uviesť aj adresu servera a veľkosť adresy servera
 void socket_bind(socket_data_t * this, const struct sockaddr * severAddress, socklen_t severAddressLength) {
   if (bind(this->socket, severAddress, severAddressLength) < 0) {
-    perror("socket_bind: zlyhanie funkcie bind!");
+    perror(RED"socket_bind: zlyhanie funkcie bind." RESET);
     exit(EXIT_FAILURE);
   }
 }
 // Funkcia, ktorá obaľuje funkciu listen, pričom je potrebné uviesť aj hodnotu maximálneho počtu čakajúcich pripojení
 void socket_listen(socket_data_t * this, int backlog) {
   if (listen(this->socket, backlog) < 0) {
-    perror("socket_listen: zlyhanie funkcie listen!");
+    perror(RED "socket_listen: zlyhanie funkcie listen." RESET);
     exit(EXIT_FAILURE);
   }
 }
@@ -189,7 +186,7 @@ _Bool socket_accept(socket_data_t * this, const socket_data_t * passiveSocket, s
     if (!atomic_load(&server->server_bezi)) {
       return 1;
     }
-    perror("socket_accept: zlyhanie funkcie accept!");
+    perror(RED "socket_accept: zlyhanie funkcie accept." RESET);
     exit(EXIT_FAILURE);
   }
   return 0;
@@ -199,7 +196,7 @@ _Bool socket_connect(socket_data_t * this, const struct sockaddr * serverAddress
   int result = connect(this->socket, serverAddress, serverAddressLength);
   printf("%d\n", result);
   if (result < 0) {
-    perror("socket_connect: zlyhanie funkcie connect!");
+    perror(RED "socket_connect: zlyhanie funkcie connect." RESET);
   }
   return result == 0;
 }
@@ -207,7 +204,7 @@ _Bool socket_connect(socket_data_t * this, const struct sockaddr * serverAddress
 void socket_write(socket_data_t * this, const char * buffer, size_t length) {
   int n = write(this->socket, buffer, length);
   if (n < 0) {
-    perror("socket_write: zlyhanie zapisu do soketu!");
+    perror(RED "socket_write: zlyhanie zápisu do soketu." RESET);
     exit(EXIT_FAILURE);
   }
 }
@@ -242,7 +239,7 @@ void socket_server_init(socket_server_t * this, int port) {
     this->klienti[i] = calloc(1, sizeof(klient_read_t));
   }
   if (this->klienti == NULL) {
-    perror("Zle inicializovana pamat pre klientov!");
+    perror(RED "Zle inicializovaná pamäť pre klientov." RESET);
     exit(EXIT_FAILURE);
   }
   for (int i = 0; i < this->maxPocetKlientov; i++) {
@@ -283,7 +280,7 @@ void socket_server_accept_connection(socket_server_t * this) {
     int naviac = this->maxPocetKlientov + 5;
     klient_read_t ** tmp = realloc(this->klienti, sizeof(klient_read_t*) * naviac);
     if (tmp == NULL) {
-      perror("Chyba zvacsania pamate!");
+      perror(RED "Chyba zväčšenia pamäte." RESET);
       exit(EXIT_FAILURE);
     }
     this->klienti = tmp;
@@ -376,7 +373,7 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
   // Zisťovanie adresy servera podľa mena, portu a uvedených informácií o type komunikácie
   int s = getaddrinfo(serverName, port, &hints, &server);
   if (s != 0) {
-    fprintf(stderr, "socket_client_init: zlyhanie funkcie getaddrinfo(%d): %s\n", s, gai_strerror(s));
+    fprintf(RED stderr, "socket_client_init: zlyhanie funkcie getaddrinfo(%d): %s\n" RESET, s, gai_strerror(s));
     exit(EXIT_FAILURE);
   }
   // Pozor! V určitých prípadoch môže existovať aj viac dostupných adries
@@ -389,10 +386,10 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
       continue;
     }
     // Pripojenie na server
-    printf("Klient sa pripaja na server!\n");
+    printf("Klient sa pripaja na server.\n");
     if (!socket_connect(&this->activeSocket, rp->ai_addr, rp->ai_addrlen)) {
       // Ak zlyhalo, tak sa zatvorí soket a pokračuje sa ďalšou adresou
-      printf("Zlyhanie pripojenia!\n");
+      printf("Zlyhanie pripojenia.\n");
       socket_destroy(&this->activeSocket);
     } else {
       // Ak sa podarilo pripojiť, uvoľní sa získaná štruktúra z funkcie getaddrinfo a nastaví sa pomocná premenná na úspešné pripojenie
@@ -405,7 +402,7 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
     }
   }
   // Pokiaľ po prejdení všetkých adries nedošlo k pripojeniu, tak vypíš chybu a skonči
-  fprintf(stderr, "socket_client_init: zlyhalo pripojenie na server!\n");
+  fprintf(stderr, RED "socket_client_init: zlyhalo pripojenie na server.\n" RESET);
   freeaddrinfo(server);
   exit(EXIT_FAILURE);
 }

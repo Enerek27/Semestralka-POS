@@ -1,5 +1,13 @@
 
 #define _POSIX_C_SOURCE 199309L   
+
+#define RED "\033[31m"
+#define MAGENTA "\033[35m"
+#define GREEN "\033[31m"
+#define ORANGE "\033[38;5;9m"
+#define BLUE "\033[34m"
+#define RESET "\033[0m"
+
 #include "UI.h"
 
 
@@ -19,18 +27,18 @@ char * vrat_menu_klient() {
     buff = calloc(maxPocetZnakov, sizeof(char));
     if (buff == NULL)
    {
-    perror("Chyba pamate v inicializacii, vo vykresleni sveta.");
+    perror("Chyba pamäte v inicializácii, vo vykresleni sveta.");
     exit(EXIT_FAILURE);
    }
 
    int len = 0;
    
-   len += snprintf(buff + len, maxPocetZnakov - len, "MENU:\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "1. VYPNI SIMULACIU\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "2. ZMEN MOD SIMULACIE\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "3. ZOBRAZ STATISTIKU\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "4. ZOBRAZ KROKY\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, "5. ODPOJ SA OD SIMULACIE\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "MENU:\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "1. VYPNI SIMULACIU\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "2. ZMEN MOD SIMULACIE\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "3. ZOBRAZ STATISTIKU\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "4. ZOBRAZ KROKY\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "5. ODPOJ SA OD SIMULACIE\n" RESET);
    
    return buff;
 }
@@ -44,7 +52,7 @@ char * vycisti_obrazovku() {
    buff = calloc(maxPocetZnakov, sizeof(char));
    if (buff == NULL)
    {
-    perror("Chyba pamate v inicializacii, vo vykresleni sveta.");
+    perror(RED "Chyba pamäte v inicializácii, vo vykresleni sveta." RESET);
     exit(EXIT_FAILURE);
    }
 
@@ -56,7 +64,7 @@ char * vycisti_obrazovku() {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii  realokacia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -75,7 +83,7 @@ char * vycisti_obrazovku() {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii  realokacia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -99,7 +107,7 @@ char * vykresli_svet(svt_t * svet) {
 
    if (buff == NULL)
    {
-    perror("Chyba pamate v inicializacii, vo vykresleni sveta.");
+    perror(RED "Chyba pamäte v inicializácii, vo vykresleni sveta." RESET);
     exit(EXIT_FAILURE);
    }
 
@@ -112,7 +120,7 @@ char * vykresli_svet(svt_t * svet) {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii  realokácia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -132,7 +140,7 @@ char * vykresli_svet(svt_t * svet) {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii  realokácia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -149,7 +157,7 @@ char * vykresli_svet(svt_t * svet) {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii  realokácia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -197,7 +205,7 @@ char * vykresli_svet(svt_t * svet) {
                 char * zatial1 = realloc(buff, novyMax * sizeof(char));
                 if (zatial1 == NULL)
                 {
-                    perror("Chyba pamate v inicializacii realokacia.");
+                    perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                     exit(EXIT_FAILURE);
                 }
                 buff = zatial1;
@@ -215,7 +223,7 @@ char * vykresli_svet(svt_t * svet) {
                 char * zatial1 = realloc(buff, novyMax * sizeof(char));
                 if (zatial1 == NULL)
                 {
-                    perror("Chyba pamate v inicializacii realokacia.");
+                    perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                     exit(EXIT_FAILURE);
                 }
                 buff = zatial1;
@@ -237,7 +245,7 @@ char * vykresli_svet(svt_t * svet) {
                 char * zatial1 = realloc(buff, novyMax * sizeof(char));
                 if (zatial1 == NULL)
                 {
-                    perror("Chyba pamate v inicializacii  realokacia.");
+                    perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                     exit(EXIT_FAILURE);
                 }
                 buff = zatial1;
@@ -263,7 +271,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
 
    if (buff == NULL)
    {
-    perror("Chyba pamate v inicializacii, vo vykresleni sveta.");
+    perror(RED "Chyba pamäte v inicializácii, vo vykresleni sveta." RESET);
     exit(EXIT_FAILURE);
    }
 
@@ -276,7 +284,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii  realokácia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -296,7 +304,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii  realokácia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -320,7 +328,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
-                            perror("Chyba pamate v inicializacii  realokacia.");
+                            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                             exit(EXIT_FAILURE);
                         }
                         buff = zatial1;
@@ -338,7 +346,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
-                            perror("Chyba pamate v inicializacii  realokacia.");
+                            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                             exit(EXIT_FAILURE);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
                         }
                         buff = zatial1;
@@ -356,7 +364,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
-                            perror("Chyba pamate v inicializacii  realokacia.");
+                            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                             exit(EXIT_FAILURE);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
                         }
                         buff = zatial1;
@@ -374,7 +382,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
-                            perror("Chyba pamate v inicializacii  realokacia.");
+                            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                             exit(EXIT_FAILURE);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
                         }
                         buff = zatial1;
@@ -394,7 +402,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
         char * zatial1 = realloc(buff, novyMax * sizeof(char));
         if (zatial1 == NULL)
         {
-            perror("Chyba pamate v inicializacii  realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buff = zatial1;
@@ -416,7 +424,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
 
    if (buff == NULL)
    {
-    perror("Chyba pamate v inicializacii, vo vykresleni sveta.");
+    perror(RED "Chyba pamäte v inicializácii, vo vykresleí sveta." RESET);
     exit(EXIT_FAILURE);
    }
 
@@ -429,7 +437,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -450,7 +458,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
     char * zatial1 = realloc(buff, novyMax * sizeof(char));
     if (zatial1 == NULL)
     {
-        perror("Chyba pamate v inicializacii  realokacia.");
+        perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
         exit(EXIT_FAILURE);
     }
     buff = zatial1;
@@ -474,7 +482,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
-                            perror("Chyba pamate v inicializacii  realokacia.");
+                            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                             exit(EXIT_FAILURE);
                         }
                         buff = zatial1;
@@ -494,7 +502,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
-                            perror("Chyba pamate v inicializacii  realokacia.");
+                            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                             exit(EXIT_FAILURE);
                         }
                         buff = zatial1;
@@ -513,7 +521,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
-                            perror("Chyba pamate v inicializacii  realokacia.");
+                            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                             exit(EXIT_FAILURE);
                         }
                         buff = zatial1;
@@ -531,7 +539,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
                         char * zatial1 = realloc(buff, novyMax * sizeof(char));
                         if (zatial1 == NULL)
                         {
-                            perror("Chyba pamate v inicializacii  realokacia.");
+                            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
                             exit(EXIT_FAILURE);
                         }
                         buff = zatial1;
@@ -551,7 +559,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
         char * zatial1 = realloc(buff, novyMax * sizeof(char));
         if (zatial1 == NULL)
         {
-            perror("Chyba pamate v inicializacii  realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buff = zatial1;
@@ -615,7 +623,7 @@ void  posli_vsetkym_svet(svt_vp_t * data) {
     socket_data_t * posielaj;
     posielaj = calloc(pocet_klientov, sizeof(socket_data_t));
     if (posielaj == NULL) {
-        perror("Chyba alokovania pamate pre vypis.");
+        perror(RED "Chyba alokovania pamäte pre výpis." RESET);
         exit(EXIT_FAILURE);
     }
     //treba dorobit
@@ -676,7 +684,7 @@ void  posli_vsetkym_stat(svt_vp_t * data) {
     klient_read_t * klienti;
     klienti = calloc(pocet_klientov, sizeof(klient_read_t));
     if (klienti == NULL) {
-        perror("Chyba alokovania pamate pre vypis");
+        perror(RED "Chyba alokovania pamäte pre vypis." RESET);
         exit(EXIT_FAILURE);
     }
     pthread_mutex_lock(&data->server->mutex);
@@ -740,7 +748,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
     int max = 100;
     buf = calloc(max, sizeof(char));
     if (buf == NULL) {
-        perror("Chyba pamate v inicializacii.");
+        perror(RED "Chyba pamäte v inicializácii." RESET);
         exit(EXIT_FAILURE);
     }
     int len = snprintf(tmp, sizeof(tmp), "%d;",data->rozmer_x);
@@ -748,7 +756,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -762,7 +770,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba paäate v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -776,7 +784,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -801,7 +809,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED"Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -821,7 +829,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -835,7 +843,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -849,7 +857,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -863,7 +871,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -877,7 +885,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -893,7 +901,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror("Chyba pamate v inicializacii realokacia.");
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
@@ -933,15 +941,15 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf("Zadaj sirku pola(rozmer_x): \n");
+        printf(GREEN "Zadaj šírku poľa(rozmer x): " RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavania textu.");
+            perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
         char * kontrola;
         rozmer_x = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
-            printf("To nie je cislo zadaj znova!!\n");
+            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
         } else {
             break;
         }
@@ -952,15 +960,15 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf("Zadaj vysku pola(rozmer_y): \n");
+        printf(GREEN "Zadaj výšku po+a(rozmer y): " RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavania textu.");
+            perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
         char * kontrola;
         rozmer_y = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
-            printf("To nie je cislo zadaj znova!!\n");
+            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
         } else {
             break;
         }
@@ -971,9 +979,9 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf("Zadaj pocet replikacii simulacie: \n");
+        printf(GREEN "Zadaj počet replikácii simulácie: " RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavania textu.");
+            perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
         char * kontrola;
@@ -981,7 +989,7 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         
         
         if (kontrola == buf) {
-            printf("To nie je cislo zadaj znova!!\n");
+            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
         } else {
             break;
         }
@@ -991,22 +999,22 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
 
     while (1) {
-        printf("Zadaj pravdepodobnosti v tvare s desatinou bodkou.\n");
-        printf("Ich súčet musí byť 1.\n");
+        printf(GREEN "Zadaj pravdepodobnosti v tvare s desatinnou bodkou.\n");
+        printf( "Ich súčet musí byť 1.\n" RESET);
     
         while (1) {
         
             char buf [200];
             memset(buf, 0, sizeof(buf));
-            printf("Zadaj pravdepodobnost pohybu smer hore: \n");
+            printf(GREEN "Zadaj pravdepodobnosť pohybu -> smer hore: " RESET);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                perror("Chyba nacitavania textu.");
+                perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
             char * kontrola;
             pravdepodobnosti.hore = strtof(buf, &kontrola);
             if (kontrola == buf) {
-                printf("To nie je cislo zadaj znova!!\n");
+                printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
             } else {
                 break;
             }
@@ -1016,15 +1024,15 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         
             char buf [200];
             memset(buf, 0, sizeof(buf));
-            printf("Zadaj pravdepodobnost pohybu smer dole: \n");
+            printf(GREEN "Zadaj pravdepodobnosť pohybu -> smer dole: " RESET);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                perror("Chyba nacitavania textu.");
+                perror(RED "Chyba načítavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
             char * kontrola;
             pravdepodobnosti.dole = strtof(buf, &kontrola);
             if (kontrola == buf) {
-                printf("To nie je cislo zadaj znova!!\n");
+                printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
             } else {
                 break;
             }
@@ -1034,15 +1042,15 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         
             char buf [200];
             memset(buf, 0, sizeof(buf));
-            printf("Zadaj pravdepodobnost pohybu smer vpravo: \n");
+            printf(GREEN"Zadaj pravdepodobnosť pohybu -> smer vpravo: " RESET);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                perror("Chyba nacitavania textu.");
+                perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
             char * kontrola;
             pravdepodobnosti.vpravo = strtof(buf, &kontrola);
             if (kontrola == buf) {
-                printf("To nie je cislo zadaj znova!!\n");
+                printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
             } else {
                 break;
             }
@@ -1052,15 +1060,15 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         
             char buf [200];
             memset(buf, 0, sizeof(buf));
-            printf("Zadaj pravdepodobnost pohybu smer vlavo: \n");
+            printf(GREEN "Zadaj pravdepodobnosť pohybu -> smer vlavo: \n" RESET);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
-                perror("Chyba nacitavania textu.");
+                perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
             char * kontrola;
             pravdepodobnosti.vlavo = strtof(buf, &kontrola);
             if (kontrola == buf) {
-                printf("To nie je cislo zadaj znova!!\n");
+                printf(ORANGE "To nie je číslo, zadaj znova.\n"RESET);
             } else {
                 break;
             }
@@ -1074,7 +1082,7 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         if (sucet == 1.0) {
             break;
         } else {
-            printf("Sucet nie je 1 !!!!\n");
+            printf(ORANGE"Sucet nie je 1.\n" RESET);
         }
     }
 
@@ -1083,15 +1091,15 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf("Zadaj hodnotu K maximalny pocet krokov chodca: \n");
+        printf(GREEN "Zadaj hodnotu K -> maximálny počet krokov chodca: " RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavania textu.");
+            perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
         char * kontrola;
         pocet_krokov_K = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
-            printf("To nie je cislo zadaj znova!!\n");
+            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
         } else {
             break;
         }
@@ -1101,36 +1109,32 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf("Zadaj ci sa ma byt svet s prekazkami(1) alebo bez(0) (1/0): \n");
+        printf(GREEN "Zadaj či chceš svet s prekážkami(1) alebo bez nich(0): " RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavania textu.");
+            perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
         char * kontrola;
         int tmp_int;
         tmp_int = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
-            printf("To nie je cislo zadaj znova!!\n");
+            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
         } else {
             if (tmp_int == 1 || tmp_int == 0) {
                 svet_s_prekazkami = (_Bool)tmp_int;
                 break;
             } else {
-                printf("Zle zadane cislo skus znova.");
+                printf(ORANGE "Zle zadané číslo, skús znova." RESET);
             }
-
-            
         }
     }
 
     while (1) {
-    
-    
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf("Zadaj cestu k suboru na ulozenie: \n");
+        printf(GREEN "Zadaj cestu k súboru na uloženie(ukončená musi byť '.txt'): \n" RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavania textu.");
+            perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
         buf[strcspn(buf, "\n")] = '\0';
@@ -1155,20 +1159,20 @@ void spusti_initmenu_klient(socket_client_t * socket) {
 int hlavne_menu_klient(){
     while (1) {
     
-        printf("Vitaj v aplikacii menom Nahodna pochodzka.\n K dispozicii mas tento manual, v ktorom si mozes vybrat priebeh pochodzky.\n\n");
-        printf("MENU:\n 1. NOVA SIMULACIA \n 2. PRIPOJENIE K SIMULACII\n 3. OPATOVNE SPUSTENIE SIMULACIE\n 4. KONIEC\n");
-        printf("Tvoja volba je: ");
+        printf("\033[38;5;128m Vitaj v aplikácii menom Náhodna pochôdzka.\n K dispozícii máš tento manuál, v ktorom si môžeš vybrať priebeh pochôdzky.\n\n" RESET);
+        printf("\033[38;5;49m MENU:\n 1. NOVÁ SIMULÁCIA \n 2. PRIPOJENIE K SIMULÁCII\n 3. OPATOVNÉ SPUSTENIE SIMULÁCIE\n 4. KONIEC\n" RESET);
+        printf(GREEN" Tvoja voľba je: " RESET);
         int moznost;
         char buf [200];
         memset(buf, 0, sizeof(buf));
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba nacitavania textu.");
+            perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
         char * kontrola;    //ak nieco ostane v nej, znamena, ze zachytilo aspon nejake cislo
         moznost = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
-            printf("To nie je cislo zadaj znova!!\n");
+            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
         } else if(moznost == 1) {
             return 1;
         } else if (moznost == 2) {

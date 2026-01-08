@@ -1,7 +1,4 @@
 
-
-
-
 typedef struct Chodec {
   int x;
   int y;
