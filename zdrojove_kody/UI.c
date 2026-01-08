@@ -3,7 +3,7 @@
 
 #define RED "\033[31m"
 #define MAGENTA "\033[35m"
-#define GREEN "\033[31m"
+#define GREEN "\033[32m"
 #define ORANGE "\033[38;5;9m"
 #define BLUE "\033[34m"
 #define RESET "\033[0m"
@@ -23,7 +23,7 @@
 
 char * vrat_menu_klient() {
     char * buff;
-    int maxPocetZnakov = 150;
+    int maxPocetZnakov = 250;
     buff = calloc(maxPocetZnakov, sizeof(char));
     if (buff == NULL)
    {
@@ -132,7 +132,7 @@ char * vykresli_svet(svt_t * svet) {
 
 
    
-   len = snprintf(zatial, sizeof(zatial), "\033[32m%s: %d/%d\033[0m\n","Pocet replikacii", svet->original_replikacii, svet->pocet_replikacii );
+   len = snprintf(zatial, sizeof(zatial), "\033[90m%s: %d/ \033[75m %d\033[0m\n","Pocet replikacii", svet->original_replikacii, svet->pocet_replikacii );
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -149,7 +149,7 @@ char * vykresli_svet(svt_t * svet) {
    memcpy(buff + aktualPocetZnakov, zatial, len);
    aktualPocetZnakov += len;
 
-   len = snprintf(zatial, sizeof(zatial), "\033[32m%s: %d/%d\033[0m\n","Pocet krokov", svet->pocet_krokov_K_origo, svet->pocet_krokov_K);
+   len = snprintf(zatial, sizeof(zatial), "\033[93m%s: %d/%d\033[0m\n","Pocet krokov", svet->pocet_krokov_K_origo, svet->pocet_krokov_K);
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -241,7 +241,7 @@ char * vykresli_svet(svt_t * svet) {
 
             if (aktualPocetZnakov + len >= maxPocetZnakov)
             {
-                int novyMax = maxPocetZnakov + 150;
+                int novyMax = maxPocetZnakov + 200;
                 char * zatial1 = realloc(buff, novyMax * sizeof(char));
                 if (zatial1 == NULL)
                 {
@@ -1159,8 +1159,8 @@ void spusti_initmenu_klient(socket_client_t * socket) {
 int hlavne_menu_klient(){
     while (1) {
     
-        printf("\033[38;5;128m Vitaj v aplikácii menom Náhodna pochôdzka.\n K dispozícii máš tento manuál, v ktorom si môžeš vybrať priebeh pochôdzky.\n\n" RESET);
-        printf("\033[38;5;49m MENU:\n 1. NOVÁ SIMULÁCIA \n 2. PRIPOJENIE K SIMULÁCII\n 3. OPATOVNÉ SPUSTENIE SIMULÁCIE\n 4. KONIEC\n" RESET);
+        printf("\n \033[38;5;128m Vitaj v aplikácii menom Náhodna pochôdzka.\n K dispozícii máš tento manuál, v ktorom si môžeš vybrať priebeh pochôdzky.\n\n" RESET);
+        printf("\033[38;5;172m MENU:\n 1. NOVÁ SIMULÁCIA \n 2. PRIPOJENIE K SIMULÁCII\n 3. OPATOVNÉ SPUSTENIE SIMULÁCIE\n 4. KONIEC\n" RESET);
         printf(GREEN" Tvoja voľba je: " RESET);
         int moznost;
         char buf [200];
