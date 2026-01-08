@@ -14,7 +14,9 @@ client_server/CMakeFiles/server.dir/server.c.o: \
  /usr/include/bits/types/struct_timespec.h /usr/include/bits/endian.h \
  /usr/include/bits/endianness.h /usr/include/time.h \
  /usr/include/bits/time.h /usr/include/bits/types/clock_t.h \
- /usr/include/bits/types/struct_tm.h /usr/include/bits/sched.h \
+ /usr/include/bits/types/struct_tm.h /usr/include/bits/types/clockid_t.h \
+ /usr/include/bits/types/timer_t.h \
+ /usr/include/bits/types/struct_itimerspec.h /usr/include/bits/sched.h \
  /usr/include/bits/types/struct_sched_param.h /usr/include/bits/cpu-set.h \
  /usr/include/bits/pthreadtypes.h /usr/include/bits/thread-shared-types.h \
  /usr/include/bits/pthreadtypes-arch.h \
@@ -23,11 +25,23 @@ client_server/CMakeFiles/server.dir/server.c.o: \
  /usr/include/bits/types/__sigset_t.h \
  /usr/include/bits/types/struct___jmp_buf_tag.h /usr/include/sys/socket.h \
  /usr/include/bits/types/struct_iovec.h /usr/include/bits/socket.h \
- /usr/include/sys/types.h /usr/include/bits/types/clockid_t.h \
- /usr/include/bits/types/timer_t.h /usr/include/bits/stdint-intn.h \
+ /usr/include/sys/types.h /usr/include/bits/stdint-intn.h \
  /usr/include/bits/socket_type.h /usr/include/bits/sockaddr.h \
  /usr/include/bits/socket-constants.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdatomic.h \
+ /usr/include/signal.h /usr/include/bits/signum-generic.h \
+ /usr/include/bits/signum-arch.h /usr/include/bits/types/sig_atomic_t.h \
+ /usr/include/bits/types/sigset_t.h /usr/include/bits/types/siginfo_t.h \
+ /usr/include/bits/types/__sigval_t.h /usr/include/bits/siginfo-arch.h \
+ /usr/include/bits/siginfo-consts.h /usr/include/bits/types/sigevent_t.h \
+ /usr/include/bits/sigevent-consts.h /usr/include/bits/sigaction.h \
+ /usr/include/bits/signal_ext.h /usr/include/sys/prctl.h \
+ /usr/include/linux/prctl.h /usr/include/linux/types.h \
+ /usr/include/asm/types.h /usr/include/asm-generic/types.h \
+ /usr/include/asm-generic/int-ll64.h /usr/include/asm/bitsperlong.h \
+ /usr/include/asm-generic/bitsperlong.h /usr/include/linux/posix_types.h \
+ /usr/include/linux/stddef.h /usr/include/asm/posix_types.h \
+ /usr/include/asm/posix_types_64.h /usr/include/asm-generic/posix_types.h \
  /usr/include/stdio.h /usr/include/bits/libc-header-start.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdarg.h \
  /usr/include/bits/types/__fpos_t.h /usr/include/bits/types/__mbstate_t.h \
@@ -37,7 +51,8 @@ client_server/CMakeFiles/server.dir/server.c.o: \
  /usr/include/bits/floatn-common.h /usr/include/stdlib.h \
  /usr/include/bits/stdlib-float.h /usr/include/string.h \
  /usr/include/unistd.h /usr/include/bits/posix_opt.h \
- /usr/include/bits/confname.h /usr/include/bits/unistd_ext.h \
+ /usr/include/bits/confname.h /usr/include/bits/getopt_posix.h \
+ /usr/include/bits/getopt_core.h /usr/include/bits/unistd_ext.h \
  /home/nereke/Dokumenty/skola/POS/Semestralka/client_server/../zdrojove_kody/UI.h \
  /home/nereke/Dokumenty/skola/POS/Semestralka/client_server/../zdrojove_kody/simulacia.h \
  /home/nereke/Dokumenty/skola/POS/Semestralka/client_server/../zdrojove_kody/svet.h \

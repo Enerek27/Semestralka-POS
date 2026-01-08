@@ -14,8 +14,11 @@ client_server/CMakeFiles/klient.dir/klient.c.o: /home/nereke/Dokumenty/skola/POS
   /usr/include/bits/cpu-set.h \
   /usr/include/bits/endian.h \
   /usr/include/bits/endianness.h \
+  /usr/include/bits/environments.h \
   /usr/include/bits/floatn-common.h \
   /usr/include/bits/floatn.h \
+  /usr/include/bits/getopt_core.h \
+  /usr/include/bits/getopt_posix.h \
   /usr/include/bits/libc-header-start.h \
   /usr/include/bits/long-double.h \
   /usr/include/bits/posix_opt.h \
@@ -24,6 +27,14 @@ client_server/CMakeFiles/klient.dir/klient.c.o: /home/nereke/Dokumenty/skola/POS
   /usr/include/bits/sched.h \
   /usr/include/bits/select.h \
   /usr/include/bits/setjmp.h \
+  /usr/include/bits/sigaction.h \
+  /usr/include/bits/sigevent-consts.h \
+  /usr/include/bits/siginfo-arch.h \
+  /usr/include/bits/siginfo-consts.h \
+  /usr/include/bits/signal_ext.h \
+  /usr/include/bits/signum-arch.h \
+  /usr/include/bits/signum-generic.h \
+  /usr/include/bits/sigthread.h \
   /usr/include/bits/sockaddr.h \
   /usr/include/bits/socket-constants.h \
   /usr/include/bits/socket.h \
@@ -42,14 +53,23 @@ client_server/CMakeFiles/klient.dir/klient.c.o: /home/nereke/Dokumenty/skola/POS
   /usr/include/bits/types/__FILE.h \
   /usr/include/bits/types/__fpos64_t.h \
   /usr/include/bits/types/__fpos_t.h \
+  /usr/include/bits/types/__locale_t.h \
   /usr/include/bits/types/__mbstate_t.h \
   /usr/include/bits/types/__sigset_t.h \
+  /usr/include/bits/types/__sigval_t.h \
   /usr/include/bits/types/clock_t.h \
   /usr/include/bits/types/clockid_t.h \
+  /usr/include/bits/types/idtype_t.h \
+  /usr/include/bits/types/locale_t.h \
+  /usr/include/bits/types/sig_atomic_t.h \
+  /usr/include/bits/types/sigevent_t.h \
+  /usr/include/bits/types/siginfo_t.h \
   /usr/include/bits/types/sigset_t.h \
+  /usr/include/bits/types/stack_t.h \
   /usr/include/bits/types/struct_FILE.h \
   /usr/include/bits/types/struct___jmp_buf_tag.h \
   /usr/include/bits/types/struct_iovec.h \
+  /usr/include/bits/types/struct_itimerspec.h \
   /usr/include/bits/types/struct_sched_param.h \
   /usr/include/bits/types/struct_timespec.h \
   /usr/include/bits/types/struct_timeval.h \
@@ -67,6 +87,7 @@ client_server/CMakeFiles/klient.dir/klient.c.o: /home/nereke/Dokumenty/skola/POS
   /usr/include/gnu/stubs.h \
   /usr/include/pthread.h \
   /usr/include/sched.h \
+  /usr/include/signal.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdio.h \
   /usr/include/stdlib.h \
@@ -75,6 +96,7 @@ client_server/CMakeFiles/klient.dir/klient.c.o: /home/nereke/Dokumenty/skola/POS
   /usr/include/sys/select.h \
   /usr/include/sys/socket.h \
   /usr/include/sys/types.h \
+  /usr/include/sys/ucontext.h \
   /usr/include/sys/wait.h \
   /usr/include/time.h \
   /usr/include/unistd.h \
@@ -114,15 +136,11 @@ client_server/CMakeFiles/klient.dir/klient.c.o:
 
 /usr/lib/crtn.o:
 
-/usr/lib/crti.o:
-
 /usr/lib/Scrt1.o:
 
 sockety/libsockety.so:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stddef.h:
-
-/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdatomic.h:
 
 /usr/include/unistd.h:
 
@@ -130,43 +148,73 @@ zdrojove_kody/libzdrojove_kody.so:
 
 /usr/include/time.h:
 
-/usr/include/sys/types.h:
-
 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o:
 
 /usr/include/sys/socket.h:
-
-/usr/include/sys/select.h:
 
 /usr/include/sys/cdefs.h:
 
 /usr/include/stdlib.h:
 
-/usr/include/sched.h:
+/usr/include/signal.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/libgcc.a:
 
 /usr/include/pthread.h:
 
-/usr/include/gnu/stubs.h:
-
-/usr/include/gnu/stubs-64.h:
-
 /usr/include/features.h:
 
 /usr/include/features-time64.h:
 
-/usr/include/bits/socket_type.h:
+/usr/include/bits/wordsize.h:
 
-/usr/include/bits/sockaddr.h:
+/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdarg.h:
 
-/usr/include/bits/struct_mutex.h:
+/usr/include/bits/waitstatus.h:
 
-/usr/include/bits/stdint-intn.h:
+/usr/include/bits/unistd_ext.h:
 
-/usr/include/bits/socket.h:
+/usr/include/stdio.h:
 
-/usr/include/bits/sched.h:
+/usr/include/bits/types/timer_t.h:
+
+/usr/include/bits/types/struct_tm.h:
+
+zdielanaPamat/libzdielanaPamat.so:
+
+/usr/include/sys/ucontext.h:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/bits/types/struct_sched_param.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/bits/types/struct_itimerspec.h:
+
+/usr/include/sys/wait.h:
+
+/usr/include/bits/types/struct_iovec.h:
+
+/usr/include/bits/types/struct_FILE.h:
+
+/usr/include/bits/types/siginfo_t.h:
+
+/usr/lib/crti.o:
+
+/usr/include/bits/types/sigevent_t.h:
+
+/usr/include/bits/types/sig_atomic_t.h:
+
+/usr/include/bits/types/struct_timespec.h:
+
+/usr/include/bits/sigevent-consts.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/types/struct___jmp_buf_tag.h:
+
+/usr/include/bits/setjmp.h:
 
 /usr/include/stdc-predef.h:
 
@@ -174,27 +222,35 @@ zdrojove_kody/libzdrojove_kody.so:
 
 /home/nereke/Dokumenty/skola/POS/Semestralka/zdrojove_kody/simulacia.h:
 
+/usr/include/bits/siginfo-consts.h:
+
 /usr/include/bits/libc-header-start.h:
 
 /home/nereke/Dokumenty/skola/POS/Semestralka/zdrojove_kody/UI.h:
 
-/usr/include/bits/pthreadtypes.h:
+/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdatomic.h:
+
+/usr/include/bits/getopt_posix.h:
+
+/usr/include/bits/thread-shared-types.h:
 
 /usr/include/bits/floatn.h:
+
+/usr/include/bits/floatn-common.h:
 
 /usr/include/bits/select.h:
 
 /usr/include/bits/types/__fpos64_t.h:
 
+/usr/include/bits/types/struct_timeval.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/home/nereke/Dokumenty/skola/POS/Semestralka/client_server/klient.c:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o:
 
 /usr/include/bits/types/FILE.h:
-
-/usr/include/bits/types/__FILE.h:
-
-/usr/include/bits/stdlib-float.h:
-
-/usr/include/bits/floatn-common.h:
 
 /home/nereke/Dokumenty/skola/POS/Semestralka/zdielanaPamat/pipe.h:
 
@@ -208,7 +264,33 @@ zdrojove_kody/libzdrojove_kody.so:
 
 /home/nereke/Dokumenty/skola/POS/Semestralka/zdrojove_kody/svet.h:
 
+/usr/include/bits/typesizes.h:
+
+/usr/include/bits/cpu-set.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/bits/sigaction.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/include/bits/signum-generic.h:
+
+/usr/include/bits/sockaddr.h:
+
+/usr/include/bits/types/idtype_t.h:
+
+/usr/include/bits/struct_mutex.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/environments.h:
+
+/usr/include/bits/sigthread.h:
+
 /usr/include/bits/posix_opt.h:
+
+/usr/include/bits/types/__sigval_t.h:
 
 /usr/include/bits/timesize.h:
 
@@ -216,19 +298,29 @@ zdrojove_kody/libzdrojove_kody.so:
 
 /usr/include/bits/types/__sigset_t.h:
 
-zdielanaPamat/libzdielanaPamat.so:
-
-/usr/include/bits/types/struct_sched_param.h:
-
-/usr/include/bits/waitflags.h:
-
 /usr/include/bits/confname.h:
 
-/usr/include/stdio.h:
+/usr/include/bits/signal_ext.h:
 
-/usr/include/bits/types/timer_t.h:
+/usr/include/bits/types/stack_t.h:
 
-/usr/include/bits/thread-shared-types.h:
+/usr/include/bits/signum-arch.h:
+
+/usr/include/bits/sched.h:
+
+/usr/include/bits/socket.h:
+
+/usr/include/bits/socket_type.h:
+
+/usr/include/bits/stdint-intn.h:
+
+/usr/include/bits/types/__FILE.h:
+
+/usr/include/bits/stdlib-float.h:
+
+/usr/include/bits/types/time_t.h:
+
+/usr/include/bits/struct_rwlock.h:
 
 /usr/include/bits/time.h:
 
@@ -238,11 +330,11 @@ zdielanaPamat/libzdielanaPamat.so:
 
 /usr/include/bits/time64.h:
 
-/usr/include/sys/wait.h:
-
-/usr/include/bits/types/struct_iovec.h:
-
 /usr/lib/libc_nonshared.a:
+
+/usr/include/bits/getopt_core.h:
+
+/usr/include/bits/siginfo-arch.h:
 
 /usr/include/bits/types.h:
 
@@ -250,11 +342,9 @@ zdielanaPamat/libzdielanaPamat.so:
 
 /usr/include/bits/types/__fpos_t.h:
 
-/usr/include/bits/setjmp.h:
+/usr/include/sched.h:
 
-/usr/include/bits/types/struct___jmp_buf_tag.h:
-
-/usr/include/bits/wordsize.h:
+/usr/include/bits/types/__locale_t.h:
 
 /usr/include/bits/types/__mbstate_t.h:
 
@@ -264,28 +354,4 @@ zdielanaPamat/libzdielanaPamat.so:
 
 /usr/include/bits/types/clockid_t.h:
 
-/usr/include/bits/types/struct_FILE.h:
-
-/usr/include/bits/types/struct_timespec.h:
-
-/usr/include/bits/stdio_lim.h:
-
-/home/nereke/Dokumenty/skola/POS/Semestralka/client_server/klient.c:
-
-/usr/include/bits/types/struct_timeval.h:
-
-/usr/include/bits/types/struct_tm.h:
-
-/usr/include/bits/struct_rwlock.h:
-
-/usr/include/bits/types/time_t.h:
-
-/usr/include/bits/cpu-set.h:
-
-/usr/include/bits/typesizes.h:
-
-/usr/include/bits/unistd_ext.h:
-
-/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdarg.h:
-
-/usr/include/bits/waitstatus.h:
+/usr/include/bits/types/locale_t.h:

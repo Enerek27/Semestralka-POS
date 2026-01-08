@@ -53,6 +53,7 @@ typedef struct SocketServer {
     atomic_bool server_bezi;
     srv_inf_t server_info;
     int hlavny_klient;
+    int dokopyPripojenych;
 } socket_server_t;
 void client_zavri(socket_server_t * server);
 _Bool socket_accept(socket_data_t * this, const socket_data_t * passiveSocket, struct sockaddr * clientAddress, socklen_t * clientAddressLength, socket_server_t * server );
@@ -71,5 +72,5 @@ typedef struct SocketClient {
 // Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre klienta
 void socket_client_init(socket_client_t * this, char * serverName, char * port);
 void socket_client_destroy(socket_client_t * this);
-
+void socket_posli_klientom_end( socket_server_t * server);
 #endif

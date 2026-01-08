@@ -584,7 +584,11 @@ void server_vykonavaj_sim(svt_brd_t * data) {
             if (data->svet->pocet_krokov_K == 0 && data->svet->pocet_replikacii == 0) {
                 return;
             }
-            
+            if (data->svet->chodec->x == data->svet->stred_x && data->svet->chodec->y == data->svet->stred_y) {
+                printf("Chodec Dosiahol stred!!\n");
+                sleep(1);
+                break;
+            }
             svt_vp_t vypisovac;
             
             
@@ -593,7 +597,9 @@ void server_vykonavaj_sim(svt_brd_t * data) {
             posli_vsetkym_svet( &vypisovac);
             posun_chodca(daj_nahodny_smer_pre_chodca(data->svet), data->svet);
             data->svet->pocet_krokov_K--;
-            sleep(1);
+            
+            struct timespec ts = {0, 500 * 1000000}; 
+            nanosleep(&ts, NULL);
         }
         data->svet->pocet_krokov_K = data->svet->pocet_krokov_K_origo;
         data->svet->pocet_replikacii--;

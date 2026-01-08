@@ -1,5 +1,9 @@
 
+#define _POSIX_C_SOURCE 199309L 
+
 #include "../sockety/socket.h"
+#include <signal.h>
+#include <sys/prctl.h>
 
 
 #include <pthread.h>
@@ -142,7 +146,7 @@ svt_t * server_info_subor(socket_server_t * server) {
 
 int main(int argc, char const *argv[])
 {
-    
+    prctl(PR_SET_PDEATHSIG, SIGTERM);
     srand(time(NULL)); 
     socket_server_t socket_server;
     socket_server_init(&socket_server, 2000);
@@ -205,20 +209,31 @@ int main(int argc, char const *argv[])
             } 
         }
     }
-
     
     client_zavri(&socket_server);
-    socket_destroy(&socket_server.passiveSocket);
-    shutdown(socket_server.passiveSocket.socket, SHUT_RDWR);
+    
+    struct timespec ts = {0, 400 * 1000000}; 
+    nanosleep(&ts, NULL);
+   shutdown(socket_server.passiveSocket.socket, SHUT_RDWR);
+   
     pthread_join(vlakienko[0], NULL);
+    
+    socket_destroy(&socket_server.passiveSocket);
+   
+    
+    
     pthread_join(vlakienko[1], NULL);
+   
     pthread_join(vlakienko[2], NULL);
+   
     free(svet_vypis);
     
+    socket_posli_klientom_end(&socket_server);
+    nanosleep(&ts, NULL);
     svet_uloz_do_suboru(svet);
     svet_destroy(svet);
     socket_server_destroy(&socket_server);
-
+     
 
 
     /*

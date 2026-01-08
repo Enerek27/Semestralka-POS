@@ -38,6 +38,8 @@ void * cisti_server(void * arg) {
 
                 
                 server->pocetKlinetov--;
+                
+                
                 posledny--; 
             } else {
                 prvy++; 
@@ -72,8 +74,9 @@ void * cisti_server(void * arg) {
 
 void * nacuvajklientovi(void * arg) {
   klient_read_t * info_klient = arg; 
- 
+  
   while (atomic_load(&info_klient->bezi_klient )) {
+    
     char buf[200];
 
     fd_set readfds;
@@ -256,6 +259,7 @@ void socket_server_init(socket_server_t * this, int port) {
   srv_inf_t server_info;
   atomic_store(&this->server_info.sumarny_mod, 0);
   this->server_info = server_info;
+  this->dokopyPripojenych = 0;
   
 }
 // Funkcia na akceptovanie pripojenia klientom, pričom sa jedná o blokovacie volanie
@@ -271,7 +275,9 @@ void socket_server_accept_connection(socket_server_t * this) {
     return;
   }
   
+  
   pthread_mutex_lock(&this->mutex);
+  
   // Pripojenie klienta na server, pričom sa nastaví všetko potrebné v adrese klienta, nastaví sa veľkosť adresy a vráti sa popisovač soketu určeného pre komunikáciu
   if (this->maxPocetKlientov == this->pocetKlinetov) {
     int naviac = this->maxPocetKlientov + 5;
@@ -301,12 +307,17 @@ void socket_server_accept_connection(socket_server_t * this) {
   atomic_store(&this->klienti[this->pocetKlinetov]->prepni_mod, 0);
   this->pocetKlinetov++;
   pthread_t vlakno;
+  
   if (this->pocetKlinetov == 1) {
     this->hlavny_klient = this->pocetKlinetov - 1;
     char buff[2];
     buff[0] = '7';
     buff[1] = '\0';
     socket_write(&this->klienti[this->hlavny_klient]->socket_pocuvaj, buff, strlen(buff));
+    if (this->dokopyPripojenych > 0) {
+      pthread_create(&vlakno, NULL, nacuvajklientovi, this->klienti[this->pocetKlinetov - 1]);
+    pthread_detach(vlakno);
+    }
   } else {
     char buff[2];
     buff[0] = '5';
@@ -315,7 +326,7 @@ void socket_server_accept_connection(socket_server_t * this) {
     pthread_create(&vlakno, NULL, nacuvajklientovi, this->klienti[this->pocetKlinetov - 1]);
     pthread_detach(vlakno);
   }
-    
+  this->dokopyPripojenych++;
   pthread_mutex_unlock(&this->mutex);
     
   
@@ -404,4 +415,19 @@ void socket_client_destroy(socket_client_t * this) {
   socket_destroy(&this->activeSocket);
   atomic_store(&this->klien_bezi, 0);
   pthread_mutex_destroy(&this->mutex);
+}
+
+void socket_posli_klientom_end( socket_server_t * server) {
+  pthread_mutex_lock(&server->mutex);
+  char buff[4];
+  buff[0] = 'o';
+  buff[1] = 'f';
+  buff[2] = 'f';
+  buff[3] = '\0';
+  for (int i = 0; i < server->pocetKlinetov; i++) {
+    socket_write(&server->klienti[i]->socket_pocuvaj, buff, 4);
+    
+  }
+  pthread_mutex_unlock(&server->mutex);
+
 }
