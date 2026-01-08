@@ -17,7 +17,7 @@ void * vlaknoPrijmaniaSpojenia(void * arg) {
     socket_server_t * server = arg;
     while (atomic_load(&server->server_bezi)) {
         socket_server_accept_connection(server);
-        printf("halooo halooo\n");
+        
     }
     pthread_exit(NULL);
 }
@@ -127,7 +127,7 @@ svt_t * server_info_subor(socket_server_t * server) {
     if (buf[0] - '0' == 7) {
         //true treba subor
         char cesta_k_suboru[100];
-        memcpy(cesta_k_suboru, buf + 2, strlen(buf + 2));
+        memcpy(cesta_k_suboru, buf + 2, strlen(buf + 2) + 1);
         return svet_nacitaj_zo_suboru(cesta_k_suboru);
         
     } else if (buf[0] - '0' == 5) {
@@ -148,6 +148,7 @@ int main(int argc, char const *argv[])
     socket_server_init(&socket_server, 2000);
     
     socket_server_accept_connection(&socket_server);
+    
     svt_t * skuska = server_info_subor(&socket_server);
     svt_t * svet;
     
@@ -207,15 +208,14 @@ int main(int argc, char const *argv[])
 
     
     client_zavri(&socket_server);
+    socket_destroy(&socket_server.passiveSocket);
     shutdown(socket_server.passiveSocket.socket, SHUT_RDWR);
     pthread_join(vlakienko[0], NULL);
     pthread_join(vlakienko[1], NULL);
     pthread_join(vlakienko[2], NULL);
     free(svet_vypis);
     
-    
-    
-    sleep(1);
+    svet_uloz_do_suboru(svet);
     svet_destroy(svet);
     socket_server_destroy(&socket_server);
 

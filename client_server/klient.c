@@ -78,10 +78,7 @@ void * vypisujObraz(void * arg) {
                 break;
             }
 
-            if (strstr(nacitaj, "off") != NULL) {
-                atomic_store(&klient->klien_bezi, 0);
-                break;
-            }
+           
             for (int i = 0; i < n; i++) {
                     if (maxVelkost - 1 >= aktualVelkost) {
                         int novaVelkost = maxVelkost + 50;
@@ -174,6 +171,7 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
         poslat[0] = '7';
         poslat[1] = ';';            //7;cestaksuboru
         memcpy(poslat + 2, cesta_k_suboru, strlen(cesta_k_suboru) + 1);
+        printf("toto posielam: %s\n", poslat);
         socket_write(&socket->activeSocket, poslat, strlen(poslat) + 1);
     } else {
         
@@ -260,7 +258,6 @@ int main(int argc, char const *argv[])
                         //tu bezi klient
                         sleep(1);
                         socket_client_t socket_client;
-                        sleep(1);
                         socket_client_init(&socket_client, "127.0.0.1", "2000");
                         if (je_klient_hlavny(&socket_client)) {
                             if (!nacitaj_zo_suboru(&socket_client, NULL)) {
@@ -342,6 +339,14 @@ int main(int argc, char const *argv[])
                                     socket_write(&socket_client.activeSocket, buff , strlen(buff));
                                     pthread_mutex_unlock(&socket_client.mutex);
                                     break;
+                                case 5:
+                                    //signal na odpojenie
+                                    buff[0] = '4';
+                                    buff[1] = '\0';
+                                    
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
                                 default:
                                     printf("Take cislo nie je uvedene.\n");
                                     break;
@@ -355,7 +360,7 @@ int main(int argc, char const *argv[])
                         int status;
                         waitpid(pid, &status,0);
                         printf("Server skoncil so statusom %d\n", status);
-                        sleep(1);
+                        
                     } else {
                         perror("Chyba vytvorenia procesu");
                         exit(EXIT_FAILURE);
@@ -374,16 +379,17 @@ int main(int argc, char const *argv[])
                     //treba upravit vypinanie aby tam bola dalsia moznost
                     printf("Napis adresu pripojenia : ");
                     char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
+                    adresaPripojenia[strcspn(adresaPripojenia, "\n")] = '\0';
                     if (adresaPripojenia == NULL) {
                         perror("Chyba nacitavanie textu");
                         exit(EXIT_FAILURE);
                     } 
                     socket_client_t socket_client;
-                    socket_client_init(&socket_client, adresaPripojenia, "777");
+                    socket_client_init(&socket_client, adresaPripojenia, "2000");
                     je_klient_hlavny(&socket_client);
                     pthread_t vlakno;
                     pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
-                    pthread_detach(vlakno);
+                    
 
                     while (atomic_load(&socket_client.klien_bezi)) {
                            char stlacene[10];
@@ -394,44 +400,72 @@ int main(int argc, char const *argv[])
                                 printf("Nezadal si cislo, skus znova\n");
                                 break;
                             }
+                            stlacene[strcspn(stlacene, "\n")] = '\0';
                             stlacenePismeno = strtol(stlacene, &endptr, 10);
                             if (stlacene == endptr) {
                                 printf("Nie je to cislo.\n");
                                 break;
                             }
-                            
+                            if (!atomic_load(&socket_client.klien_bezi)) {
+                                break;
+                            }
                             char buff[2];
                             switch (stlacenePismeno) {
-                                case 0:
+                                case 1:
                                     //signal vypnutie
                                     buff[0] = '0';
                                     buff[1] = '\0';
-                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
+                                  
+                                    sleep(1);
                                     atomic_store(&socket_client.klien_bezi, 0);
                                     break;
-                                case 1:
+                                case 2:
                                     //signal prepni mod
                                     buff[0] = '1';
                                     buff[1] = '\0';
-                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                     
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
+                                   
                                     break;
-                                case 2:
+                                case 3:
                                     //signal v prepnutom mode chcem teraz statistiku
                                     buff[0] = '2';
                                     buff[1] = '\0';
-                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                     
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
                                     break;
-                                case 3:
+                                case 4:
                                     //signal v prepnutom mode chcem teraz kroky
                                     buff[0] = '3';
                                     buff[1] = '\0';
-                                    socket_write(&socket_client.activeSocket, buff , sizeof(buff));
+                                    
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
                                     break;
+                                case 5:
+                                    //signal na odpojenie
+                                    buff[0] = '4';
+                                    buff[1] = '\0';
+                                    
+                                    pthread_mutex_lock(&socket_client.mutex);
+                                    socket_write(&socket_client.activeSocket, buff , strlen(buff));
+                                    pthread_mutex_unlock(&socket_client.mutex);
                                 default:
                                     printf("Take cislo nie je uvedene.\n");
                                     break;
+                            
                             }
                     }
+                    pthread_join(vlakno, NULL);
                     socket_client_destroy(&socket_client);
                     
                     

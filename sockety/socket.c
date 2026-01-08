@@ -26,7 +26,9 @@ void * cisti_server(void * arg) {
         pthread_mutex_lock(&server->mutex);
         int prvy = 0;
         int posledny = server->pocetKlinetov - 1;
-
+        if (server->pocetKlinetov == 0) {
+          atomic_store(&server->server_info.sumarny_mod, 1);
+        }
         while (prvy <= posledny) {
             if (!atomic_load(&server->klienti[prvy]->bezi_klient)) {
                 
@@ -42,6 +44,7 @@ void * cisti_server(void * arg) {
             }
         }
         for (int i = 0; i < server->pocetKlinetov; i++) {
+
           if (atomic_load(&server->klienti[i]->vypni_server)) {
               atomic_store(&server->server_bezi, 0);
               break;
@@ -119,6 +122,10 @@ void * nacuvajklientovi(void * arg) {
                 case 3:
                   //signal v prepnutom mode chcem teraz kroky
                   atomic_store(&info_klient->chcem_statistiku, 0);
+                  break;
+                case 4:
+                //odpojim klienta
+                  atomic_store(&info_klient->bezi_klient, 0);
                   break;
                 default:
                   break;
@@ -317,12 +324,7 @@ void socket_server_accept_connection(socket_server_t * this) {
 void client_zavri(socket_server_t * server) {
   pthread_mutex_lock(&server->mutex);
   for (int i = 0; i < server->pocetKlinetov; i++) {
-    char buff[4];
-    buff[0] = 'o';
-    buff[1] = 'f';
-    buff[2] = 'f';
-    buff[3] = '\0';
-    socket_write(&server->klienti[i]->socket_pocuvaj, buff, strlen(buff) + 1);
+    
     atomic_store(&server->klienti[i]->bezi_klient, 0);
   }
   pthread_mutex_unlock(&server->mutex);
@@ -333,7 +335,7 @@ void socket_server_destroy(socket_server_t * this) {
   atomic_store(&this->server_bezi, 0);
 
   // Zničenie pasívneho soketu na prijímanie pripojení
-  socket_destroy(&this->passiveSocket);
+  
   // Zničenie aktívneho soketu pre komunikáciu s klientom
   for (int i = 0; i < this->pocetKlinetov; i++) {
     socket_destroy(&this->klienti[i]->socket_pocuvaj);

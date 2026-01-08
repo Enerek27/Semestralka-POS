@@ -15,7 +15,7 @@
 
 char * vrat_menu_klient() {
     char * buff;
-    int maxPocetZnakov = 120;
+    int maxPocetZnakov = 150;
     buff = calloc(maxPocetZnakov, sizeof(char));
     if (buff == NULL)
    {
@@ -30,6 +30,7 @@ char * vrat_menu_klient() {
    len += snprintf(buff + len, maxPocetZnakov - len, "2. ZMEN MOD SIMULACIE\n");
    len += snprintf(buff + len, maxPocetZnakov - len, "3. ZOBRAZ STATISTIKU\n");
    len += snprintf(buff + len, maxPocetZnakov - len, "4. ZOBRAZ KROKY\n");
+   len += snprintf(buff + len, maxPocetZnakov - len, "5. ODPOJ SA OD SIMULACIE\n");
    
    return buff;
 }
