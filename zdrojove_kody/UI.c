@@ -268,7 +268,7 @@ char * vykresli_svet(svt_t * svet) {
 char * svet_vypis_statistiku(svt_t * svet) {
     //vycisti_obrazovku();
      char * buff;
-   char zatial[128];
+   char zatial[550];
    int aktualPocetZnakov = 0;
    int maxPocetZnakov = 100;
    buff = calloc(maxPocetZnakov, sizeof(char));
@@ -420,7 +420,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
 char *  svet_vypis_kroky(svt_t * svet) {
      //vycisti_obrazovku();
      char * buff;
-   char zatial[128];
+   char zatial[550];
    int aktualPocetZnakov = 0;
    int maxPocetZnakov = 100;
    buff = calloc(maxPocetZnakov, sizeof(char));

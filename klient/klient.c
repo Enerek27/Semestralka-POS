@@ -128,7 +128,7 @@ int main(int argc, char const *argv[])
                                 }
                                 dobreZadal = 0;
                                 break;
-                            } else if(pocetPouzivatelov == 0) {
+                            } else if(pocetPouzivatelov < 1) {
                                 pid_t pid = fork();
                                 if (pid == 0) {
                                     //treba zmenit na execl
@@ -244,7 +244,7 @@ int main(int argc, char const *argv[])
                                     
                                 dobreZadal = 0;
                                 break;
-                            } else if (pocetPouzivatelov == 0) {
+                            } else if (pocetPouzivatelov < 0) {
                             
                                 printf(GREEN "Napíš adresu pripojenia: " RESET);
                     printf(UZIVATELFARBA);
@@ -371,7 +371,7 @@ int main(int argc, char const *argv[])
                                 }
                                 dobreZadal = 0;
                                 break;
-                            } else if(pocetPouzivatelov == 0) {
+                            } else if(pocetPouzivatelov < 0) {
                                 pid_t pid = fork();
                                 if (pid == 0) {
                                     //treba zmenit na execl
