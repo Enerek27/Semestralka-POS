@@ -1,5 +1,6 @@
 
 #define _POSIX_C_SOURCE 199309L   
+#include <sched.h>
 
 #define RED "\033[31m"
 #define MAGENTA "\033[35m"
@@ -578,158 +579,229 @@ char *  svet_vypis_kroky(svt_t * svet) {
 
 
 
-void server_vykonavaj_sim(svt_brd_t * data) {
+void server_vykonavaj_sim(svt_brd_t * data, vypis_pipe_t * data_pipe, _Bool pouziPipe) {
     
+    if (pouziPipe) {
+        for (int i = 0; i < data_pipe->svet->original_replikacii; i++) {
+            
+            for (int j = 0; j < data_pipe->svet->pocet_krokov_K_origo; j++) {
     
-    for (int i = 0; i < data->svet->original_replikacii; i++) {
-        
-        for (int j = 0; j < data->svet->pocet_krokov_K_origo; j++) {
-            
-            
-            if (!atomic_load(&data->server->server_bezi)|| atomic_load(&data->server->server_info.sumarny_mod)) {
                 
-                return;
+                if (!atomic_load(&data_pipe->server->server_bezi)|| atomic_load(&data_pipe->server->server_info.prepni_mod)) {
+                    
+                    return;
+                }
+    
+                if (data_pipe->svet->pocet_krokov_K == 0 && data_pipe->svet->pocet_replikacii == 0) {
+                    return;
+                }
+                if (data_pipe->svet->chodec->x == data_pipe->svet->stred_x && data_pipe->svet->chodec->y == data_pipe->svet->stred_y) {
+                    printf("Chodec Dosiahol stred!!\n");
+                    sleep(1);
+                    break;
+                }
+                vypis_pipe_t vypisovac;
+                
+                
+                vypisovac.server = data_pipe->server;
+                vypisovac.svet = data_pipe->svet;
+                posli_vsetkym_svet( NULL, &vypisovac, 1);
+                posun_chodca(daj_nahodny_smer_pre_chodca(data_pipe->svet), data_pipe->svet);
+                data_pipe->svet->pocet_krokov_K--;
+                
+                struct timespec ts = {0, 500 * 1000000}; 
+                nanosleep(&ts, NULL);
             }
-
-            if (data->svet->pocet_krokov_K == 0 && data->svet->pocet_replikacii == 0) {
-                return;
-            }
-            if (data->svet->chodec->x == data->svet->stred_x && data->svet->chodec->y == data->svet->stred_y) {
-                printf(ZLATA "Chodec Dosiahol stred!!\n" RESET);
-                sleep(1);
-                break;
-            }
-            svt_vp_t vypisovac;
-            
-            
-            vypisovac.server = data->server;
-            vypisovac.svet = data->svet;
-            posli_vsetkym_svet( &vypisovac);
-            posun_chodca(daj_nahodny_smer_pre_chodca(data->svet), data->svet);
-            data->svet->pocet_krokov_K--;
-            
-            struct timespec ts = {0, 500 * 1000000}; 
-            nanosleep(&ts, NULL);
+            data_pipe->svet->pocet_krokov_K = data_pipe->svet->pocet_krokov_K_origo;
+            data_pipe->svet->pocet_replikacii--;
         }
-        data->svet->pocet_krokov_K = data->svet->pocet_krokov_K_origo;
-        data->svet->pocet_replikacii--;
+    } else {
+    
+        for (int i = 0; i < data->svet->original_replikacii; i++) {
+            
+            for (int j = 0; j < data->svet->pocet_krokov_K_origo; j++) {
+    
+                
+                if (!atomic_load(&data->server->server_bezi)|| atomic_load(&data->server->server_info.sumarny_mod)) {
+                    
+                    return;
+                }
+    
+                if (data->svet->pocet_krokov_K == 0 && data->svet->pocet_replikacii == 0) {
+                    return;
+                }
+                if (data->svet->chodec->x == data->svet->stred_x && data->svet->chodec->y == data->svet->stred_y) {
+                    printf(ZLATA "Chodec Dosiahol stred!!\n" RESET);
+                    sleep(1);
+                    break;
+                }
+                svt_vp_t vypisovac;
+                
+                
+                vypisovac.server = data->server;
+                vypisovac.svet = data->svet;
+                posli_vsetkym_svet( &vypisovac,NULL, 0);
+                posun_chodca(daj_nahodny_smer_pre_chodca(data->svet), data->svet);
+                data->svet->pocet_krokov_K--;
+                
+                struct timespec ts = {0, 500 * 1000000}; 
+                nanosleep(&ts, NULL);
+            }
+            data->svet->pocet_krokov_K = data->svet->pocet_krokov_K_origo;
+            data->svet->pocet_replikacii--;
+        }
     }
 }
 
-void  posli_vsetkym_svet(svt_vp_t * data) {
+void  posli_vsetkym_svet(svt_vp_t * data, vypis_pipe_t * data_pipe, _Bool pouziPipe) {
     
-    
-    pthread_mutex_lock(&data->server->mutex);
-    int pocet_klientov = data->server->pocetKlinetov;
-    pthread_mutex_unlock(&data->server->mutex);
-    socket_data_t * posielaj;
-    posielaj = calloc(pocet_klientov, sizeof(socket_data_t));
-    if (posielaj == NULL) {
-        perror(RED "Chyba alokovania pamäte pre výpis." RESET);
-        exit(EXIT_FAILURE);
-    }
-    //treba dorobit
-    pthread_mutex_lock(&data->server->mutex);
-    for (int i = 0; i < pocet_klientov; i++) {
-        memcpy(&posielaj[i], &data->server->klienti[i]->socket_pocuvaj, sizeof(socket_data_t));
-    }
-    
-    pthread_mutex_unlock(&data->server->mutex);
-    char * buf = vykresli_svet(data->svet);
-    for (int i = 0; i < pocet_klientov; i++) {
-        //treba pockat na lydku
-        if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
-            pthread_mutex_lock(&data->server->mutex);
-            socket_write(&posielaj[i], buf,strlen(buf) + 1);
-            pthread_mutex_unlock(&data->server->mutex);
-        }
-    };
-    sleep(1);
-    free(buf);
-    free(posielaj);
-    
-    
-    
-}
-void posli_vsetkym_statistiku(svt_brd_t * data) {
-    while (atomic_load(&data->server->server_bezi)) {
-    
+    if (pouziPipe) {
+        char * buf = vykresli_svet(data_pipe->svet);
+        pipe_write(&data_pipe->server->pip_write, buf, strlen(buf) + 1);
+        free(buf);
         
-       
-        if (!data->server->server_bezi || !atomic_load(&data->server->server_info.sumarny_mod)) {
-            
-            break;
+    } else {
+    
+        pthread_mutex_lock(&data->server->mutex);
+        int pocet_klientov = data->server->pocetKlinetov;
+        pthread_mutex_unlock(&data->server->mutex);
+        socket_data_t * posielaj;
+        posielaj = calloc(pocet_klientov, sizeof(socket_data_t));
+        if (posielaj == NULL) {
+            perror(RED "Chyba alokovania pamäte pre výpis." RESET);
+            exit(EXIT_FAILURE);
+        }
+        //treba dorobit
+        pthread_mutex_lock(&data->server->mutex);
+        for (int i = 0; i < pocet_klientov; i++) {
+            memcpy(&posielaj[i], &data->server->klienti[i]->socket_pocuvaj, sizeof(socket_data_t));
         }
         
-        
-        
-        
-        svt_vp_t  vypisovac;
-       
-        vypisovac.server = data->server;
-        vypisovac.svet = data->svet;
-        posli_vsetkym_stat(&vypisovac);
-            
-        
-        sleep(1);
-    }
-    
-}
-
-void  posli_vsetkym_stat(svt_vp_t * data) {
-
-     pthread_mutex_lock(&data->server->mutex);
-    int pocet_klientov = data->server->pocetKlinetov;
-    pthread_mutex_unlock(&data->server->mutex);
-    klient_read_t * klienti;
-    klienti = calloc(pocet_klientov, sizeof(klient_read_t));
-    if (klienti == NULL) {
-        perror(RED "Chyba alokovania pamäte pre vypis." RESET);
-        exit(EXIT_FAILURE);
-    }
-    pthread_mutex_lock(&data->server->mutex);
-    for (int i = 0 ; i < pocet_klientov; i++) {
-        
-        memcpy(&klienti[i], &data->server->klienti[i], sizeof(klient_read_t));
-    }
-    pthread_mutex_unlock(&data->server->mutex);
-    char * buf1;
-    char * buf;
-    
-    
-    buf = svet_vypis_kroky(data->svet);
-    
-    
-    buf1 = svet_vypis_statistiku(data->svet);
-    for (int i = 0; i < pocet_klientov; i++) {
-        //treba pockat na lydku
-
-        //printf("Idem poslat klientovi cislo: %d\n", i + 1);
-        
-        if (atomic_load(&data->server->klienti[i]->chcem_statistiku)) {
-           
-            if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
-                 pthread_mutex_lock(&data->server->mutex);
-                // printf("Lokol som sa idem poslat stat\n");
-                 socket_write(&data->server->klienti[i]->socket_pocuvaj, buf1, strlen(buf1) + 1);
-                pthread_mutex_unlock(&data->server->mutex);
-               // printf("unlock\n");
-            }
-        } else {
+        pthread_mutex_unlock(&data->server->mutex);
+        char * buf = vykresli_svet(data->svet);
+        for (int i = 0; i < pocet_klientov; i++) {
+            //treba pockat na lydku
             if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
                 pthread_mutex_lock(&data->server->mutex);
-                //printf("Lokol som sa idem poslat kroky\n");
-                socket_write(&data->server->klienti[i]->socket_pocuvaj, buf, strlen(buf) + 1);
+                socket_write(&posielaj[i], buf,strlen(buf) + 1);
                 pthread_mutex_unlock(&data->server->mutex);
-               // printf("unlock\n");
             }
-        }
-        
-        
+        };
+        free(buf);
+        free(posielaj);
     }
-    free(buf);
-    free(buf1);
-    free(klienti);
+    
+    
+    
+}
+void posli_vsetkym_statistiku(svt_brd_t * data, vypis_pipe_t * data_pipe, _Bool pouziPipe) {
+    if (pouziPipe) {
+         while (atomic_load(&data_pipe->server->server_bezi)) {
+    
+            if (!data_pipe->server->server_bezi || !atomic_load(&data_pipe->server->server_info.prepni_mod)) {
+                
+                break;
+            }
+    
+            vypis_pipe_t  vypisovac;
+            vypisovac.server = data_pipe->server;
+            vypisovac.svet = data_pipe->svet;
+            posli_vsetkym_stat(NULL,&vypisovac, 1);
+            sleep(1);
+        }
+    } else {
+    
+        while (atomic_load(&data->server->server_bezi)) {
+    
+            if (!data->server->server_bezi || !atomic_load(&data->server->server_info.sumarny_mod)) {
+                
+                break;
+            }
+    
+            svt_vp_t  vypisovac;
+            vypisovac.server = data->server;
+            vypisovac.svet = data->svet;
+            posli_vsetkym_stat(&vypisovac, NULL, 0);
+            sleep(1);
+        }
+    }
+    
+}
+
+void  posli_vsetkym_stat(svt_vp_t * data, vypis_pipe_t * data_pipe, _Bool pouziPipe) {
+
+    if (pouziPipe) {
+        
+      
+        char * buf1;
+        char * buf;
+        
+        
+        buf = svet_vypis_kroky(data_pipe->svet);
+        buf1 = svet_vypis_statistiku(data_pipe->svet);
+        if (atomic_load(&data_pipe->server->server_info.chcem_statistiku)) {
+            pipe_write(&data_pipe->server->pip_write, buf1, strlen(buf1) + 1);
+        } else {
+            pipe_write(&data_pipe->server->pip_write, buf, strlen(buf) + 1);
+        }
+        free(buf);
+        free(buf1);
+        
+    } else {
+    
+        pthread_mutex_lock(&data->server->mutex);
+        int pocet_klientov = data->server->pocetKlinetov;
+        pthread_mutex_unlock(&data->server->mutex);
+        klient_read_t * klienti;
+        klienti = calloc(pocet_klientov, sizeof(klient_read_t));
+        if (klienti == NULL) {
+            perror(RED "Chyba alokovania pamäte pre vypis." RESET);
+            exit(EXIT_FAILURE);
+        }
+        pthread_mutex_lock(&data->server->mutex);
+        for (int i = 0 ; i < pocet_klientov; i++) {
+            
+            memcpy(&klienti[i], &data->server->klienti[i], sizeof(klient_read_t));
+        }
+        pthread_mutex_unlock(&data->server->mutex);
+        char * buf1;
+        char * buf;
+        
+        
+        buf = svet_vypis_kroky(data->svet);
+        
+        
+        buf1 = svet_vypis_statistiku(data->svet);
+        for (int i = 0; i < pocet_klientov; i++) {
+            //treba pockat na lydku
+    
+            //printf("Idem poslat klientovi cislo: %d\n", i + 1);
+            
+            if (atomic_load(&data->server->klienti[i]->chcem_statistiku)) {
+               
+                if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
+                     pthread_mutex_lock(&data->server->mutex);
+                    // printf("Lokol som sa idem poslat stat\n");
+                     socket_write(&data->server->klienti[i]->socket_pocuvaj, buf1, strlen(buf1) + 1);
+                    pthread_mutex_unlock(&data->server->mutex);
+                   // printf("unlock\n");
+                }
+            } else {
+                if (atomic_load(&data->server->klienti[i]->bezi_klient)) {
+                    pthread_mutex_lock(&data->server->mutex);
+                    //printf("Lokol som sa idem poslat kroky\n");
+                    socket_write(&data->server->klienti[i]->socket_pocuvaj, buf, strlen(buf) + 1);
+                    pthread_mutex_unlock(&data->server->mutex);
+                   // printf("unlock\n");
+                }
+            }
+            
+            
+        }
+        free(buf);
+        free(buf1);
+        free(klienti);
+    }
     
 
 }
@@ -741,7 +813,7 @@ void  posli_vsetkym_stat(svt_vp_t * data) {
                 // max pocet krokov K, pravdepodobnosti
               // cesta k suboru
               //ci sa ma nacitat zo suboru
-void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
+void inicializuj_server(srv_p_t * data, socket_client_t * socket, pipe_data_t * pip_write, _Bool pouziPipe) {
     char * buf;
     char tmp[128];
     int aktual_znakov = 0;
@@ -909,14 +981,19 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
     }
      memcpy(buf + aktual_znakov, tmp, len);
     aktual_znakov += len;
-
-    socket_write(&socket->activeSocket, buf, aktual_znakov);
+    if (pouziPipe) {
+        pipe_write(pip_write, buf, aktual_znakov);
+    } else {
+        socket_write(&socket->activeSocket, buf, aktual_znakov);
+    }
+    
     free(buf);
 }
 
 
 
-void spusti_initmenu_klient(socket_client_t * socket) {
+void spusti_initmenu_klient(socket_client_t * socket, pipe_data_t * pip_write, _Bool pouziPipe) {
+
     srv_p_t vstup;
     char cesta_k_suboru[200];
     int pocet_krokov_K;
@@ -1162,7 +1239,6 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         break;
     }
 
-
     vstup.svet_s_prekazkami = svet_s_prekazkami;
     vstup.rozmer_y = rozmer_y;
     vstup.rozmer_x = rozmer_x;
@@ -1170,8 +1246,12 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     vstup.pocet_replikacii = pocet_replikacii;
     vstup.pocet_krokov_K = pocet_krokov_K;
     vstup.cesta_k_suboru = cesta_k_suboru;
-
-    inicializuj_server(&vstup, socket);
+    if (pouziPipe) {
+        inicializuj_server(&vstup, NULL, pip_write, 1);
+    } else {
+        inicializuj_server(&vstup, socket, NULL, 0);
+    }
+    
 
 }
 

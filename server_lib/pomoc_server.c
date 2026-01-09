@@ -7,13 +7,17 @@
 #include <sys/select.h>
 
 
-svt_t * nastav_server(socket_server_t * server) {
+svt_t * nastav_server(socket_server_t * server, server_pipe_t * server_pipe, _Bool pouziPipe) {
     char buf[500];
+    if (pouziPipe) {
+        pipe_read(&server_pipe->pip_read, buf, sizeof(buf));
+    } else {
+        pthread_mutex_lock(&server->mutex);
+        socket_data_t klient = server->klienti[server->hlavny_klient]->socket_pocuvaj;
+        pthread_mutex_unlock(&server->mutex);
+        socket_read(&klient, buf, sizeof(buf));
+    }
     
-    pthread_mutex_lock(&server->mutex);
-    socket_data_t klient = server->klienti[server->hlavny_klient]->socket_pocuvaj;
-    pthread_mutex_unlock(&server->mutex);
-    socket_read(&klient, buf, sizeof(buf));
     char * prva  = strchr(buf, ';');
 
     char  medzi_step[20];                               //rozmerx;rozmery;svetprekazky;pocet_replikacii;...
@@ -113,9 +117,16 @@ void * vlaknoPrijmaniaSpojenia(void * arg) {
 }
 
 
-svt_t * server_info_subor(socket_server_t * server) {
+
+
+svt_t * server_info_subor(socket_server_t * server, server_pipe_t * server_pipe, _Bool pouziPipe) {
     char buf[250];
-    socket_read(&server->klienti[server->hlavny_klient]->socket_pocuvaj, buf, sizeof(buf));
+    if (pouziPipe) {
+        pipe_read(&server_pipe->pip_read, buf, sizeof(buf));
+    } else {
+        socket_read(&server->klienti[server->hlavny_klient]->socket_pocuvaj, buf, sizeof(buf));
+    }
+    
     if (buf[0] - '0' == 7) {
         //true treba subor
         char cesta_k_suboru[100];
@@ -130,3 +141,4 @@ svt_t * server_info_subor(socket_server_t * server) {
     }
 
 }
+

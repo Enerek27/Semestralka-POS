@@ -11,6 +11,6 @@
 #define RESET "\033[0m"
 
 
-svt_t * server_info_subor(socket_server_t * server);
+svt_t * server_info_subor(socket_server_t * server, server_pipe_t * server_pipe, _Bool pouziPipe);
 void * vlaknoPrijmaniaSpojenia(void * arg);
-svt_t * nastav_server(socket_server_t * server);
+svt_t * nastav_server(socket_server_t * server, server_pipe_t * server_pipe, _Bool pouziPipe);

@@ -1,6 +1,8 @@
 
 #include "pomoc_klient.h"
 
+#include <pthread.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +12,7 @@
 
 
 
-void klient_odpovedaj(socket_client_t * socket_client) {
+int klient_odpovedaj(socket_client_t * socket_client, klient_pipe_t * klient, _Bool pouziPipe) {
      //bude tu fgets s prevodom na cislo a kontrolou prevodu a bude tu switch podla cisla 
         //je to reakcia na menu ktore lydka robiiiii stlacenie klavesnice 
         //reakcia na menu ktore sa robilo na 2 krat to nepochopene menu ktore robit mala 
@@ -23,21 +25,30 @@ void klient_odpovedaj(socket_client_t * socket_client) {
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 300000; 
-
+    
     int rv = select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
 
     if (rv == -1) {
         perror("select stdin");
-        return;
+        return 0;
     }
 
+    if (pouziPipe) {
+        if (!atomic_load(&klient->klien_bezi)) {
+            
+            return 0; 
+        }
+    } else {
     
-    if (!atomic_load(&socket_client->klien_bezi)) {
-        return; 
+        if (!atomic_load(&socket_client->klien_bezi)) {
+            
+            return 0; 
+        }
     }
 
     if (rv == 0) {
-        return; 
+        
+        return 0; 
     }
 
     if (FD_ISSET(STDIN_FILENO, &fds)) {
@@ -47,16 +58,23 @@ void klient_odpovedaj(socket_client_t * socket_client) {
         
         if (fgets(stlacene, sizeof(stlacene), stdin) == NULL) {
             printf(ORANGE "Nezadal si číslo, skús znova.\n" RESET);
-            return;
+            return 0;
         }
         stlacene[strcspn(stlacene, "\n")] = '\0';
         stlacenePismeno = strtol(stlacene, &endptr, 10);
         if (stlacene == endptr) {
             printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
-            return;
+            return 0;
         }
-        if (!atomic_load(&socket_client->klien_bezi)) {
-            return;
+        if (pouziPipe) {
+            if (!atomic_load(&klient->klien_bezi)) {
+                return 0; 
+            }
+        } else {
+    
+            if (!atomic_load(&socket_client->klien_bezi)) {
+                return 0; 
+            }
         }
         char buff[2];
         switch (stlacenePismeno) {
@@ -64,58 +82,88 @@ void klient_odpovedaj(socket_client_t * socket_client) {
                 //signal vypnutie
                 buff[0] = '0';
                 buff[1] = '\0';
+                if (pouziPipe) {
+                   // printf("Zapisujem do pipe %s\n", buff);
+                    pipe_write(&klient->pip_write, buff, strlen(buff));
+                    atomic_store(&klient->klien_bezi, 0);
+                    
+                } else {
+                    pthread_mutex_lock(&socket_client->mutex);
+                    socket_write(&socket_client->activeSocket, buff , strlen(buff));
+                    pthread_mutex_unlock(&socket_client->mutex);
                 
-                pthread_mutex_lock(&socket_client->mutex);
-                socket_write(&socket_client->activeSocket, buff , strlen(buff));
-                pthread_mutex_unlock(&socket_client->mutex);
-            
-                sleep(1);
-                atomic_store(&socket_client->klien_bezi, 0);
+                    sleep(1);
+                    
+                    atomic_store(&socket_client->klien_bezi, 0);
+                }
+               
                 break;
             case 2:
                 //signal prepni mod
                 buff[0] = '1';
                 buff[1] = '\0';
+                if (pouziPipe) {
+                   // printf("Zapisujem do pipe %s\n", buff);
+                    pipe_write(&klient->pip_write, buff, strlen(buff));
+                } else {
+                    pthread_mutex_lock(&socket_client->mutex);
+                    socket_write(&socket_client->activeSocket, buff , strlen(buff));
+                    pthread_mutex_unlock(&socket_client->mutex);
+                    
                 
-                pthread_mutex_lock(&socket_client->mutex);
-                socket_write(&socket_client->activeSocket, buff , strlen(buff));
-                pthread_mutex_unlock(&socket_client->mutex);
-            
+                }
                 break;
             case 3:
                 //signal v prepnutom mode chcem teraz statistiku
                 buff[0] = '2';
                 buff[1] = '\0';
+                if (pouziPipe) {
+                   // printf("Zapisujem do pipe %s\n", buff);
+                    pipe_write(&klient->pip_write, buff, strlen(buff));
+                } else {
                 
-                pthread_mutex_lock(&socket_client->mutex);
-                socket_write(&socket_client->activeSocket, buff , strlen(buff));
-                pthread_mutex_unlock(&socket_client->mutex);
+                    pthread_mutex_lock(&socket_client->mutex);
+                    socket_write(&socket_client->activeSocket, buff , strlen(buff));
+                    pthread_mutex_unlock(&socket_client->mutex);
+                }
                 break;
             case 4:
                 //signal v prepnutom mode chcem teraz kroky
                 buff[0] = '3';
                 buff[1] = '\0';
+                if (pouziPipe) {
+                  //  printf("Zapisujem do pipe %s\n", buff);
+                    pipe_write(&klient->pip_write, buff, strlen(buff));
+                } else {
                 
-                pthread_mutex_lock(&socket_client->mutex);
-                socket_write(&socket_client->activeSocket, buff , strlen(buff));
-                pthread_mutex_unlock(&socket_client->mutex);
+                    pthread_mutex_lock(&socket_client->mutex);
+                    socket_write(&socket_client->activeSocket, buff , strlen(buff));
+                    pthread_mutex_unlock(&socket_client->mutex);
+                }
                 break;
             case 5:
                 //signal na odpojenie
                 buff[0] = '4';
                 buff[1] = '\0';
+                if (pouziPipe) {
+                   // printf("Zapisujem do pipe %s\n", buff);
+                    pipe_write(&klient->pip_write, buff, strlen(buff));
+                    atomic_store(&klient->klien_bezi, 0);
+                   
+                } else {
                 
-                pthread_mutex_lock(&socket_client->mutex);
-                socket_write(&socket_client->activeSocket, buff , strlen(buff));
-                pthread_mutex_unlock(&socket_client->mutex);
-                atomic_store(&socket_client->klien_bezi, 0);
+                    pthread_mutex_lock(&socket_client->mutex);
+                    socket_write(&socket_client->activeSocket, buff , strlen(buff));
+                    pthread_mutex_unlock(&socket_client->mutex);
+                    atomic_store(&socket_client->klien_bezi, 0);
+                }
                 break;
             default:
                 printf(ORANGE "Také číslo nie je uvedené.\n" RESET);
                 break;
         }
     }
-    return;
+    return 0;
                             
 }
 
@@ -220,6 +268,85 @@ void * vypisujObraz(void * arg) {
     pthread_exit(NULL);
 }
 
+void * vypisujObraz_pipe(void * arg) {
+    klient_pipe_t * klient = arg;
+    
+    char * buf;
+    char nacitaj[50];
+    int maxVelkost = 100;
+    
+    int aktualVelkost = 0;
+    buf = calloc(maxVelkost, sizeof(char));
+    if (buf == NULL) {
+        perror(RED "Chyba alokovania pamäte." RESET);
+        exit(EXIT_FAILURE);
+    }
+   
+     while (atomic_load(&klient->klien_bezi)) {
+
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(klient->pip_read.fD, &readfds);
+
+        struct timeval tv;
+        tv.tv_sec = 0;
+        tv.tv_usec = 300000; 
+
+        int rv = select(klient->pip_read.fD + 1,
+                        &readfds, NULL, NULL, &tv);
+
+        if (rv == -1) {
+            perror("select");
+            atomic_store(&klient->klien_bezi, 0);
+            break;
+        }
+
+        if (rv == 0) {
+            continue; 
+        }
+
+        int n = pipe_read(&klient->pip_read, nacitaj, sizeof(nacitaj));
+        if (n <= 0) {
+            atomic_store(&klient->klien_bezi, 0);
+            break;
+        }
+
+        for (int i = 0; i < n; i++) {
+
+            if (aktualVelkost >= maxVelkost - 1) {
+                int novaVelkost = maxVelkost + 50;
+                char *tmp = realloc(buf, novaVelkost);
+                if (!tmp) {
+                    perror(RED "Chyba pri zväčšení pamäte." RESET);
+                    free(buf);
+                    pthread_exit(NULL);
+                }
+                buf = tmp;
+                maxVelkost = novaVelkost;
+            }
+
+            buf[aktualVelkost] = nacitaj[i];
+            aktualVelkost++;
+            if (strstr(buf, "off") != NULL) {
+                atomic_store(&klient->klien_bezi, 0);
+                pthread_exit(NULL);
+            }
+
+            if (nacitaj[i] == '\0') {
+                printf("%s", buf);
+                fflush(stdout);
+                memset(buf, 0, maxVelkost);
+                aktualVelkost = 0;
+            }
+        }
+    }
+
+    free(buf);
+    pthread_exit(NULL);
+}
+
+
+
 _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
     _Bool nacitaj_zo_suboru;
     if (mozno_cesta_subor == NULL) {
@@ -302,3 +429,92 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
         return 1;
     }
 }
+
+_Bool nacitaj_zo_suboru_pipe(pipe_data_t * pip_write, char * mozno_cesta_subor) {
+    _Bool nacitaj_zo_suboru;
+    if (mozno_cesta_subor == NULL) {
+        while (1) {
+    
+    
+        char buf [200];
+        memset(buf, 0, sizeof(buf));
+        printf(GREEN "Zadaj, či sa svet ma načítať zo súboru(1) alebo nie(0)?: " RESET);
+        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            perror("Chyba načitavania textu");
+            exit(EXIT_FAILURE);
+        }
+        char * kontrola;
+        int tmp_int;
+        tmp_int = strtol(buf, &kontrola, 10);
+        if (kontrola == buf) {
+            printf(RED "To nie je číslo, zadaj znova.\n" RESET);
+        } else {
+            if (tmp_int == 1 || tmp_int == 0) {
+                nacitaj_zo_suboru = (_Bool)tmp_int;
+                break;
+            } else {
+                printf(ORANGE "Zle zadané číslo, skús znova." RESET);
+            }
+
+            
+        }
+    }
+    char cesta_k_suboru[200];
+    if (nacitaj_zo_suboru) {
+    
+        
+        memset(cesta_k_suboru, 0, sizeof(cesta_k_suboru));
+        while (1) {
+        
+        
+            char buf [200];
+            memset(buf, 0, sizeof(buf));
+            printf(GREEN "Zadaj cestu k súboru: " RESET);
+            if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                perror(RED "Chyba načitavania textu." RESET);
+                exit(EXIT_FAILURE);
+            }
+            buf[strcspn(buf, "\n")] = '\0';
+            memcpy(cesta_k_suboru, buf,strlen(buf) + 1);
+            break;
+        }
+    }
+    if (nacitaj_zo_suboru) {
+        
+      
+        
+        
+        char poslat[230];
+        memset(poslat, 0, sizeof(poslat));
+        poslat[0] = '7';
+        poslat[1] = ';';            //7;cestaksuboru
+        memcpy(poslat + 2, cesta_k_suboru, strlen(cesta_k_suboru) + 1);
+        pipe_write(pip_write, poslat, strlen(poslat) + 1);
+    } else {
+        
+        char buf[2];
+        buf[0] = '5';
+        buf[1] = ';';
+        
+        pipe_write(pip_write, buf, 2);
+    }
+
+    return nacitaj_zo_suboru;
+    } else {
+       
+        
+        
+        char poslat[230];
+        memset(poslat, 0, sizeof(poslat));
+        poslat[0] = '7';
+        poslat[1] = ';';            //7;cestaksuboru
+        memcpy(poslat + 2, mozno_cesta_subor, strlen(mozno_cesta_subor) + 1);
+        pipe_write(pip_write, poslat, strlen(poslat) + 1);
+        return 1;
+    }
+}
+
+
+ void spusti_initmenu_klient_pipe() {
+
+ }

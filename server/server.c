@@ -23,11 +23,11 @@ int main(int argc, char const *argv[])
     socket_server_t socket_server;
     socket_server_init(&socket_server, 2000);
     socket_server_accept_connection(&socket_server);
-    svt_t * skuska = server_info_subor(&socket_server);
+    svt_t * skuska = server_info_subor(&socket_server, NULL, 0);
     svt_t * svet;
     
     if (skuska == NULL) {
-        svet = nastav_server(&socket_server);
+        svet = nastav_server(&socket_server, NULL , 0);
         
         svt_vp_t  vypisovac;
         
@@ -35,7 +35,7 @@ int main(int argc, char const *argv[])
         vypisovac.svet = svet;
        
         
-        posli_vsetkym_svet(&vypisovac);
+        posli_vsetkym_svet(&vypisovac, NULL , 0);
         sleep(1);
         generuj_pravdepodobnost(svet);
        
@@ -68,10 +68,10 @@ int main(int argc, char const *argv[])
         if (atomic_load(&socket_server.server_info.sumarny_mod)) {
             
             
-            posli_vsetkym_statistiku(svet_vypis);
+            posli_vsetkym_statistiku(svet_vypis, NULL , 0);
             
         } else {
-            server_vykonavaj_sim(svet_vypis);
+            server_vykonavaj_sim(svet_vypis, NULL , 0);
             if (!atomic_load(&socket_server.server_info.sumarny_mod)) {
                 atomic_store(&socket_server.server_bezi, 0);
             } 

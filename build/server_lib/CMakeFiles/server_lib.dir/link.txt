@@ -1,1 +1,0 @@
-/usr/bin/cc -fPIC -shared -Wl,--dependency-file=CMakeFiles/server_lib.dir/link.d -Wl,-soname,libserver_lib.so -o libserver_lib.so CMakeFiles/server_lib.dir/pomoc_server.c.o
