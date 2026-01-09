@@ -2,10 +2,13 @@
 	"InstallScripts" : 
 	[
 		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/cmake_install.cmake",
-		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/cmake_install.cmake",
+		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/server/cmake_install.cmake",
+		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/klient/cmake_install.cmake",
 		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody/cmake_install.cmake",
 		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/sockety/cmake_install.cmake",
-		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/zdielanaPamat/cmake_install.cmake"
+		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/zdielanaPamat/cmake_install.cmake",
+		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/server_lib/cmake_install.cmake",
+		"/home/nereke/Dokumenty/skola/POS/Semestralka/build/klient_lib/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

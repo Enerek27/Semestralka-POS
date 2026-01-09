@@ -1,9 +1,11 @@
 /home/nereke/Dokumenty/skola/POS/Semestralka/build/CMakeFiles/edit_cache.dir
 /home/nereke/Dokumenty/skola/POS/Semestralka/build/CMakeFiles/rebuild_cache.dir
-/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/CMakeFiles/klient.dir
-/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/CMakeFiles/server.dir
-/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/CMakeFiles/edit_cache.dir
-/home/nereke/Dokumenty/skola/POS/Semestralka/build/client_server/CMakeFiles/rebuild_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/server/CMakeFiles/server.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/server/CMakeFiles/edit_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/server/CMakeFiles/rebuild_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/klient/CMakeFiles/klient.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/klient/CMakeFiles/edit_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/klient/CMakeFiles/rebuild_cache.dir
 /home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody/CMakeFiles/zdrojove_kody.dir
 /home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody/CMakeFiles/edit_cache.dir
 /home/nereke/Dokumenty/skola/POS/Semestralka/build/zdrojove_kody/CMakeFiles/rebuild_cache.dir
@@ -13,3 +15,9 @@
 /home/nereke/Dokumenty/skola/POS/Semestralka/build/zdielanaPamat/CMakeFiles/zdielanaPamat.dir
 /home/nereke/Dokumenty/skola/POS/Semestralka/build/zdielanaPamat/CMakeFiles/edit_cache.dir
 /home/nereke/Dokumenty/skola/POS/Semestralka/build/zdielanaPamat/CMakeFiles/rebuild_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/server_lib/CMakeFiles/server_lib.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/server_lib/CMakeFiles/edit_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/server_lib/CMakeFiles/rebuild_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/klient_lib/CMakeFiles/klient_lib.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/klient_lib/CMakeFiles/edit_cache.dir
+/home/nereke/Dokumenty/skola/POS/Semestralka/build/klient_lib/CMakeFiles/rebuild_cache.dir

@@ -39,7 +39,7 @@ char * vrat_menu_klient() {
    len += snprintf(buff + len, maxPocetZnakov - len, GREEN "3. ZOBRAZ STATISTIKU\n");
    len += snprintf(buff + len, maxPocetZnakov - len, GREEN "4. ZOBRAZ KROKY\n");
    len += snprintf(buff + len, maxPocetZnakov - len, GREEN "5. ODPOJ SA OD SIMULACIE\n" RESET);
-   
+   //TODO dorobit riadok pre odpoved
    return buff;
 }
 
@@ -317,7 +317,6 @@ char * svet_vypis_statistiku(svt_t * svet) {
    
      for (int i = 0; i < svet->hranica_y; i++) {    
         for (int j = 0; j < svet->hranica_x; j++) {
-            char buf[16];
             if (svet->pole[j][i] == 2) {
 
                 //printf("\033[31m%7s\033[0m", "X");
@@ -653,9 +652,7 @@ void posli_vsetkym_statistiku(svt_brd_t * data) {
     while (atomic_load(&data->server->server_bezi)) {
     
         
-        pthread_mutex_lock(&data->server->mutex);
-        int pocet_vlakien = data->server->pocetKlinetov;
-        pthread_mutex_unlock(&data->server->mutex);
+       
         if (!data->server->server_bezi || !atomic_load(&data->server->server_info.sumarny_mod)) {
             
             break;
@@ -960,7 +957,7 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf(GREEN "Zadaj výšku po+a(rozmer y): " RESET);
+        printf(GREEN "Zadaj výšku pola(rozmer y): " RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
             perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
@@ -1060,7 +1057,7 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         
             char buf [200];
             memset(buf, 0, sizeof(buf));
-            printf(GREEN "Zadaj pravdepodobnosť pohybu -> smer vlavo: \n" RESET);
+            printf(GREEN "Zadaj pravdepodobnosť pohybu -> smer vlavo: " RESET);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
                 perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);
@@ -1158,10 +1155,13 @@ void spusti_initmenu_klient(socket_client_t * socket) {
 
 int hlavne_menu_klient(){
     while (1) {
-    
-        printf("\n \033[38;5;128m Vitaj v aplikácii menom Náhodna pochôdzka.\n K dispozícii máš tento manuál, v ktorom si môžeš vybrať priebeh pochôdzky.\n\n" RESET);
+        //TODO treba skryte znaky na vycistenie obrazovky a presunutie kurzora
+        //sem ich daj
+        fflush(stdout);
+        printf("\033[38;5;128m Vitaj v aplikácii menom Náhodna pochôdzka.\n K dispozícii máš tento manuál, v ktorom si môžeš vybrať priebeh pochôdzky.\n\n" RESET);
         printf("\033[38;5;172m MENU:\n 1. NOVÁ SIMULÁCIA \n 2. PRIPOJENIE K SIMULÁCII\n 3. OPATOVNÉ SPUSTENIE SIMULÁCIE\n 4. KONIEC\n" RESET);
         printf(GREEN" Tvoja voľba je: " RESET);
+        
         int moznost;
         char buf [200];
         memset(buf, 0, sizeof(buf));

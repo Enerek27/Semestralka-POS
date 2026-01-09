@@ -253,9 +253,7 @@ void socket_server_init(socket_server_t * this, int port) {
   pthread_mutex_init(&this->mutex, NULL);
   this->server_bezi = (atomic_bool)1;
   this->hlavny_klient = 0;
-  srv_inf_t server_info;
   atomic_store(&this->server_info.sumarny_mod, 0);
-  this->server_info = server_info;
   this->dokopyPripojenych = 0;
   
 }
@@ -357,7 +355,7 @@ void socket_server_destroy(socket_server_t * this) {
   
 }
 // Funkcia na inicializáciu klienta, pričom je potrebné uviesť aj názov servera a port, na ktorom bude zadaný server čakať na pripojenia
-void socket_client_init(socket_client_t * this, char * serverName, char * port) {
+_Bool socket_client_init(socket_client_t * this, char * serverName, char * port) {
   // Štruktúra používaná pre potreby uloženia adries servera
   struct addrinfo * server;
   // Štruktúra používaná na definovanie základných informácií o type komunikácie
@@ -374,7 +372,7 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
   int s = getaddrinfo(serverName, port, &hints, &server);
   if (s != 0) {
     fprintf( stderr, RED "socket_client_init: zlyhanie funkcie getaddrinfo(%d): %s\n" RESET, s, gai_strerror(s));
-    exit(EXIT_FAILURE);
+    return 0;
   }
   // Pozor! V určitých prípadoch môže existovať aj viac dostupných adries
   for (struct addrinfo * rp = server; rp != NULL; rp = rp->ai_next) {
@@ -398,13 +396,13 @@ void socket_client_init(socket_client_t * this, char * serverName, char * port) 
       this->port = atoi(port);
       atomic_store(&this->klien_bezi, 1);
       pthread_mutex_init(&this->mutex, NULL);
-      return;
+      return 1;
     }
   }
   // Pokiaľ po prejdení všetkých adries nedošlo k pripojeniu, tak vypíš chybu a skonči
   fprintf(stderr, RED "socket_client_init: zlyhalo pripojenie na server.\n" RESET);
   freeaddrinfo(server);
-  exit(EXIT_FAILURE);
+  return 0;
 }
 // Funkcia na zničenie klienta, čo znamená zničenie aktívneho soketu
 void socket_client_destroy(socket_client_t * this) {

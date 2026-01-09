@@ -10,7 +10,10 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/home/nereke/Dokumenty/skola/POS/Semestralka/CMakeLists.txt"
   "CMakeFiles/4.2.1/CMakeCCompiler.cmake"
   "CMakeFiles/4.2.1/CMakeSystem.cmake"
-  "/home/nereke/Dokumenty/skola/POS/Semestralka/client_server/CMakeLists.txt"
+  "/home/nereke/Dokumenty/skola/POS/Semestralka/klient/CMakeLists.txt"
+  "/home/nereke/Dokumenty/skola/POS/Semestralka/klient_lib/CMakeLists.txt"
+  "/home/nereke/Dokumenty/skola/POS/Semestralka/server/CMakeLists.txt"
+  "/home/nereke/Dokumenty/skola/POS/Semestralka/server_lib/CMakeLists.txt"
   "/home/nereke/Dokumenty/skola/POS/Semestralka/sockety/CMakeLists.txt"
   "/home/nereke/Dokumenty/skola/POS/Semestralka/zdielanaPamat/CMakeLists.txt"
   "/home/nereke/Dokumenty/skola/POS/Semestralka/zdrojove_kody/CMakeLists.txt"
@@ -116,17 +119,22 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/4.2.1/CMakeCCompiler.cmake"
   "CMakeFiles/4.2.1/CMakeCCompiler.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
-  "client_server/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "server/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "klient/CMakeFiles/CMakeDirectoryInformation.cmake"
   "zdrojove_kody/CMakeFiles/CMakeDirectoryInformation.cmake"
   "sockety/CMakeFiles/CMakeDirectoryInformation.cmake"
   "zdielanaPamat/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "server_lib/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "klient_lib/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "client_server/CMakeFiles/klient.dir/DependInfo.cmake"
-  "client_server/CMakeFiles/server.dir/DependInfo.cmake"
+  "server/CMakeFiles/server.dir/DependInfo.cmake"
+  "klient/CMakeFiles/klient.dir/DependInfo.cmake"
   "zdrojove_kody/CMakeFiles/zdrojove_kody.dir/DependInfo.cmake"
   "sockety/CMakeFiles/sockety.dir/DependInfo.cmake"
   "zdielanaPamat/CMakeFiles/zdielanaPamat.dir/DependInfo.cmake"
+  "server_lib/CMakeFiles/server_lib.dir/DependInfo.cmake"
+  "klient_lib/CMakeFiles/klient_lib.dir/DependInfo.cmake"
   )

@@ -78,7 +78,7 @@ void socket_server_destroy(socket_server_t * this);
 
 
 // Hlavičky funkcií, ktoré sú verejne dostupné a pracujú s informáciami pre klienta
-void socket_client_init(socket_client_t * this, char * serverName, char * port);
+_Bool socket_client_init(socket_client_t * this, char * serverName, char * port);
 void socket_client_destroy(socket_client_t * this);
 void socket_posli_klientom_end( socket_server_t * server);
 #endif

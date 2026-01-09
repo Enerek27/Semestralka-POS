@@ -117,19 +117,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named klient
-
-# Build rule for target.
-klient: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 klient
-.PHONY : klient
-
-# fast build rule for target.
-klient/fast:
-	$(MAKE) $(MAKESILENT) -f client_server/CMakeFiles/klient.dir/build.make client_server/CMakeFiles/klient.dir/build
-.PHONY : klient/fast
-
-#=============================================================================
 # Target rules for targets named server
 
 # Build rule for target.
@@ -139,8 +126,21 @@ server: cmake_check_build_system
 
 # fast build rule for target.
 server/fast:
-	$(MAKE) $(MAKESILENT) -f client_server/CMakeFiles/server.dir/build.make client_server/CMakeFiles/server.dir/build
+	$(MAKE) $(MAKESILENT) -f server/CMakeFiles/server.dir/build.make server/CMakeFiles/server.dir/build
 .PHONY : server/fast
+
+#=============================================================================
+# Target rules for targets named klient
+
+# Build rule for target.
+klient: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 klient
+.PHONY : klient
+
+# fast build rule for target.
+klient/fast:
+	$(MAKE) $(MAKESILENT) -f klient/CMakeFiles/klient.dir/build.make klient/CMakeFiles/klient.dir/build
+.PHONY : klient/fast
 
 #=============================================================================
 # Target rules for targets named zdrojove_kody
@@ -181,6 +181,32 @@ zdielanaPamat/fast:
 	$(MAKE) $(MAKESILENT) -f zdielanaPamat/CMakeFiles/zdielanaPamat.dir/build.make zdielanaPamat/CMakeFiles/zdielanaPamat.dir/build
 .PHONY : zdielanaPamat/fast
 
+#=============================================================================
+# Target rules for targets named server_lib
+
+# Build rule for target.
+server_lib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 server_lib
+.PHONY : server_lib
+
+# fast build rule for target.
+server_lib/fast:
+	$(MAKE) $(MAKESILENT) -f server_lib/CMakeFiles/server_lib.dir/build.make server_lib/CMakeFiles/server_lib.dir/build
+.PHONY : server_lib/fast
+
+#=============================================================================
+# Target rules for targets named klient_lib
+
+# Build rule for target.
+klient_lib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 klient_lib
+.PHONY : klient_lib
+
+# fast build rule for target.
+klient_lib/fast:
+	$(MAKE) $(MAKESILENT) -f klient_lib/CMakeFiles/klient_lib.dir/build.make klient_lib/CMakeFiles/klient_lib.dir/build
+.PHONY : klient_lib/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -190,7 +216,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... klient"
+	@echo "... klient_lib"
 	@echo "... server"
+	@echo "... server_lib"
 	@echo "... sockety"
 	@echo "... zdielanaPamat"
 	@echo "... zdrojove_kody"
