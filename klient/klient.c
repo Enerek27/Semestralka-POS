@@ -107,7 +107,7 @@ int main(int argc, char const *argv[])
                                     pthread_t vlakno;
                                     pthread_create(&vlakno, NULL, vypisujObraz_pipe, &klient);
                                     
-                                    int odpoved;
+                                    
                                     while (atomic_load(&klient.klien_bezi)) {
                                         
                                         klient_odpovedaj(NULL, &klient, 1);
@@ -230,7 +230,7 @@ int main(int argc, char const *argv[])
                                     pthread_t vlakno;
                                     pthread_create(&vlakno, NULL, vypisujObraz_pipe, &klient);
                                     
-                                    int odpoved;
+                                    
                                     while (atomic_load(&klient.klien_bezi)) {
                                         
                                         klient_odpovedaj(NULL, &klient, 1);
@@ -351,7 +351,7 @@ int main(int argc, char const *argv[])
                                     pthread_t vlakno;
                                     pthread_create(&vlakno, NULL, vypisujObraz_pipe, &klient);
                                     printf("Vlakno vytvorene ideme pocuvat\n");
-                                    int odpoved;
+                                    
                                     while (atomic_load(&klient.klien_bezi)) {
                                         
                                         klient_odpovedaj(NULL, &klient, 1);

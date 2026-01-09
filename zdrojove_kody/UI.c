@@ -34,7 +34,7 @@ char * vrat_menu_klient() {
     exit(EXIT_FAILURE);
    }
 
-   int len = 0;
+  
    
    snprintf(buff, maxPocetZnakov,
     ZLATA "MENU:\n"
