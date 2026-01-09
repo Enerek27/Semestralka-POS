@@ -1,8 +1,9 @@
-
-//TODO
-// treba potom zmenit na svet.h
-
 #define _POSIX_C_SOURCE 200809L
+#define UZIVATELFARBA "\033[38;5;14m"
+#define GREEN "\033[32m"
+#define ORANGE "\033[38;5;9m"
+#define RESET "\033[0m"
+
 #include <sys/wait.h>
 
 #include <signal.h>
@@ -37,9 +38,6 @@ int main(int argc, char const *argv[])
     sigaction(SIGCHLD, &sa, NULL);
 
    while (idem) {
-        //tvoje menu
-        //
-        //
         // switch co lydkine menu vrati podla toho sa bude nieco robit
         
         int odpoved = hlavne_menu_klient();
@@ -58,11 +56,14 @@ int main(int argc, char const *argv[])
                     _Bool dobreZadal = 1;
                     while (dobreZadal) {
 
-                        printf(GREEN "Ma byt simulacia pre 1 alebo viac ? (0/1):  " RESET);
+                        printf(GREEN "AK ma byt simulacia pre jedneho kienta, napis 1, inak zadaj vlastny pocet:  " RESET);
+                        printf(UZIVATELFARBA);
                         if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                            printf(RESET);
                             perror(RED "Chyba načitavania textu." RESET);
                             exit(EXIT_FAILURE);
                         }
+                        printf(RESET);
                         
                         pocetPouzivatelov = strtol(buf, &kontrola, 10);
                         if (kontrola == buf) {
@@ -133,12 +134,15 @@ int main(int argc, char const *argv[])
                     { char buf[200];
                     //treba upravit vypinanie aby tam bola dalsia moznost
                     printf(GREEN "Napíš adresu pripojenia: " RESET);
+                    printf(UZIVATELFARBA);
                     char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
                     adresaPripojenia[strcspn(adresaPripojenia, "\n")] = '\0';
                     if (adresaPripojenia == NULL) {
+                        printf(RESET);
                         perror(RED "Chyba načitavania textu." RESET);
                         exit(EXIT_FAILURE);
                     } 
+                    printf(RESET);
                     socket_client_t socket_client;
                     if (socket_client_init(&socket_client, adresaPripojenia, "2000")) {
                             break;
@@ -169,10 +173,13 @@ int main(int argc, char const *argv[])
                     char buf [200];
                     memset(buf, 0, sizeof(buf));
                     printf(GREEN "Zadaj cestu k súboru: \n" RESET);
+                    printf(UZIVATELFARBA);
                     if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                        printf(RESET);
                         perror(RED "Chyba načitavania textu." RESET);
                         exit(EXIT_FAILURE);
                     }
+                    printf(RESET);
                     buf[strcspn(buf, "\n")] = '\0';
                     memcpy(cesta_k_suboru, buf,strlen(buf) + 1);
                     break;
@@ -192,7 +199,7 @@ int main(int argc, char const *argv[])
                     }
                     if (je_klient_hlavny(&socket_client)) {
                         if (!nacitaj_zo_suboru(&socket_client, cesta_k_suboru)) {
-                            printf("Subor sa nenasiel\n");
+                            printf(ORANGE "Súbor sa nenašiel.\n" RESET);
                             break;
                         }   
                     }

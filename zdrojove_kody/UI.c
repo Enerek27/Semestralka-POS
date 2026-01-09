@@ -6,6 +6,8 @@
 #define GREEN "\033[32m"
 #define ORANGE "\033[38;5;9m"
 #define BLUE "\033[34m"
+#define UZIVATELFARBA "\033[38;5;14m"
+#define ZLATA "\033[38;5;222m"
 #define RESET "\033[0m"
 
 #include "UI.h"
@@ -27,19 +29,20 @@ char * vrat_menu_klient() {
     buff = calloc(maxPocetZnakov, sizeof(char));
     if (buff == NULL)
    {
-    perror("Chyba pamäte v inicializácii, vo vykresleni sveta.");
+    perror(RED "Chyba pamäte v inicializácii, vo vykresleni sveta." RESET);
     exit(EXIT_FAILURE);
    }
 
    int len = 0;
    
-   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "MENU:\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "1. VYPNI SIMULACIU\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "2. ZMEN MOD SIMULACIE\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "3. ZOBRAZ STATISTIKU\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "4. ZOBRAZ KROKY\n");
-   len += snprintf(buff + len, maxPocetZnakov - len, GREEN "5. ODPOJ SA OD SIMULACIE\n" RESET);
-   //TODO dorobit riadok pre odpoved
+   snprintf(buff, maxPocetZnakov,
+    ZLATA "MENU:\n"
+            ZLATA "1. VYPNI SIMULACIU\n"
+            ZLATA "2. ZMEN MOD SIMULACIE\n"
+            ZLATA "3. ZOBRAZ STATISTIKU\n"
+            ZLATA "4. ZOBRAZ KROKY\n"
+            ZLATA "5. ODPOJ SA OD SIMULACIE\n" RESET
+            GREEN "Tvoje odpoved je: " RESET );
    return buff;
 }
 
@@ -56,7 +59,7 @@ char * vycisti_obrazovku() {
     exit(EXIT_FAILURE);
    }
 
-   int len = snprintf(zatial, sizeof(zatial), "\033[H");
+   int len = snprintf(zatial, sizeof(zatial), "\033[2J");
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -75,7 +78,7 @@ char * vycisti_obrazovku() {
     //printf("\033[H");   //ako clear
 
 
-   len = snprintf(zatial, sizeof(zatial), "\033[2J");
+   len = snprintf(zatial, sizeof(zatial), "\033[H");
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -111,7 +114,7 @@ char * vykresli_svet(svt_t * svet) {
     exit(EXIT_FAILURE);
    }
 
-   char * vycistenieObr = vycisti_obrazovku(); // ona mi posle char, co mam do zaciatku buffru prilepit  TODO
+   char * vycistenieObr = vycisti_obrazovku(); // ona mi posle char, co mam do zaciatku buffru prilepit
    int len = snprintf(zatial, sizeof(zatial), "%s", vycistenieObr);
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
@@ -132,7 +135,7 @@ char * vykresli_svet(svt_t * svet) {
 
 
    
-   len = snprintf(zatial, sizeof(zatial), "\033[90m%s: %d/ \033[75m %d\033[0m\n","Pocet replikacii", svet->original_replikacii, svet->pocet_replikacii );
+   len = snprintf(zatial, sizeof(zatial), "\033[90m%s: %d/\033[75m %d\033[0m\n","Počet replikácii", svet->original_replikacii, svet->pocet_replikacii );
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -149,7 +152,7 @@ char * vykresli_svet(svt_t * svet) {
    memcpy(buff + aktualPocetZnakov, zatial, len);
    aktualPocetZnakov += len;
 
-   len = snprintf(zatial, sizeof(zatial), "\033[93m%s: %d/%d\033[0m\n","Pocet krokov", svet->pocet_krokov_K_origo, svet->pocet_krokov_K);
+   len = snprintf(zatial, sizeof(zatial), "\033[93m%s: %d/%d\033[0m\n","Počet krokov", svet->pocet_krokov_K_origo, svet->pocet_krokov_K);
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -296,7 +299,7 @@ char * svet_vypis_statistiku(svt_t * svet) {
 
 
    //printf("\033[1;32m--- STATISTIKA PRAVDEPODOBNOSTI ---\033[0m\n");  
-    len = snprintf(zatial, sizeof(zatial), "\033[1;32m--- STATISTIKA PRAVDEPODOBNOSTI ---\033[0m\n");
+    len = snprintf(zatial, sizeof(zatial), "\033[1;32m--- ŠTATISTIKA PRAVDEPODOBNOSTI ---\033[0m\n");
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -449,7 +452,7 @@ char *  svet_vypis_kroky(svt_t * svet) {
 
 
     //printf("\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
-    len = snprintf(zatial, sizeof(zatial), "%s", "\033[1;32m--- STATISTIKA KROKOV ---\033[0m\n");
+    len = snprintf(zatial, sizeof(zatial), "%s", "\033[1;32m--- ŠTATISTIKA KROKOV ---\033[0m\n");
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -592,7 +595,7 @@ void server_vykonavaj_sim(svt_brd_t * data) {
                 return;
             }
             if (data->svet->chodec->x == data->svet->stred_x && data->svet->chodec->y == data->svet->stred_y) {
-                printf("Chodec Dosiahol stred!!\n");
+                printf(ZLATA "Chodec Dosiahol stred!!\n" RESET);
                 sleep(1);
                 break;
             }
@@ -914,35 +917,28 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket) {
 
 
 void spusti_initmenu_klient(socket_client_t * socket) {
-
     srv_p_t vstup;
     char cesta_k_suboru[200];
-
-
-
     int pocet_krokov_K;
-
     int pocet_replikacii;
-
     prvd_t pravdepodobnosti;
-
     int rozmer_x;
-
     int rozmer_y;
-
     _Bool svet_s_prekazkami;
-
     
     while (1) {
     
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf(GREEN "Zadaj šírku poľa(rozmer x): " RESET);
+        printf(GREEN "Zadaj jedno číslo - šírku poľa(rozmer x): " RESET);
+        printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            printf(RESET);
             perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
+        printf(RESET);
         char * kontrola;
         rozmer_x = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
@@ -957,11 +953,14 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf(GREEN "Zadaj výšku pola(rozmer y): " RESET);
+        printf(GREEN "Zadaj jedno číslo - výšku poľa(rozmer y): " RESET);
+        printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            printf(RESET);
             perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
+        printf(RESET);
         char * kontrola;
         rozmer_y = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
@@ -977,10 +976,13 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         char buf [200];
         memset(buf, 0, sizeof(buf));
         printf(GREEN "Zadaj počet replikácii simulácie: " RESET);
+        printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            printf(RESET);
             perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
+        printf(RESET);
         char * kontrola;
         pocet_replikacii = strtol(buf, &kontrola, 10);
         
@@ -996,18 +998,21 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
 
     while (1) {
-        printf(GREEN "Zadaj pravdepodobnosti v tvare s desatinnou bodkou.\n");
-        printf( "Ich súčet musí byť 1.\n" RESET);
+        printf(GREEN "\nZadaj pravdepodobnosti v tvare s desatinnou bodkou.\n");
+        printf( "Ich súčet MUSÍ BYŤ 1.\n" RESET);
     
         while (1) {
         
             char buf [200];
             memset(buf, 0, sizeof(buf));
             printf(GREEN "Zadaj pravdepodobnosť pohybu -> smer hore: " RESET);
+            printf(UZIVATELFARBA);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                printf(RESET);
                 perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
+            printf(RESET);
             char * kontrola;
             pravdepodobnosti.hore = strtof(buf, &kontrola);
             if (kontrola == buf) {
@@ -1022,10 +1027,13 @@ void spusti_initmenu_klient(socket_client_t * socket) {
             char buf [200];
             memset(buf, 0, sizeof(buf));
             printf(GREEN "Zadaj pravdepodobnosť pohybu -> smer dole: " RESET);
+            printf(UZIVATELFARBA);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                printf(RESET);
                 perror(RED "Chyba načítavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
+            printf(RESET);
             char * kontrola;
             pravdepodobnosti.dole = strtof(buf, &kontrola);
             if (kontrola == buf) {
@@ -1040,10 +1048,13 @@ void spusti_initmenu_klient(socket_client_t * socket) {
             char buf [200];
             memset(buf, 0, sizeof(buf));
             printf(GREEN"Zadaj pravdepodobnosť pohybu -> smer vpravo: " RESET);
+            printf(UZIVATELFARBA);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                printf(RESET);
                 perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
+            printf(RESET);
             char * kontrola;
             pravdepodobnosti.vpravo = strtof(buf, &kontrola);
             if (kontrola == buf) {
@@ -1058,10 +1069,13 @@ void spusti_initmenu_klient(socket_client_t * socket) {
             char buf [200];
             memset(buf, 0, sizeof(buf));
             printf(GREEN "Zadaj pravdepodobnosť pohybu -> smer vlavo: " RESET);
+            printf(UZIVATELFARBA);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                printf(RESET);
                 perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);
             }
+            printf(RESET);
             char * kontrola;
             pravdepodobnosti.vlavo = strtof(buf, &kontrola);
             if (kontrola == buf) {
@@ -1079,7 +1093,7 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         if (sucet == 1.0) {
             break;
         } else {
-            printf(ORANGE"Sucet nie je 1.\n" RESET);
+            printf(ORANGE"Súčet sa nerová 1. Porozmýšľaj a skús znova.\n" RESET);
         }
     }
 
@@ -1089,10 +1103,13 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         char buf [200];
         memset(buf, 0, sizeof(buf));
         printf(GREEN "Zadaj hodnotu K -> maximálny počet krokov chodca: " RESET);
+        printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            printf(RESET);
             perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
+        printf(RESET);
         char * kontrola;
         pocet_krokov_K = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
@@ -1106,11 +1123,14 @@ void spusti_initmenu_klient(socket_client_t * socket) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf(GREEN "Zadaj či chceš svet s prekážkami(1) alebo bez nich(0): " RESET);
+        printf(GREEN "Ak súhlasíš, že chceš svet s prekážkami zadaj 1, inak zadaj 0: " RESET);
+        printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            printf(RESET);
             perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
+        printf(RESET);
         char * kontrola;
         int tmp_int;
         tmp_int = strtol(buf, &kontrola, 10);
@@ -1130,10 +1150,13 @@ void spusti_initmenu_klient(socket_client_t * socket) {
         char buf [200];
         memset(buf, 0, sizeof(buf));
         printf(GREEN "Zadaj cestu k súboru na uloženie(ukončená musi byť '.txt'): \n" RESET);
+        printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            printf(RESET);
             perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
+        printf(RESET);
         buf[strcspn(buf, "\n")] = '\0';
         memcpy(cesta_k_suboru, buf, strlen(buf));
         break;
@@ -1155,20 +1178,25 @@ void spusti_initmenu_klient(socket_client_t * socket) {
 
 int hlavne_menu_klient(){
     while (1) {
-        //TODO treba skryte znaky na vycistenie obrazovky a presunutie kurzora
-        //sem ich daj
+
+        printf("\033[2J");  //vymaze obrazovku
+        printf("\033[H");   //posun kurzora do lava hore
+        
         fflush(stdout);
         printf("\033[38;5;128m Vitaj v aplikácii menom Náhodna pochôdzka.\n K dispozícii máš tento manuál, v ktorom si môžeš vybrať priebeh pochôdzky.\n\n" RESET);
         printf("\033[38;5;172m MENU:\n 1. NOVÁ SIMULÁCIA \n 2. PRIPOJENIE K SIMULÁCII\n 3. OPATOVNÉ SPUSTENIE SIMULÁCIE\n 4. KONIEC\n" RESET);
-        printf(GREEN" Tvoja voľba je: " RESET);
+        printf(" \033[1;32m Tvoja voľba je: \033[0m" );
         
         int moznost;
         char buf [200];
         memset(buf, 0, sizeof(buf));
+        printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            printf(RESET);
             perror(RED "Chyba načitavania textu." RESET);
             exit(EXIT_FAILURE);
         }
+        printf(RESET);
         char * kontrola;    //ak nieco ostane v nej, znamena, ze zachytilo aspon nejake cislo
         moznost = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {

@@ -15,7 +15,7 @@
 static void pipe_open_with_flags(pipe_data_t * this, int flags) {
   this->fD = open(this->path, flags);
   if (this->fD == -1) {
-    fprintf(stderr, RED "Pipe_open_with_flags: zlyhanie otvorenia dátovodu: %s" RESET, this->path);
+    fprintf(stderr, RED "pipe_open_with_flags: zlyhanie otvorenia dátovodu: %s" RESET, this->path);
     perror("");
     exit(EXIT_FAILURE);
   }
@@ -24,7 +24,7 @@ static void pipe_open_with_flags(pipe_data_t * this, int flags) {
 void pipe_init(pipe_data_t * this, char * path, _Bool withCreation) {
   if (withCreation) {
     if (mkfifo(path, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP) == -1) {
-      perror(RED "Pipe_init: zlyhanie pri vytvorení dátovodu." RESET);
+      perror(RED "pipe_init: zlyhanie pri vytvorení dátovodu." RESET);
       exit(EXIT_FAILURE);
     }
   }
@@ -38,7 +38,7 @@ void pipe_destroy(pipe_data_t * this, _Bool withDeletion, _Bool withNameFree) {
       if (withNameFree) {
         free(this->path);
       }
-      perror(RED "Pipe_destroy: zlyhanie funkcie unlink pri vymazávani dátovodu." RESET);
+      perror(RED "pipe_destroy: zlyhanie funkcie unlink pri vymazávani dátovodu." RESET);
       exit(EXIT_FAILURE);
     }
   }
@@ -59,19 +59,19 @@ void pipe_open_read(pipe_data_t * this) {
 // Funkcia pre čítanie z dátovodu, pričom je potrebné uviesť aj miesto, kde sa uloží výsledok a maximálnu veľkosť miesta na uloženie
 void pipe_read(pipe_data_t * this, char * result, size_t size) {
   if (read(this->fD, result, size) == -1) {
-    perror(RED "Pipe_read: zlyhalo čítanie z dátovodu." RESET);
+    perror(RED "pipe_read: zlyhalo čítanie z dátovodu." RESET);
   }
 }
 // Funkcia pre zápis do dátovodu, pričom je potrebné uviesť aj miesto, kde sa nachádzajú údaje a veľkosť miesta, z ktorého sa číta
 void pipe_write(pipe_data_t * this, const char * data, size_t size) {
   if (write(this->fD, data, size) == -1) {
-    perror(RED "Pipe_write: zlyhal zápis do dátovodu!" RESET);
+    perror(RED "pipe_write: zlyhal zápis do dátovodu!" RESET);
   }
 }
 // Funkcia na zavretie dátovodu
 void pipe_close(pipe_data_t * this) {
   if (close(this->fD) == -1) {
-    perror(RED "Pipe_close: zlyhanie pri zatvárani dátovodu!" RESET);
+    perror(RED "pipe_close: zlyhanie pri zatvárani dátovodu!" RESET);
     exit(EXIT_FAILURE);
   }
   this->fD = 0;

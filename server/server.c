@@ -16,16 +16,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 int main(int argc, char const *argv[])
 {
     prctl(PR_SET_PDEATHSIG, SIGTERM);
