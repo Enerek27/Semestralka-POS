@@ -115,7 +115,7 @@ void * nacuvajklientovi_pipe(void * arg) {
           } else {
             //prijal som spravu spracovanie
             int signal = buf[0] - '0';
-            printf("prisla sprava %d\n", signal);
+            //printf("prisla sprava %d\n", signal);
               switch (signal) {
                 case 0:
                   //signal vypnutie

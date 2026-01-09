@@ -136,7 +136,7 @@ char * vykresli_svet(svt_t * svet) {
 
 
    
-   len = snprintf(zatial, sizeof(zatial), "\033[90m%s: %d/\033[75m %d\033[0m\n","Počet replikácii", svet->original_replikacii, svet->pocet_replikacii );
+   len = snprintf(zatial, sizeof(zatial), "\033[90m%s: %d/\033[75m%d\033[0m\n","Počet replikácii", svet->original_replikacii, svet->pocet_replikacii );
 
    if (aktualPocetZnakov + len >= maxPocetZnakov)
    {
@@ -600,6 +600,9 @@ void server_vykonavaj_sim(svt_brd_t * data, vypis_pipe_t * data_pipe, _Bool pouz
                     sleep(1);
                     break;
                 }
+                if (data_pipe->svet->pocet_krokov_K == 0) {
+                    break;
+                }
                 vypis_pipe_t vypisovac;
                 
                 
@@ -637,7 +640,9 @@ void server_vykonavaj_sim(svt_brd_t * data, vypis_pipe_t * data_pipe, _Bool pouz
                     break;
                 }
                 svt_vp_t vypisovac;
-                
+                if (data->svet->pocet_krokov_K == 0) {
+                    break;
+                }
                 
                 vypisovac.server = data->server;
                 vypisovac.svet = data->svet;
