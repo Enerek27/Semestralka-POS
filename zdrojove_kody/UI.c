@@ -104,7 +104,7 @@ char * vycisti_obrazovku() {
 
 char * vykresli_svet(svt_t * svet) {
     char * buff;
-   char zatial[128];
+   char zatial[450];
    int aktualPocetZnakov = 0;
    int maxPocetZnakov = 100;
    buff = calloc(maxPocetZnakov, sizeof(char));
@@ -596,7 +596,7 @@ void server_vykonavaj_sim(svt_brd_t * data, vypis_pipe_t * data_pipe, _Bool pouz
                     return;
                 }
                 if (data_pipe->svet->chodec->x == data_pipe->svet->stred_x && data_pipe->svet->chodec->y == data_pipe->svet->stred_y) {
-                    printf("Chodec Dosiahol stred!!\n");
+                    printf(ZLATA"Chodec Dosiahol stred!!\n"RESET);
                     sleep(1);
                     break;
                 }
@@ -614,6 +614,7 @@ void server_vykonavaj_sim(svt_brd_t * data, vypis_pipe_t * data_pipe, _Bool pouz
             }
             data_pipe->svet->pocet_krokov_K = data_pipe->svet->pocet_krokov_K_origo;
             data_pipe->svet->pocet_replikacii--;
+            posun_chodca_na(data_pipe->svet, data_pipe->svet->hranica_x - 1, data_pipe->svet->hranica_y -1 );
         }
     } else {
     
@@ -649,6 +650,7 @@ void server_vykonavaj_sim(svt_brd_t * data, vypis_pipe_t * data_pipe, _Bool pouz
             }
             data->svet->pocet_krokov_K = data->svet->pocet_krokov_K_origo;
             data->svet->pocet_replikacii--;
+            posun_chodca_na(data->svet, data->svet->hranica_x - 1, data->svet->hranica_y -1 );
         }
     }
 }
