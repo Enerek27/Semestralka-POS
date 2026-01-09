@@ -104,7 +104,7 @@ char * vycisti_obrazovku() {
 
 char * vykresli_svet(svt_t * svet) {
     char * buff;
-   char zatial[450];
+   char zatial[550];
    int aktualPocetZnakov = 0;
    int maxPocetZnakov = 100;
    buff = calloc(maxPocetZnakov, sizeof(char));
