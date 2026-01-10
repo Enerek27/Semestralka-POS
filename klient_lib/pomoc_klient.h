@@ -4,6 +4,7 @@
 #define RED "\033[31m"
 #define GREEN "\033[32m"
 #define ORANGE "\033[38;5;9m"
+#define UZIVATELFARBA "\033[38;5;14m"
 #define RESET "\033[0m"
 
 

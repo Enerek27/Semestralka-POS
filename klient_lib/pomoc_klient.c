@@ -356,10 +356,13 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
         char buf [200];
         memset(buf, 0, sizeof(buf));
         printf(GREEN "Zadaj, či sa svet ma načítať zo súboru(1) alebo nie(0)?: " RESET);
+        printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba načitavania textu");
+            printf(RESET);
+            perror(RED "Chyba načitavania textu" RESET);
             exit(EXIT_FAILURE);
         }
+        printf(RESET);
         char * kontrola;
         int tmp_int;
         tmp_int = strtol(buf, &kontrola, 10);
@@ -440,14 +443,14 @@ _Bool nacitaj_zo_suboru_pipe(pipe_data_t * pip_write, char * mozno_cesta_subor) 
         memset(buf, 0, sizeof(buf));
         printf(GREEN "Zadaj, či sa svet ma načítať zo súboru(1) alebo nie(0)?: " RESET);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
-            perror("Chyba načitavania textu");
+            perror(RED "Chyba načitavania textu" RESET);
             exit(EXIT_FAILURE);
         }
         char * kontrola;
         int tmp_int;
         tmp_int = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
-            printf(RED "To nie je číslo, zadaj znova.\n" RESET);
+            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
         } else {
             if (tmp_int == 1 || tmp_int == 0) {
                 nacitaj_zo_suboru = (_Bool)tmp_int;

@@ -97,7 +97,7 @@ void * nacuvajklientovi(void * arg) {
           int n = socket_read(&info_klient->socket_pocuvaj, buf, sizeof(buf));
           
           if (n < 0) {
-            printf("klient sa zavrel\n");
+            
             if (!atomic_load(&info_klient->bezi_klient)) {
               pthread_exit(NULL);
             }
@@ -384,7 +384,7 @@ _Bool socket_client_init(socket_client_t * this, char * serverName, char * port)
       continue;
     }
     // Pripojenie na server
-    printf("Klient sa pripaja na server.\n");
+    
     if (!socket_connect(&this->activeSocket, rp->ai_addr, rp->ai_addrlen)) {
       // Ak zlyhalo, tak sa zatvorí soket a pokračuje sa ďalšou adresou
       printf("Zlyhanie pripojenia.\n");

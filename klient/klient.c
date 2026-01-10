@@ -128,7 +128,7 @@ int main(int argc, char const *argv[])
                                 }
                                 dobreZadal = 0;
                                 break;
-                            } else if(pocetPouzivatelov < 1) {
+                            } else if(pocetPouzivatelov > 1) {
                                 pid_t pid = fork();
                                 if (pid == 0) {
                                     //treba zmenit na execl
@@ -244,7 +244,7 @@ int main(int argc, char const *argv[])
                                     
                                 dobreZadal = 0;
                                 break;
-                            } else if (pocetPouzivatelov < 0) {
+                            } else if (pocetPouzivatelov > 1) {
                             
                                 printf(GREEN "Napíš adresu pripojenia: " RESET);
                     printf(UZIVATELFARBA);
@@ -308,7 +308,7 @@ int main(int argc, char const *argv[])
                     _Bool dobreZadal = 1;
                     while (dobreZadal) {
 
-                        printf(GREEN "Ma byt simulacia pre 1 alebo viac ? (0/1):  " RESET);
+                        printf(GREEN "AK ma byt simulacia pre jedneho kienta, napis 1, inak zadaj vlastny pocet:  " RESET);
                         if (fgets(buf, sizeof(buf), stdin) == NULL) {
                             perror(RED "Chyba načitavania textu." RESET);
                             exit(EXIT_FAILURE);
@@ -319,12 +319,7 @@ int main(int argc, char const *argv[])
                             printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
                         } else {
                             if (pocetPouzivatelov == 1) {
-                                pipe_data_t pip_read;
-                                pipe_data_t pip_write;
-                                klient_pipe_t klient;
-                                klient.pip_write = pip_write;
-                                klient.pip_read = pip_read;
-                                atomic_store(&klient.klien_bezi, 1);
+                                
                                 pid_t pid = fork();
                                 if (pid == 0) {
                                     //treba zmenit na execl
@@ -332,25 +327,33 @@ int main(int argc, char const *argv[])
                                     perror(RED "Chyba pri spustení servera." RESET);
                                     _exit(EXIT_FAILURE);
                                 } else if (pid > 0) {
-                                    //tu bezi klient
-                                    sleep(1);
-                                    printf("Klient pripajam sa\n");
+                                   //tu bezi klient
+                                    pipe_data_t pip_read;
+                                    pipe_data_t pip_write;
+                                    klient_pipe_t klient;
+                                    atomic_store(&klient.klien_bezi, 1);
+                                    
+                                    sleep(2);
+                                  
+                                    
                                     pipe_init(&pip_read, "../pipe_read", 0);
                                     pipe_init(&pip_write, "../pipe_write", 0);
-                                    printf("Klient pripojil som sa\n");
-                                    pipe_open_read(&pip_read);
+                                    
                                     pipe_open_write(&pip_write);
-                                    printf("otvaril datovod\n");
+                                    pipe_open_read(&pip_read);
+                                   
+                                    klient.pip_write = pip_write;
+                                    klient.pip_read = pip_read;
                                    
                                     if (!nacitaj_zo_suboru_pipe(&pip_write, NULL)) {
-                                        printf("Spustam init menu\n");
+                                        
                                         spusti_initmenu_klient(NULL,&pip_write, 1);
                                     }   
                                     //tu som skoncil
 
                                     pthread_t vlakno;
                                     pthread_create(&vlakno, NULL, vypisujObraz_pipe, &klient);
-                                    printf("Vlakno vytvorene ideme pocuvat\n");
+                                    
                                     
                                     while (atomic_load(&klient.klien_bezi)) {
                                         
@@ -358,10 +361,9 @@ int main(int argc, char const *argv[])
                                     }
                                     pipe_destroy(&klient.pip_read, 0,0);
                                     pipe_destroy(&klient.pip_write, 0,0);
-                                    printf("Klient vlakno pripojene\n");
+                                   
                                     pthread_join(vlakno, NULL);
-                                    printf("Klient datovody znicene\n");
-                                    
+                                   
                                     
                                     
                                     
@@ -371,7 +373,7 @@ int main(int argc, char const *argv[])
                                 }
                                 dobreZadal = 0;
                                 break;
-                            } else if(pocetPouzivatelov < 0) {
+                            } else if(pocetPouzivatelov > 1) {
                                 pid_t pid = fork();
                                 if (pid == 0) {
                                     //treba zmenit na execl

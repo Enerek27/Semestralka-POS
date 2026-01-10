@@ -849,7 +849,7 @@ void inicializuj_server(srv_p_t * data, socket_client_t * socket, pipe_data_t * 
         int novy_max = max + 50;
         char * tmp1 = realloc(buf, novy_max * sizeof(char));
         if (tmp1 == NULL) {
-            perror(RED "Chyba paäate v inicializácii realokácia." RESET);
+            perror(RED "Chyba pamäte v inicializácii realokácia." RESET);
             exit(EXIT_FAILURE);
         }
         buf = tmp1;
