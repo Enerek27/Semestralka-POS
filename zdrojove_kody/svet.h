@@ -51,6 +51,5 @@ smer_t daj_nahodny_smer_pre_chodca(svt_t * svet);
 //vytvor kopiu sveta
 svt_t * svet_copy(svt_t * svet_nakopirovanie);
 
-//nevieme este co bude vracat
-void naformatuj_svet_na_poslanie(); 
+
 
