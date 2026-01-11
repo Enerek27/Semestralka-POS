@@ -29,7 +29,7 @@ int klient_odpovedaj(socket_client_t * socket_client, klient_pipe_t * klient, _B
     int rv = select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
 
     if (rv == -1) {
-        perror("select stdin");
+        perror(RED"select stdin"RESET);
         return 0;
     }
 
@@ -218,7 +218,7 @@ void * vypisujObraz(void * arg) {
     struct timeval tv = {0, 300000}; // 0.3 s
     int rv = select(klient->activeSocket.socket + 1, &readfds, NULL, NULL, &tv);
      if (rv == -1) {
-        perror("select");
+        perror(RED"select"RESET);
         break;
         } else if (rv == 0) {
           continue; 
@@ -296,7 +296,7 @@ void * vypisujObraz_pipe(void * arg) {
                         &readfds, NULL, NULL, &tv);
 
         if (rv == -1) {
-            perror("select");
+            perror(RED"select"RESET);
             atomic_store(&klient->klien_bezi, 0);
             break;
         }
@@ -367,7 +367,7 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
         int tmp_int;
         tmp_int = strtol(buf, &kontrola, 10);
         if (kontrola == buf) {
-            printf(RED "To nie je číslo, zadaj znova.\n" RESET);
+            printf(ORANGE "To nie je číslo, zadaj znova.\n" RESET);
         } else {
             if (tmp_int == 1 || tmp_int == 0) {
                 nacitaj_zo_suboru = (_Bool)tmp_int;
@@ -518,6 +518,3 @@ _Bool nacitaj_zo_suboru_pipe(pipe_data_t * pip_write, char * mozno_cesta_subor) 
 }
 
 
- void spusti_initmenu_klient_pipe() {
-
- }
