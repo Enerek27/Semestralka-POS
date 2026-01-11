@@ -27,7 +27,7 @@
 
 
 
-int main(int argc, char const *argv[])
+int main(void)
 {
     
     prctl(PR_SET_PDEATHSIG, SIGTERM);

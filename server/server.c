@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 199309L 
 
 
-#include "../sockety/socket.h"
+
 #include <signal.h>
 #include <sys/prctl.h>
 
@@ -16,7 +16,7 @@
 
 
 
-int main(int argc, char const *argv[])
+int main(void)
 {
     prctl(PR_SET_PDEATHSIG, SIGTERM);
     srand(time(NULL)); 

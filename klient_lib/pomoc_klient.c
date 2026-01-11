@@ -355,8 +355,8 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
     
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf(GREEN "Zadaj, či sa svet ma načítať zo súboru(1) alebo nie(0)?: " RESET);
-        printf(UZIVATELFARBA);
+        printf(GREEN "Zadaj, či sa svet ma načítať zo súboru(1) alebo nie(0)?: " UZIVATELFARBA);
+        //printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
             printf(RESET);
             perror(RED "Chyba načitavania textu" RESET);
@@ -389,7 +389,7 @@ _Bool nacitaj_zo_suboru(socket_client_t * socket, char * mozno_cesta_subor) {
         
             char buf [200];
             memset(buf, 0, sizeof(buf));
-            printf(GREEN "Zadaj cestu k súboru: " RESET);
+            printf(GREEN "Zadaj cestu k súboru na uloženie(ukončená musi byť '.txt'): " RESET);
             if (fgets(buf, sizeof(buf), stdin) == NULL) {
                 perror(RED "Chyba načitavania textu." RESET);
                 exit(EXIT_FAILURE);

@@ -3,6 +3,7 @@
 #define RESET "\033[0m"
 
 #include "svet.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>

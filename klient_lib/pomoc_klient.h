@@ -1,6 +1,7 @@
 
 #include "../zdielanaPamat/pipe.h"
 #include "../sockety/socket.h"
+#include "../zdrojove_kody/UI.h"
 #define RED "\033[31m"
 #define GREEN "\033[32m"
 #define ORANGE "\033[38;5;9m"

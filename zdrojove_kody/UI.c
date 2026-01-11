@@ -38,12 +38,12 @@ char * vrat_menu_klient() {
    
    snprintf(buff, maxPocetZnakov,
     ZLATA "MENU:\n"
-            ZLATA "1. VYPNI SIMULACIU\n"
-            ZLATA "2. ZMEN MOD SIMULACIE\n"
-            ZLATA "3. ZOBRAZ STATISTIKU\n"
+            ZLATA "1. VYPNI SIMULÁCIU\n"
+            ZLATA "2. ZMEŇ MÓD SIMULÁCIE\n"
+            ZLATA "3. ZOBRAZ ŠTATISTIKU\n"
             ZLATA "4. ZOBRAZ KROKY\n"
-            ZLATA "5. ODPOJ SA OD SIMULACIE\n" RESET
-            GREEN "Tvoje odpoved je: " RESET );
+            ZLATA "5. ODPOJ SA OD SIMULÁCIE\n" RESET
+            GREEN "Tvoja voľba je: " RESET );
    return buff;
 }
 
@@ -1233,7 +1233,7 @@ void spusti_initmenu_klient(socket_client_t * socket, pipe_data_t * pip_write, _
     while (1) {
         char buf [200];
         memset(buf, 0, sizeof(buf));
-        printf(GREEN "Zadaj cestu k súboru na uloženie(ukončená musi byť '.txt'): \n" RESET);
+        printf(GREEN "Zadaj cestu k súboru na uloženie(ukončená musi byť '.txt'): " RESET);
         printf(UZIVATELFARBA);
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
             printf(RESET);

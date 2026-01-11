@@ -1,7 +1,5 @@
 
 
-
-
 #include "../zdrojove_kody/UI.h"
 
 
