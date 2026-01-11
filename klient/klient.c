@@ -100,10 +100,14 @@ int main()
                                     klient.pip_write = pip_write;
                                     klient.pip_read = pip_read;
                                    
-                                    if (!nacitaj_zo_suboru_pipe(&pip_write, NULL)) {
-                                        
-                                        spusti_initmenu_klient(NULL,&pip_write, 1);
-                                    }   
+                                    
+                                    char buf[2];
+                                    buf[0] = '5';
+                                    buf[1] = ';';
+                                    
+                                    pipe_write(&klient.pip_write, buf, 2);
+                                    spusti_initmenu_klient(NULL,&pip_write, 1);
+                                       
                                     //tu som skoncil
 
                                     pthread_t vlakno;
@@ -147,9 +151,12 @@ int main()
                                     }
 
                                     if (je_klient_hlavny(&socket_client)) {
-                                        if (!nacitaj_zo_suboru(&socket_client, NULL)) {
-                                            spusti_initmenu_klient(&socket_client, NULL, 0);
-                                        }   
+                                        char buf[2];
+                                        buf[0] = '5';
+                                        buf[1] = ';';
+                                        socket_write(&socket_client.activeSocket,buf, 2);
+                                        spusti_initmenu_klient(&socket_client, NULL, 0);
+                                          
                                     }
             
                                     pthread_t vlakno;
