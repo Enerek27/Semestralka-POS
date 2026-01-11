@@ -18,7 +18,7 @@
 
 int main(void)
 {
-    prctl(PR_SET_PDEATHSIG, SIGTERM);
+    
     srand(time(NULL)); 
     socket_server_t socket_server;
     socket_server_init(&socket_server, 2000);

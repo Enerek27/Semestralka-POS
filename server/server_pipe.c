@@ -30,7 +30,7 @@
 int main(void)
 {
     
-    prctl(PR_SET_PDEATHSIG, SIGTERM);
+    
     srand(time(NULL)); 
     
     server_pipe_t server;
