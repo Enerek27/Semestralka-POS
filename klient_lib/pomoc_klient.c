@@ -241,6 +241,8 @@ void * vypisujObraz(void * arg) {
                             exit(EXIT_FAILURE);
                         }
                         buf = tmp;
+                        
+                        memset(buf + maxVelkost, 0, novaVelkost - maxVelkost);
                         maxVelkost = novaVelkost;
 
                         
@@ -249,10 +251,15 @@ void * vypisujObraz(void * arg) {
                     aktualVelkost++;
                     //treba odstranit iba na test
                 // printf("%s", buf);
-                    if (strstr(buf, "off") != NULL) {
+                    char skuska[500];
+                    memset(skuska, 0, sizeof(skuska));
+                    memcpy(skuska, buf, aktualVelkost);
+                    skuska[aktualVelkost] = '\0';
+                    if (strstr(skuska, "off") != NULL) {
                         atomic_store(&klient->klien_bezi, 0);
                         break;
                     }
+
                     if (buf[aktualVelkost - 1] == '\0') {
                         printf("%s", buf);
                         fflush(stdout);
@@ -322,12 +329,19 @@ void * vypisujObraz_pipe(void * arg) {
                     pthread_exit(NULL);
                 }
                 buf = tmp;
+                memset(buf + maxVelkost, 0, novaVelkost - maxVelkost);
                 maxVelkost = novaVelkost;
             }
 
             buf[aktualVelkost] = nacitaj[i];
             aktualVelkost++;
-            if (strstr(buf, "off") != NULL) {
+            
+            char skuska[500];
+            memset(skuska, 0, sizeof(skuska));
+            memcpy(skuska, buf, aktualVelkost);
+            skuska[aktualVelkost] = '\0';
+
+            if (strstr(skuska, "off") != NULL) {
                 atomic_store(&klient->klien_bezi, 0);
                 pthread_exit(NULL);
             }

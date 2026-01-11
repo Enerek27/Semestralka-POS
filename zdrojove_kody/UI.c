@@ -1242,7 +1242,7 @@ void spusti_initmenu_klient(socket_client_t * socket, pipe_data_t * pip_write, _
         }
         printf(RESET);
         buf[strcspn(buf, "\n")] = '\0';
-        memcpy(cesta_k_suboru, buf, strlen(buf));
+        memcpy(cesta_k_suboru, buf, strlen(buf) + 1);
         break;
     }
 
