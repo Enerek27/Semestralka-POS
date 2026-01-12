@@ -16,22 +16,28 @@
 
 
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    
+    int port = atoi(argv[1]);
     srand(time(NULL)); 
-    socket_server_t socket_server;
-    socket_server_init(&socket_server, 2000);
-    socket_server_accept_connection(&socket_server);
-    svt_t * skuska = server_info_subor(&socket_server, NULL, 0);
+    socket_server_t * socket_server;
+    socket_server = malloc(sizeof(socket_server_t));
+    if (socket_server == NULL) {
+        perror("Chyba pamate");
+        exit(EXIT_FAILURE);
+    }
+
+    socket_server_init(socket_server, port);
+    socket_server_accept_connection(socket_server);
+    svt_t * skuska = server_info_subor(socket_server, NULL, 0);
     svt_t * svet;
     
     if (skuska == NULL) {
-        svet = nastav_server(&socket_server, NULL , 0);
+        svet = nastav_server(socket_server, NULL , 0);
         
         svt_vp_t  vypisovac;
         
-        vypisovac.server = &socket_server;
+        vypisovac.server = socket_server;
         vypisovac.svet = svet;
        
         
@@ -48,11 +54,11 @@ int main(void)
     pthread_t vlakienko[3];
     //treba spravit nekonecny loop kde sa bude posielat ci sa ma vypnut alebo nie bude to aj cakaci loop
     
-    pthread_create(&vlakienko[0], NULL, vlaknoPrijmaniaSpojenia, &socket_server);
+    pthread_create(&vlakienko[0], NULL, vlaknoPrijmaniaSpojenia, socket_server);
     
-    pthread_create(&vlakienko[1], NULL, nacuvajklientovi, socket_server.klienti[socket_server.hlavny_klient]);
+    pthread_create(&vlakienko[1], NULL, nacuvajklientovi, socket_server->klienti[socket_server->hlavny_klient]);
     
-    pthread_create(&vlakienko[2], NULL, cisti_server, &socket_server);
+    pthread_create(&vlakienko[2], NULL, cisti_server, socket_server);
     
     svt_brd_t * svet_vypis;
     svet_vypis = calloc(1, sizeof(svt_brd_t));
@@ -61,32 +67,32 @@ int main(void)
         exit(EXIT_FAILURE);
     }
     svet_vypis->svet = svet;
-    svet_vypis->server = &socket_server;
+    svet_vypis->server = socket_server;
     //treba dorobit ukoncenie a posielanie a skoncenie v sledovaci
     
-    while (atomic_load(&socket_server.server_bezi)) {
-        if (atomic_load(&socket_server.server_info.sumarny_mod)) {
+    while (atomic_load(&socket_server->server_bezi)) {
+        if (atomic_load(&socket_server->server_info.sumarny_mod)) {
             
             
             posli_vsetkym_statistiku(svet_vypis, NULL , 0);
             
         } else {
             server_vykonavaj_sim(svet_vypis, NULL , 0);
-            if (!atomic_load(&socket_server.server_info.sumarny_mod)) {
-                atomic_store(&socket_server.server_bezi, 0);
+            if (!atomic_load(&socket_server->server_info.sumarny_mod)) {
+                atomic_store(&socket_server->server_bezi, 0);
             } 
         }
     }
     
-    client_zavri(&socket_server);
+    client_zavri(socket_server);
     
     struct timespec ts = {0, 400 * 1000000}; 
     nanosleep(&ts, NULL);
-   shutdown(socket_server.passiveSocket.socket, SHUT_RDWR);
+   shutdown(socket_server->passiveSocket.socket, SHUT_RDWR);
    
     pthread_join(vlakienko[0], NULL);
     
-    socket_destroy(&socket_server.passiveSocket);
+    socket_destroy(&socket_server->passiveSocket);
    
     
     
@@ -96,11 +102,12 @@ int main(void)
    
     free(svet_vypis);
     
-    socket_posli_klientom_end(&socket_server);
+    socket_posli_klientom_end(socket_server);
     nanosleep(&ts, NULL);
     svet_uloz_do_suboru(svet);
     svet_destroy(svet);
-    socket_server_destroy(&socket_server);
+    socket_server_destroy(socket_server);
+    free(socket_server);
      
 
 

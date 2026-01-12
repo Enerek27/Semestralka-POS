@@ -135,43 +135,60 @@ int main()
                                 dobreZadal = 0;
                                 break;
                             } else if(pocetPouzivatelov > 1) {
+                                char port[50];
+                                memset(port, 0, sizeof(port));
+                                printf(GREEN "Zadaj cislo portu pre vytvorenie:  " RESET);
+                                printf(UZIVATELFARBA);
+                                if (fgets(port, sizeof(port), stdin) == NULL) {
+                                    printf(RESET);
+                                    perror(RED "Chyba načitavania textu." RESET);
+                                    exit(EXIT_FAILURE);
+                                    }       
+                                port[strcspn(port, "\n")] = '\0';
                                 pid_t pid = fork();
                                 if (pid == 0) {
                                     //treba zmenit na execl
-                                    execl("../server/server","server", NULL);
+                                    execl("../server/server","server", port, NULL);
                                     perror(RED "Chyba pri spustení servera." RESET);
                                     _exit(EXIT_FAILURE);
                                 } else if (pid > 0) {
                                     //tu bezi klient
-                                    sleep(1);
-                                    socket_client_t socket_client;
+                                    sleep(2);
+                                    socket_client_t * socket_client;
+                                    socket_client = malloc(sizeof(socket_client_t));
+                                    if (socket_client == NULL) {
+                                        perror("Chyba alokacie pamate");
+                                        exit(EXIT_FAILURE);
+                                    }
+
                                     
-                                    if (!socket_client_init(&socket_client, "127.0.0.1", "2000")) {
+                                    if (!socket_client_init(socket_client, "127.0.0.1", port)) {
+                                        free(socket_client);
                                         break;
                                     }
 
-                                    if (je_klient_hlavny(&socket_client)) {
+                                    if (je_klient_hlavny(socket_client)) {
                                         char buf[2];
                                         buf[0] = '5';
                                         buf[1] = ';';
-                                        socket_write(&socket_client.activeSocket,buf, 2);
-                                        spusti_initmenu_klient(&socket_client, NULL, 0);
+                                        socket_write(&socket_client->activeSocket,buf, 2);
+                                        spusti_initmenu_klient(socket_client, NULL, 0);
                                           
                                     }
             
                                     pthread_t vlakno;
-                                    pthread_create(&vlakno, NULL, vypisujObraz, &socket_client);
+                                    pthread_create(&vlakno, NULL, vypisujObraz, socket_client);
                                     
                                     
-                                    while (atomic_load(&socket_client.klien_bezi)) {
+                                    while (atomic_load(&socket_client->klien_bezi)) {
                                         
-                                        klient_odpovedaj(&socket_client, NULL, 0);
+                                        klient_odpovedaj(socket_client, NULL, 0);
                                     }
                                     
                                     
                                     pthread_join(vlakno, NULL);
-                                    socket_client_destroy(&socket_client);
-                                    
+                                    socket_client_destroy(socket_client);
+                                    free(socket_client);
                                     
                                 } else {
                                     perror(RED "Chyba vytvorenia procesu." RESET);
@@ -255,7 +272,7 @@ int main()
                                 break;
                             } else if (pocetPouzivatelov > 1) {
                             
-                                printf(GREEN "Napíš adresu pripojenia: " RESET);
+                                printf(GREEN "Napíš port pripojenia: " RESET);
                                 printf(UZIVATELFARBA);
                                 char * adresaPripojenia  = fgets(buf, sizeof(buf), stdin);
                                 adresaPripojenia[strcspn(adresaPripojenia, "\n")] = '\0';
@@ -266,7 +283,7 @@ int main()
                                 } 
                                 printf(RESET);
                                 socket_client_t socket_client;
-                                if (!socket_client_init(&socket_client, adresaPripojenia, "2000")) {
+                                if (!socket_client_init(&socket_client, "127.0.0.1", adresaPripojenia)) {
                                         break;
                                 }
                                 je_klient_hlavny(&socket_client);
@@ -385,17 +402,27 @@ int main()
                                 dobreZadal = 0;
                                 break;
                             } else if(pocetPouzivatelov > 1) {
+                                char port[50];
+                                memset(port, 0, sizeof(port));
+                                printf(GREEN "Zadaj cislo portu pre vytvorenie:  " RESET);
+                                printf(UZIVATELFARBA);
+                                if (fgets(port, sizeof(port), stdin) == NULL) {
+                                    printf(RESET);
+                                    perror(RED "Chyba načitavania textu." RESET);
+                                    exit(EXIT_FAILURE);
+                                    }       
+                                port[strcspn(port, "\n")] = '\0';
                                 pid_t pid = fork();
                                 if (pid == 0) {
                                     //treba zmenit na execl
-                                    execl("../server/server","server", NULL);
+                                    execl("../server/server","server",port, NULL);
                                     perror(RED "Chyba pri spustení servera." RESET);
                                     _exit(EXIT_FAILURE);
                                 } else if (pid > 0) {
                                     //tu bezi klient
                                     sleep(1);
                                     socket_client_t socket_client;
-                                    if (!socket_client_init(&socket_client, "127.0.0.1", "2000")) {
+                                    if (!socket_client_init(&socket_client, "127.0.0.1", port)) {
                                         break;
                                     }
                                     if (je_klient_hlavny(&socket_client)) {

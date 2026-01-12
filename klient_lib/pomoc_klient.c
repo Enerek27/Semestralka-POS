@@ -200,91 +200,101 @@ void * vypisujObraz(void * arg) {
     socket_client_t * klient = arg;
     
     char * buf;
+    char * skuska;
     char nacitaj[50];
     int maxVelkost = 100;
     
     int aktualVelkost = 0;
     buf = calloc(maxVelkost, sizeof(char));
-    if (buf == NULL) {
+    skuska = calloc(maxVelkost, sizeof(char));
+    if (buf == NULL || skuska == NULL) {
         perror(RED "Chyba alokovania pamäte." RESET);
         exit(EXIT_FAILURE);
     }
     
     while (atomic_load(&klient->klien_bezi)) {
-        
-    fd_set readfds;
-    FD_ZERO(&readfds);
-    FD_SET(klient->activeSocket.socket, &readfds);
-    struct timeval tv = {0, 300000}; // 0.3 s
-    int rv = select(klient->activeSocket.socket + 1, &readfds, NULL, NULL, &tv);
-     if (rv == -1) {
-        perror(RED"select"RESET);
-        break;
-        } else if (rv == 0) {
-          continue; 
-        } else {
-                int n = socket_read(&klient->activeSocket, nacitaj, 50);
-            if (n <= 0) {
-                //chyba alebo sa zavrej socket
-                atomic_store(&klient->klien_bezi, 0);
-                break;
-            }
+        pthread_mutex_lock(&klient->mutex);
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(klient->activeSocket.socket, &readfds);
+        struct timeval tv = {0, 300000}; // 0.3 s
+        int rv = select(klient->activeSocket.socket + 1, &readfds, NULL, NULL, &tv);
+        pthread_mutex_unlock(&klient->mutex);
+        if (rv == -1) {
+            perror(RED"select"RESET);
+            break;
+            } else if (rv == 0) {
+            continue; 
+            } else {
+                    pthread_mutex_lock(&klient->mutex);
+                    int n = socket_read(&klient->activeSocket, nacitaj, sizeof(nacitaj));
+                    pthread_mutex_unlock(&klient->mutex);
+                if (n <= 0) {
+                    //chyba alebo sa zavrej socket
+                    atomic_store(&klient->klien_bezi, 0);
+                    break;
+                }
 
-           
-            for (int i = 0; i < n; i++) {
-                    if (maxVelkost - 1 <= aktualVelkost) {
-                        int novaVelkost = maxVelkost + 50;
-                        char * tmp = realloc(buf, novaVelkost);
-                        if (tmp == NULL) {
-                            perror(RED "Chyba pri zväčšení pamäte." RESET);
-                            free(buf);
-                            exit(EXIT_FAILURE);
+            
+                for (int i = 0; i < n; i++) {
+                        if (maxVelkost - 1 <= aktualVelkost) {
+                            int novaVelkost = maxVelkost + 50;
+                            char * tmp = realloc(buf, novaVelkost);
+                            char * tmp1 = realloc(skuska, novaVelkost);
+                            if (tmp == NULL || tmp1 == NULL) {
+                                perror(RED "Chyba pri zväčšení pamäte." RESET);
+                                free(buf);
+                                free(skuska);
+                                exit(EXIT_FAILURE);
+                            }
+                            buf = tmp;
+                            skuska = tmp1;
+                            memset(buf + maxVelkost, 0, novaVelkost - maxVelkost);
+                            memset(skuska + maxVelkost, 0, novaVelkost - maxVelkost);
+                            maxVelkost = novaVelkost;
+
+                            
                         }
-                        buf = tmp;
+                        buf[aktualVelkost] = nacitaj[i];
+                        aktualVelkost++;
+                        //treba odstranit iba na test
+                    // printf("%s", buf);
                         
-                        memset(buf + maxVelkost, 0, novaVelkost - maxVelkost);
-                        maxVelkost = novaVelkost;
-
                         
-                    }
-                    buf[aktualVelkost] = nacitaj[i];
-                    aktualVelkost++;
-                    //treba odstranit iba na test
-                // printf("%s", buf);
-                    char skuska[500];
-                    memset(skuska, 0, sizeof(skuska));
-                    memcpy(skuska, buf, aktualVelkost);
-                    skuska[aktualVelkost] = '\0';
-                    if (strstr(skuska, "off") != NULL) {
-                        atomic_store(&klient->klien_bezi, 0);
-                        break;
-                    }
+                        memcpy(skuska, buf, aktualVelkost);
+                        skuska[aktualVelkost] = '\0';
+                        if (strstr(skuska, "off") != NULL) {
+                            atomic_store(&klient->klien_bezi, 0);
+                            break;
+                        }
 
-                    if (buf[aktualVelkost - 1] == '\0') {
-                        printf("%s", buf);
-                        fflush(stdout);
-                        memset(buf, 0, maxVelkost);
-                        aktualVelkost = 0;
-                    }
+                        if (buf[aktualVelkost - 1] == '\0') {
+                            printf("%s", buf);
+                            fflush(stdout);
+                            memset(buf, 0, maxVelkost);
+                            aktualVelkost = 0;
+                        }
 
+                }
             }
-        }
-
+        
     }
     free(buf);
+    free(skuska);
     pthread_exit(NULL);
 }
 
 void * vypisujObraz_pipe(void * arg) {
     klient_pipe_t * klient = arg;
-    
+    char * skuska;
     char * buf;
     char nacitaj[50];
     int maxVelkost = 100;
     
     int aktualVelkost = 0;
     buf = calloc(maxVelkost, sizeof(char));
-    if (buf == NULL) {
+    skuska = calloc(maxVelkost, sizeof(char));
+    if (buf == NULL || skuska == NULL) {
         perror(RED "Chyba alokovania pamäte." RESET);
         exit(EXIT_FAILURE);
     }
@@ -323,21 +333,25 @@ void * vypisujObraz_pipe(void * arg) {
             if (aktualVelkost >= maxVelkost - 1) {
                 int novaVelkost = maxVelkost + 50;
                 char *tmp = realloc(buf, novaVelkost);
-                if (!tmp) {
+                char *tmp1 = realloc(skuska, novaVelkost);
+                if (tmp == NULL || tmp1 == NULL ) {
                     perror(RED "Chyba pri zväčšení pamäte." RESET);
                     free(buf);
+                    free(skuska);
                     pthread_exit(NULL);
                 }
                 buf = tmp;
+                skuska = tmp1;
                 memset(buf + maxVelkost, 0, novaVelkost - maxVelkost);
+                memset(skuska + maxVelkost, 0, novaVelkost - maxVelkost);
                 maxVelkost = novaVelkost;
             }
 
             buf[aktualVelkost] = nacitaj[i];
             aktualVelkost++;
+
             
-            char skuska[500];
-            memset(skuska, 0, sizeof(skuska));
+            
             memcpy(skuska, buf, aktualVelkost);
             skuska[aktualVelkost] = '\0';
 
@@ -356,6 +370,7 @@ void * vypisujObraz_pipe(void * arg) {
     }
 
     free(buf);
+    free(skuska);
     pthread_exit(NULL);
 }
 
